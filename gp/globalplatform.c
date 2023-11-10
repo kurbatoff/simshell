@@ -37,6 +37,16 @@
 #define CRYPTOGRAMM_SZ		8
 #define C_MAC_SZ			8
 
+// APDU
+static uint8_t command[256 + 5];
+static uint16_t commend_len;
+static uint8_t response[256 + 2];
+static uint16_t response_length;
+
+// SCP03
+static uint8_t counter[3];
+
+// SCP 02, 03
 static uint8_t host_cryptogramm[CRYPTOGRAMM_SZ];
 static uint8_t card_cryptogramm[CRYPTOGRAMM_SZ];
 static uint8_t card_challenge[CHALLENGE_SZ];
@@ -156,11 +166,6 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 
 int select_ISD()
 {
-	uint8_t command[256 + 5];
-	uint16_t commend_len;
-	uint8_t response[256 + 2];
-	uint16_t response_length;
-
 	commend_len = 0;
 	command[commend_len++] = 0x00;
 	command[commend_len++] = INS_GP_SELECT;
@@ -192,15 +197,6 @@ int mutual_authentication()
 
 int init_update()
 {
-	//	if (!LChannel_ID) {
-	//		open_LC();
-	//	}
-
-	uint8_t command[256 + 5];
-	uint16_t commend_len;
-	uint8_t response[256 + 2];
-	uint16_t response_length;
-
 	//random
 	generate_random(host_challenge, CHALLENGE_SZ);
 
@@ -225,115 +221,21 @@ int init_update()
 		return -1;
 	}
 
-	{
-		CTX.scp_index = response[11];
-		uint8_t counter[3];
-		uint8_t tmp_buffer[256 + LENGTH_OF_ICV]; // for SCP03
-		int len;
+	CTX.scp_index = response[11];
 
-		switch (CTX.scp_index) {
-		case SECURE_CHANNEL_PROTOCOL_02:
-			memcpy(card_challenge, &response[12], 8); // |counter[2]|challenge[6]|
+	switch (CTX.scp_index) {
+	case SECURE_CHANNEL_PROTOCOL_02:
+		memcpy(card_challenge, &response[12], 8); // |counter[2]|challenge[6]|
+		break;
 
-			scp02_generate_session_key(card_challenge, KEY, KEY, KEY);
-			scp02_generate_cryptogramms(host_challenge, card_challenge, host_cryptogramm, card_cryptogramm);
+	case SECURE_CHANNEL_PROTOCOL_03:
+		memcpy(counter, &response[29], 3);
+		memcpy(card_challenge, &response[13], 8);
+		break;
 
-/*
-#ifdef ...
-			dump_hexascii_buffer("sENC:", buf_session_ENC, 16);
-			dump_hexascii_buffer("sMAC:", buf_session_MAC, 16);
-			dump_hexascii_buffer("sDEK:", buf_session_DEK, 16);
-			dump_hexascii_buffer("hostCR:", host_cryptogramm, 8);
-			dump_hexascii_buffer("cardCR:", card_cryptogramm, 8);
-#endif
-*/
-
-			// Verify card cryptogramm
-			if (memcmp(card_cryptogramm, &response[20], 8) != 0) {
-				printf(COLOR_RED " Wrong card cryptogramm\n" COLOR_RESET);
-				return -1;
-			}
-
-			command[0] = 0x84;
-			command[1] = INS_EXTERNAL_AUTHENTICATE;
-			command[2] = 0x00;
-			command[3] = 0x00;
-			command[4] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
-
-			memcpy(&command[5], host_cryptogramm, 8);
-
-			memset(c_mac, 0, C_MAC_SZ);
-			scp02_calculate_c_mac(command, 13, buf_session_MAC, c_mac);
-
-			memcpy(&command[13], c_mac, C_MAC_SZ);
-
-			pcsc_sendAPDU(command, 5 + 16, response, sizeof(response), &response_length);
-
-//			CTX.security_level = 
-//			CTX.security_status =
-
-			break;
-
-		case SECURE_CHANNEL_PROTOCOL_03:
-			memcpy(counter, &response[29], 3);
-			memcpy(card_challenge, &response[13], 8); // |counter[2]|challenge[6]|
-
-			scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_ENC, host_challenge, 8, card_challenge, 8, buf_session_ENC, 128);
-			scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_MAC, host_challenge, 8, card_challenge, 8, buf_session_MAC, 128);
-			// DEK key will be used static without session key generation
-			scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_RMAC, host_challenge, 8, card_challenge, 8, buf_session_RMAC, 128);
-
-			scp03_calculate_cryptogram(buf_session_MAC, SCP03_DERIVE_CARD_CRYPTOGRAMM, host_challenge, 8, card_challenge, 8, card_cryptogramm, 64);
-			scp03_calculate_cryptogram(buf_session_MAC, SCP03_DERIVE_HOST_CRYPTOGRAMM, host_challenge, 8, card_challenge, 8, host_cryptogramm, 64);
-
-/*
-#ifdef [-]
-			dump_hexascii_buffer("sENC", buf_session_ENC, 16);
-			dump_hexascii_buffer("sMAC", buf_session_MAC, 16);
-			dump_hexascii_buffer("sRMAC", buf_session_RMAC, 16);
-			dump_hexascii_buffer("cardCR", card_cryptogramm, CRYPTOGRAMM_SZ);
-			dump_hexascii_buffer("hostCR", host_cryptogramm, CRYPTOGRAMM_SZ);
-#endif
-*/
-
-			// Verify card cryptogramm
-			if (memcmp(card_cryptogramm, &response[21], 8) != 0) {
-				printf(COLOR_RED " Wrong card cryptogramm\n" COLOR_RESET);
-				return -1;
-			}
-
-			command[0] = 0x84;
-			command[1] = INS_EXTERNAL_AUTHENTICATE;
-			command[2] = 0x00;
-			command[3] = 0x00;
-			command[4] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
-
-			memcpy(&command[5], host_cryptogramm, 8);
-
-			memset(buf_ICV, 0, LENGTH_OF_ICV);
-			memcpy(tmp_buffer, buf_ICV, LENGTH_OF_ICV);
-			len = LENGTH_OF_ICV;
-
-			memcpy(&tmp_buffer[len], command, 13);
-			len += 13;
-
-			hal_AES_CMAC(tmp_buffer, len, buf_ICV, buf_session_MAC, buf_ICV);
-
-			memcpy(&command[13], buf_ICV, C_MAC_SZ);
-
-			pcsc_sendAPDU(command, 5 + CHALLENGE_SZ + CRYPTOGRAMM_SZ,
-				response, sizeof(response), &response_length);
-
-			//			CTX.security_level = 
-			//			CTX.security_status =
-
-			break;
-
-		default:
-			printf(COLOR_RED " Wrong (unexpected) SCP index: %02X\n" COLOR_RESET, CTX.scp_index);
-			return -1;
-		}
-
+	default:
+		printf(COLOR_RED " Wrong (unexpected) SCP index: %02X\n" COLOR_RESET, CTX.scp_index);
+		return -1;
 	}
 
 	return 0;
@@ -341,16 +243,112 @@ int init_update()
 
 int ext_authenticate()
 {
+	uint8_t tmp_buffer[256 + LENGTH_OF_ICV]; // for SCP03
+	int len;
+
+	switch (CTX.scp_index) {
+	case SECURE_CHANNEL_PROTOCOL_02:
+
+		scp02_generate_session_key(card_challenge, KEY, KEY, KEY);
+		scp02_generate_cryptogramms(host_challenge, card_challenge, host_cryptogramm, card_cryptogramm);
+
+		/*
+		#ifdef ...
+					dump_hexascii_buffer("sENC:", buf_session_ENC, 16);
+					dump_hexascii_buffer("sMAC:", buf_session_MAC, 16);
+					dump_hexascii_buffer("sDEK:", buf_session_DEK, 16);
+					dump_hexascii_buffer("hostCR:", host_cryptogramm, 8);
+					dump_hexascii_buffer("cardCR:", card_cryptogramm, 8);
+		#endif
+		*/
+
+		// Verify card cryptogramm
+		if (memcmp(card_cryptogramm, &response[20], 8) != 0) {
+			printf(COLOR_RED " Wrong card cryptogramm\n" COLOR_RESET);
+			return -1;
+		}
+
+		command[0] = 0x84;
+		command[1] = INS_EXTERNAL_AUTHENTICATE;
+		command[2] = 0x00;
+		command[3] = 0x00;
+		command[4] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
+
+		memcpy(&command[5], host_cryptogramm, 8);
+
+		memset(c_mac, 0, C_MAC_SZ);
+		scp02_calculate_c_mac(command, 13, buf_session_MAC, c_mac);
+
+		memcpy(&command[13], c_mac, C_MAC_SZ);
+
+		pcsc_sendAPDU(command, 5 + 16, response, sizeof(response), &response_length);
+
+		//			CTX.security_level = 
+		//			CTX.security_status =
+
+		break;
+
+	case SECURE_CHANNEL_PROTOCOL_03:
+		memcpy(counter, &response[29], 3);
+		memcpy(card_challenge, &response[13], 8); // |counter[2]|challenge[6]|
+
+		scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_ENC, host_challenge, 8, card_challenge, 8, buf_session_ENC, 128);
+		scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_MAC, host_challenge, 8, card_challenge, 8, buf_session_MAC, 128);
+		// DEK key will be used static without session key generation
+		scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_RMAC, host_challenge, 8, card_challenge, 8, buf_session_RMAC, 128);
+
+		scp03_calculate_cryptogram(buf_session_MAC, SCP03_DERIVE_CARD_CRYPTOGRAMM, host_challenge, 8, card_challenge, 8, card_cryptogramm, 64);
+		scp03_calculate_cryptogram(buf_session_MAC, SCP03_DERIVE_HOST_CRYPTOGRAMM, host_challenge, 8, card_challenge, 8, host_cryptogramm, 64);
+
+		/*
+		#ifdef [-]
+					dump_hexascii_buffer("sENC", buf_session_ENC, 16);
+					dump_hexascii_buffer("sMAC", buf_session_MAC, 16);
+					dump_hexascii_buffer("sRMAC", buf_session_RMAC, 16);
+					dump_hexascii_buffer("cardCR", card_cryptogramm, CRYPTOGRAMM_SZ);
+					dump_hexascii_buffer("hostCR", host_cryptogramm, CRYPTOGRAMM_SZ);
+		#endif
+		*/
+
+		// Verify card cryptogramm
+		if (memcmp(card_cryptogramm, &response[21], 8) != 0) {
+			printf(COLOR_RED " Wrong card cryptogramm\n" COLOR_RESET);
+			return -1;
+		}
+
+		command[0] = 0x84;
+		command[1] = INS_EXTERNAL_AUTHENTICATE;
+		command[2] = 0x00;
+		command[3] = 0x00;
+		command[4] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
+
+		memcpy(&command[5], host_cryptogramm, 8);
+
+		memset(buf_ICV, 0, LENGTH_OF_ICV);
+		memcpy(tmp_buffer, buf_ICV, LENGTH_OF_ICV);
+		len = LENGTH_OF_ICV;
+
+		memcpy(&tmp_buffer[len], command, 13);
+		len += 13;
+
+		hal_AES_CMAC(tmp_buffer, len, buf_ICV, buf_session_MAC, buf_ICV);
+
+		memcpy(&command[13], buf_ICV, C_MAC_SZ);
+
+		pcsc_sendAPDU(command, 5 + CHALLENGE_SZ + CRYPTOGRAMM_SZ,
+			response, sizeof(response), &response_length);
+
+		//			CTX.security_level = 
+		//			CTX.security_status =
+
+		break;
+	}
+
 	return 0;
 }
 
 int get_status()
 {
-	uint8_t command[256 + 5];
-	uint16_t commend_len;
-	uint8_t response[256 + 2];
-	uint16_t response_length;
-
 	// --- step 1: Issuer Security Domain ---
 	commend_len = 0;
 	command[commend_len++] = 0x80;
@@ -467,7 +465,6 @@ int get_status()
 			}
 		}
 	}
-
 
 	return 0;
 }

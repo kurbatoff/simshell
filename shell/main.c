@@ -71,11 +71,6 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
-		if ('/' == str[0]) {
-			// Replace slash by underscore
-			str[0] = '_';
-		}
-
 		// remove trailing SPACE and LF
 		len = strlen(str);
 		while (len && (str[len-1] == ' ' || str[len-1] == '\n' || str[len - 1] == '\t')) {

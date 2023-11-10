@@ -82,51 +82,51 @@ simshell_command_t command_array[SHELL_COMMAND_COUNT] = {
 		cmd_version
 	},
 	{	
-		"listreaders",
+		"/list-readers",
 		"\n\"list-readers\"\n",
 		" /list-readers [-] List available card readers\n",
 		cmd_S_listreaders
 	},
 	{	
-		"_term",
+		"/term",
 		"\n\"/term arg1\":\n Usage:\n    arg1: terminal type\n",
 		" /term             List card readers and connect\n",
 		cmd_S_term
 	},
 	{	
-		"close",
+		"/close",
 		"\n\"/close\"\n\n",
 		" /close            Close current terminal (card reader context)\n",
 		cmd_S_close
 	},
 	{	
-		"_card",
+		"/card",
 		"\n\"/card -a AID\":\n Usage:\n    AID: ISD (Card Manager) AID\n",
 		" /card             Power on the card and select ISD \n",
 		cmd_S_card
 	},
 	{	
-		"_atr",
+		"/atr",
 		"\n\"led arg1 arg2\":\n Usage:\n    arg1: 1|2|3|4[-]         "
 		"   /atr\n    arg2: on|off                Led status\n",
 		" /atr              Power on the card and print ATR\n",
 		cmd_S_atr
 	},
 	{
-		"_select",
+		"/select",
 		"\n\"/select AID\":\n Usage:\n    AID: AID of the applet to select\n",
 		" /select           Select an applet idetified by AID\n",
 		cmd_S_select
 	},
 	{
-		"initupdate",
+		"init-update",
 		"\n\"init-update\""
 		"   init-update sec_level\n",
 		" init-update       Perform initialize update\n",
 		cmd_initupdate
 	},
 	{
-		"extauthenticate",
+		"ext-auth",
 		"\n\"ext-auth PLAIN|MAC|ENC"
 		"   ext-auth sec_level\n",
 		" ext-auth          Perform external authentication\n",
@@ -153,70 +153,45 @@ simshell_command_t command_array[SHELL_COMMAND_COUNT] = {
  * @param argc: amount of help command aguments including help command itself as argv[0]
  * @param argv: help command aguments including help command itself as argv[0]
  */
-static void help(char* _cmd)//int32_t argc, char** argv)
+static void help(char* _cmd)
 {
-//	shell_command_t* p = &shellcommands[0];
+	simshell_command_t* c;
+	simshell_command_t* cj;
 
-	//char* sortedlist[SHELL_COMMAND_COUNT];
+	int sortedlist[SHELL_COMMAND_COUNT];
 
-
-/*
-	if (argc - 1)
+	// Copy indexes for sorting
+	for (int i = 0; i < SHELL_COMMAND_COUNT; i++)
 	{
-		while (p)
-		{
-			if (strlen(argv[1]) == strlen(p->pcCommand))
-			{
-				if (strcmp(argv[1], p->pcCommand) == 0)
-				{
-					printf(p->pcHelpString);
-					return shellStatus_Success;
-				}
-			}
-			p = p->link;
-		}
-	}
-*/
-
-	// Collect command names
-//	p = &helpcmd;
-//	int cnt = 0;
-
-/*
-	// Fill command names
-	shell_command_t** cmds = new shell_command_t * [cnt];
-
-	p = &helpcmd;
-	int i = 0;
-	while (p)
-	{
-		cmds[i++] = p;
-		p = p->link;
+		sortedlist[i] = i;
 	}
 
 	// Sort command names alphabetically
-	for (i = 0; i < (cnt - 1); ++i)
+	for (int i = 0; i < SHELL_COMMAND_COUNT; i++)
 	{
-		for (int j = i; j < cnt; ++j)
+		for (int j = i; j < SHELL_COMMAND_COUNT; j++)
 		{
-			if (strcmp(cmds[i]->pcCommand, cmds[j]->pcCommand) > 0)
+			c = (simshell_command_t*)&command_array[sortedlist[i]];
+			cj = (simshell_command_t*)&command_array[sortedlist[j]];
+
+			if (strcmp(c->pcName, cj->pcName) > 0)
 			{
-				shell_command_t* t = cmds[i];
-				cmds[i] = cmds[j];
-				cmds[j] = t;
+				int x;
+
+				x = sortedlist[i];
+				sortedlist[i] = sortedlist[j];
+				sortedlist[j] = x;
 			}
 		}
 	}
 
-
-	printf("\n");
-	delete[] cmds;
-*/
-
-// Print sorted command names
-	printf("\n");
+	// Print our the sorted list
 	for (int i = 0; i < SHELL_COMMAND_COUNT; i++)
-		printf("%s", command_array[i].pcShortHelp);
+	{
+		c = (simshell_command_t*)&command_array[sortedlist[i]];
+
+		printf(" %s", c->pcShortHelp);
+	}
 	printf("\n");
 }
 
@@ -324,7 +299,7 @@ static void cmd_S_term(char* _cmd)
  */
 static void cmd_initupdate(char* _cmd)
 {
-	printf(COLOR_CYAN " init-update " COLOR_RESET "under implementation..\n");
+	init_update();
 }
 
 /**
@@ -334,7 +309,7 @@ static void cmd_initupdate(char* _cmd)
  */
 static void cmd_extauthenticate(char* _cmd)
 {
-	printf(COLOR_CYAN " ext-authenticte " COLOR_RESET "under implementation..\n");
+	ext_authenticate();
 }
 /**
  * @brief get-sd-certificate callback function
