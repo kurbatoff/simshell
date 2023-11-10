@@ -2,14 +2,23 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: g++ build active file",
-            "command": "/usr/bin/g++",
+            "label": "C/C++: gcc build active file",
+            "command": "/usr/bin/gcc",
             "args": [
                 "-fdiagnostics-color=always",
-                "-g",
-                "${file}",
+                //"-g",
+                "${workspaceFolder}/shell/*.c",
+                "${workspaceFolder}/gp/*.c",
+                "${workspaceFolder}/pcsc/*.c",
+                "-I${workspaceFolder}/shell",
+                "-I${workspaceFolder}/gp",
+                "-I${workspaceFolder}/pcsc",
+                "/Users/alexey/dev/lib/mbedtls/library/des.c",
+                "/Users/alexey/dev/lib/mbedtls/library/platform_util.c",
+                "-I/Users/alexey/dev/lib/mbedtls/include",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "./bin/simshell",
+                "-framework", "PCSC"
             ],
             "options": {
                 "cwd": "${fileDirname}"

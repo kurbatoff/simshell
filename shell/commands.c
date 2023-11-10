@@ -216,7 +216,7 @@ static void help(char* _cmd)//int32_t argc, char** argv)
 // Print sorted command names
 	printf("\n");
 	for (int i = 0; i < SHELL_COMMAND_COUNT; i++)
-		printf(command_array[i].pcShortHelp);
+		printf("%s", command_array[i].pcShortHelp);
 	printf("\n");
 }
 

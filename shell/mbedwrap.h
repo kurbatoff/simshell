@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 
-#include "mbedtls\ecp.h"
+#include "mbedtls/ecp.h"
 
 #define M2M_ECC_SECRET_KEY_LEN			0x20
 #define M2M_ECC_PUBLIC_KEY_LEN			(1 + 2 * M2M_ECC_SECRET_KEY_LEN)

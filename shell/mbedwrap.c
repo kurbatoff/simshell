@@ -23,9 +23,9 @@
 #include "mbedwrap.h"
 #include "tools.h"
 
-#include "mbedtls\ecdsa.h"
-#include "mbedtls\sha256.h"
-#include "mbedtls\ecdh.h"
+#include "mbedtls/ecdsa.h"
+#include "mbedtls/sha256.h"
+#include "mbedtls/ecdh.h"
 
 
 #define ecp_clear_precomputed( g )

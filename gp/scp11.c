@@ -29,7 +29,7 @@
 #include "gp.h"
 //#include "sw.h"
 
-#include "mbedtls\sha256.h"
+#include "mbedtls/sha256.h"
 
 // TODO combine with other global temp buffers
 static uint8_t PK_OCE_ECKA[0x41];
