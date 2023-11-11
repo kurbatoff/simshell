@@ -88,9 +88,9 @@ simshell_command_t command_array[SHELL_COMMAND_COUNT] = {
 		cmd_S_listreaders
 	},
 	{	
-		"/term",
-		"\n\"/term arg1\":\n Usage:\n    arg1: terminal type\n",
-		" /term             List card readers and connect\n",
+		"/terminal",
+		"\n\"/terminal arg1\":\n Usage:\n    arg1: terminal type\n",
+		" /terminal         List card readers and connect\n",
 		cmd_S_term
 	},
 	{	

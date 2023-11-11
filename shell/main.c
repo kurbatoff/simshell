@@ -40,7 +40,9 @@
 */
 int main(int argc, char* argv[])
 {
-	char str[4096];
+	char commandline[4096];
+	char* str;
+
 	size_t len;
 	clock_t start;
 	clock_t finish;
@@ -55,7 +57,9 @@ int main(int argc, char* argv[])
 	{
 		shell_prompt;
 
-		fgets(str, sizeof(str) - 1, stdin);
+		fgets(commandline, sizeof(commandline) - 1, stdin);
+		str = commandline;
+
 		if (strcmp(str, "cls\n") == 0) {
 			system("cls");
 			printf("\033[00;00m");
@@ -75,6 +79,11 @@ int main(int argc, char* argv[])
 		len = strlen(str);
 		while (len && (str[len-1] == ' ' || str[len-1] == '\n' || str[len - 1] == '\t')) {
 			str[--len] = 0x00;
+		}
+
+		// remove leading SPACEs and TABs
+		while ((*str == ' ' || *str == '\t') && (*str != 0x00)) {
+			str++;
 		}
 
 		if (0 == strlen(str)) {

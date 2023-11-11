@@ -24,6 +24,34 @@
 #include "shell.h"
 #include "commands.h"
 
+int find_shell_command(char* _cmd, int* _idx)
+{
+	simshell_command_t* c;
+	size_t len;
+	int count = 0;
+
+	for (int i = 0; i < SHELL_COMMAND_COUNT; i++) {
+		c = (simshell_command_t*)&command_array[i];
+
+		len = 0;
+		while (1) {
+			char c;
+
+			c = _cmd[len];
+			if ((c == ' ') || (c == '\t') || (c == 0x0A) || (c == 0x0D) || (c == 0))
+				break;
+
+			len++;
+		}
+
+		if (memcmp(_cmd, c->pcName, len) == 0) {
+			*_idx = i;
+			count++;
+		}
+	}
+
+	return count;
+}
 
 /**
 * @brief Execute the shell command
@@ -33,90 +61,26 @@
 void SHELL_execute(char *command)
 {
 	simshell_command_t* c;
-	size_t len;
+	int cmd_idx;
+	int found;
 
-	for (int i = 0; i < SHELL_COMMAND_COUNT; i++) {
-		c = (simshell_command_t*)&command_array[i];
-		len = strlen(c->pcName) - 1; // exclude '\n'
+	found = find_shell_command(command, &cmd_idx);
 
-		if (memcmp(command, c->pcName, len) == 0) {
+	switch (found) {
+	case 0:
+		printf("\nCommand not found. Type \"help\" for a list of available commands\n");
+		return;
 
-			c->pCallBackFunction(command);
+	case 1:
+		// Execute single found
 
-			return;
-		}
+		c = (simshell_command_t*)&command_array[cmd_idx];
+
+		c->pCallBackFunction(command);
+		return;
+
+	default:
+		// Print the list of similar commands
+		;
 	}
-	/*
-	size_t len = strlen(command);
-	char* p = command;
-	char* pe = p + len;
-    uint8_t cc = 0;
-    //shell_command_t *c = &helpcmd;
-
-	simshell_command_t* cmd = &shellcommands[0];
-
-	cmd->pFuncCallBack(argvc, argv);
-
-
-    if (p && pe != p)
-    {
-        int argvc = 0;
-
-        if (*pe != 0)
-            *pe = 0;
-        
-		if (*(pe + 1) != 0)
-            *(pe + 1) = 0;
-		
-		for (; p < pe; ++p)
-		{
-			if (*p == ' ' || *p == '\t')
-			{
-				*p = 0;
-				++argvc;
-			}
-		}
-
-        ++argvc;    
-        char **argv = new char*[argvc];
-        int i = 0;
-        p = command;
-        while (*p && i < argvc)
-        {
-			argv[i] = p;
-            p += (strlen(p) + 1);
-            ++i;
-        }
-
-        while (c)
-        {
-			if (strlen(argv[0]) == strlen(c->pcCommand))
-			{
-				if (_stricmp(argv[0], c->pcCommand) == 0)
-				{
-					if (argvc < (c->cExpectedNumberOfParameters + 1))
-						printf(c->pcHelpString);
-					else
-					{
-						int exec_time = 0;
-
-						if (!c->pFuncCallBack)
-							return false;
-
-						c->pFuncCallBack(argvc, argv);
-					}
-					delete[] argv;
-					return true;
-				}
-			}
-			c = c->link;
-        }
-
-		delete[] argv;
-    }
-
-*/
-	printf("\nCommand not found. Type \"help\" for a list of available commands\n");
-
-	return;
 }
