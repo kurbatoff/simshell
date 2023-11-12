@@ -23,18 +23,20 @@
 #include <string.h>
 
 #include "unzip.h"
+#include "tools.h"
 
-static const char* COMP_HEADER		= "Header";
-static const char* COMP_DIRECTORY	= "Directory";
-static const char* COMP_APPLET		= "Applet";
-static const char* COMP_IMPORT		= "Import";
-static const char* COMP_CONSTANTPOOL = "ConstantPool";
-static const char* COMP_CLASS		= "Class";
-static const char* COMP_METHOD		= "Method";
-static const char* COMP_STATICFIELD = "StaticField";
-static const char* COMP_REFLOCATION = "RefLocation";
-static const char* COMP_DESCRIPTOR	= "Descriptor";
-static const char* COMP_DEBUG		= "Debug";
+static const char* COMP_HEADER		= "Header.cap";
+static const char* COMP_DIRECTORY	= "Directory.cap";
+static const char* COMP_APPLET		= "Applet.cap";
+static const char* COMP_IMPORT		= "Import.cap";
+static const char* COMP_CONSTANTPOOL = "ConstantPool.cap";
+static const char* COMP_CLASS		= "Class.cap";
+static const char* COMP_METHOD		= "Method.cap";
+static const char* COMP_STATICFIELD = "StaticField.cap";
+static const char* COMP_REFLOCATION = "RefLocation.cap";
+static const char* COMP_DESCRIPTOR	= "Descriptor.cap";
+static const char* COMP_DEBUG		= "Debug.cap";
+static const char* COMP_EXPORT		= "Export.cap";
 
 /**
  * @brief Look for a component (aka zip file)
@@ -70,16 +72,45 @@ static bool find_component(unzFile _cap, const char* _cname, unz_file_info* _pfi
 		while (*component != '/')
 			component--;
 
-		component++; // next after '/'
+		component++; // Component name start next char after '/'
 
 		len = strlen(component);
-		len -= 4; // exclude '.cap'
 
 		if (memcmp(_cname, component, len) == 0)
 			return true;
 	}
 	printf("Component %s not found..\n", _cname);
 	return false;
+}
+
+static void load_component(unzFile _cap, const char* _cname)
+{
+	unz_file_info pfile_info;
+	uint8_t buffer[256];
+	unsigned int len;
+	unsigned int len_read;
+
+	if (!find_component(_cap, _cname, &pfile_info))
+	{
+		return;
+	}
+
+	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, pfile_info.uncompressed_size);
+
+	len = pfile_info.uncompressed_size;
+	unzOpenCurrentFile(_cap);
+
+	while (len > 0) {
+
+		len_read = unzReadCurrentFile(_cap, buffer, sizeof(buffer));
+		len -= len_read;
+
+		for (size_t j = 0; j < len_read; j++)
+			printf("%02X ", buffer[j]);
+		printf("\n");
+	}
+
+	printf("\n");
 }
 
 void print_cap_info(const char* filename)
@@ -102,7 +133,7 @@ void print_cap_info(const char* filename)
 		return;
 	}
 	// --- print CAP name
-	printf(" CAP file name      : %s\n", filename);
+	printf(" CAP file name      : " COLOR_GREEN "%s\n" COLOR_RESET, filename);
 
 	unzGetGlobalInfo(cap, &pglobal_info);
 
@@ -235,68 +266,35 @@ void print_cap_info(const char* filename)
 		}
 	}
 
-
 	unzClose(cap);
+
+	printf("\n");
 }
 
-void upload(const char* filename)
+void upload_cap(const char* filename)
 {
 	unzFile cap;
-	unz_global_info pglobal_info;
-	unz_file_info pfile_info;
-	char szFileName[2048];
-	char extraField[32];
-	char szComment[256];
-
 
 	cap = unzOpen(filename);
 
 	if (cap == NULL) {
-		printf("Not OK\n");
+		printf("Failed to open CAP file %s\n", filename);
 
 		return;
 	}
 
-	unzGetGlobalInfo(cap, &pglobal_info);
-
-	for (size_t i = 0; i < pglobal_info.number_entry; i++)
-	{
-		char* component;
-		uint8_t buffer[256];
-		unsigned int len;
-		unsigned int len_read;
-
-		if (i == 0) {
-			unzGoToFirstFile(cap);
-		}
-		else unzGoToNextFile(cap);
-
-		unzGetCurrentFileInfo(cap, &pfile_info,
-			szFileName, 2048,
-			extraField, 32,
-			szComment, 256);
-
-		len = pfile_info.uncompressed_size;
-
-		component = &szFileName[strlen(szFileName) - 1];
-		while (*component != '/')
-			component--;
-
-		component++; // next after '/'
-
-		printf("File name: %s\n", component);
-		printf("File size: %d\n", len);
-
-		if (len > sizeof(buffer))
-			len = sizeof(buffer);
-
-		unzOpenCurrentFile(cap);
-		len_read = unzReadCurrentFile(cap, buffer, len);
-
-		for (size_t j = 0; j < len; j++)
-			printf("%02X ", buffer[j]);
-		printf("\n\n");
-	}
+	load_component(cap, COMP_HEADER);
+	load_component(cap, COMP_DIRECTORY);
+	load_component(cap, COMP_IMPORT);
+	load_component(cap, COMP_APPLET);
+	load_component(cap, COMP_CLASS);
+	load_component(cap, COMP_METHOD);
+	load_component(cap, COMP_STATICFIELD);
+	load_component(cap, COMP_CONSTANTPOOL);
+	load_component(cap, COMP_REFLOCATION);
+	//load_component(cap, COMP_DESCRIPTOR);
+	//load_component(cap, COMP_DEBUG);
+	//load_component(cap, COMP_EXPORT);
 
 	unzClose(cap);
 }

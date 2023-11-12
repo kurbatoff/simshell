@@ -28,6 +28,9 @@
     <Filter Include="Source files\mbedtls">
       <UniqueIdentifier>{5f9b47c9-c9e2-4a9e-85d8-faf003cd3bfa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source files\zip">
+      <UniqueIdentifier>{05804537-b12f-407a-ba7d-795707c669be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shell\main.c">
@@ -134,6 +137,18 @@
     </ClCompile>
     <ClCompile Include="..\Lib\mbedtls-2.16.0\library\cipher_wrap.c">
       <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="unzip\ioapi.c">
+      <Filter>Source files\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="unzip\iowin32.c">
+      <Filter>Source files\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="unzip\unzip.c">
+      <Filter>Source files\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="unzip\zip.c">
+      <Filter>Source files\zip</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

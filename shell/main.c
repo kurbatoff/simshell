@@ -38,7 +38,7 @@
 * @param argv: command line arguments including the application file name
 * @retval the resulting code returned by the application
 */
-int main(int argc, char* argv[])
+int __cdecl main(int argc, char* argv[])
 {
 	char commandline[4096];
 	char* str;

@@ -73,7 +73,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>K:\V.CPP\simshell\gp;K:\V.CPP\simshell\shell;K:\V.CPP\simshell\pcsc;K:\V.CPP\Lib\mbedtls-2.16.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>K:\V.CPP\Lib\zlib-1.3;.\unzip;.\gp;K:\V.CPP\simshell\shell;K:\V.CPP\simshell\pcsc;K:\V.CPP\Lib\mbedtls-2.16.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>K:\V.CPP\simshell\zlib-1.2.8\win32-build\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -93,11 +94,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winscard.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>genversion.bat</Command>
@@ -203,6 +205,10 @@
     <ClCompile Include="shell\shell.c" />
     <ClCompile Include="shell\tools.c" />
     <ClCompile Include="shell\version.c" />
+    <ClCompile Include="unzip\ioapi.c" />
+    <ClCompile Include="unzip\iowin32.c" />
+    <ClCompile Include="unzip\unzip.c" />
+    <ClCompile Include="unzip\zip.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gp\globalplatform.h" />
