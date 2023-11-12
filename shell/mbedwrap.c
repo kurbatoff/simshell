@@ -59,7 +59,7 @@ void mbedtls_compute_public_keys(int curve_id, const uint8_t SK_buff[M2M_ECC_SEC
 	mbedtls_mpi_read_binary(&privatekey, SK_buff, M2M_ECC_SECRET_KEY_LEN);
 	mbedtls_ecp_point_init(&publickkey);
 
-	dump_hexascii_buffer("Private key:", SK_buff, M2M_ECC_SECRET_KEY_LEN);
+	//dump_hexascii_buffer("Private key:", SK_buff, M2M_ECC_SECRET_KEY_LEN);
 
 	// calculate the public key
 	mbedtls_ecp_mul(&ecgroup, &publickkey, &privatekey, &ecgroup.G, NULL, NULL);

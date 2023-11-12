@@ -222,11 +222,11 @@ void cmd_scp11_mutual_authenticate(void)
 
 	load_plain_memory(key.data_offset, SK_SD_ECKA, key.length);
 
-	/*
-	 * извлекаем ID эллиптической кривой и конвертируем его из GP в тип MBEDTLS_*
-	 * Card Specification – Public Release v2.3
-	 * Table B-2: Key Parameter Reference Values
-	 * /
+	//
+	// извлекаем ID эллиптической кривой и конвертируем его из GP в тип MBEDTLS_*
+	// Card Specification – Public Release v2.3
+	// Table B-2: Key Parameter Reference Values
+	//
 	switch (keyset.param_reference) {
 	case 0x00: // P-256 as specified in [FIPS 186-4]
 		curveId = MBEDTLS_ECP_DP_SECP256R1;
@@ -239,7 +239,7 @@ void cmd_scp11_mutual_authenticate(void)
 
 		// TODO fix?
 		// НЕ СОВПАДАЕТ с GP ???
-		curveId = MBEDTLS_ECP_DP_FRP256; /*!< 256-bits ...... curve * /
+		curveId = MBEDTLS_ECP_DP_FRP256;
 		break;
 	default:
 		// ERROR

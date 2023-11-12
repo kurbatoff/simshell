@@ -95,7 +95,7 @@ static void load_component(unzFile _cap, const char* _cname)
 		return;
 	}
 
-	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, pfile_info.uncompressed_size);
+	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, (int)pfile_info.uncompressed_size);
 
 	len = pfile_info.uncompressed_size;
 	unzOpenCurrentFile(_cap);
@@ -137,7 +137,7 @@ void print_cap_info(const char* filename)
 
 	unzGetGlobalInfo(cap, &pglobal_info);
 
-	printf(" CAP file components (%d)\n", pglobal_info.number_entry);
+	printf(" CAP file components (%d)\n", (int)pglobal_info.number_entry);
 	for (size_t i = 0; i < pglobal_info.number_entry; i++)
 	{
 		char* component;
@@ -160,7 +160,7 @@ void print_cap_info(const char* filename)
 
 		component++; // next after '/'
 
-		printf("   %-16s : %d bytes\n", component, len);
+		printf("   %-16s : %d bytes\n", component, (int)len);
 	}
 
 	// --- print HEADER
