@@ -54,10 +54,9 @@ static void test_dsa(void);
  */
 static void handleErrors(char *reason)
 {
-	printf("\n\n ---\n ERROR during ECC\n\n");
+	printf(COLOR_RED "\n\n ---\n ERROR during ECC\n\n" COLOR_RESET);
 
-	fprintf(stderr, reason);
-    fflush(stderr);
+	printf("%s/n", reason);
 	
 	while(1);
 }
@@ -94,12 +93,12 @@ int ecc_main(void)
 	uint8_t data_buff[1024];
 	int data_len = 0;
 
-	convert_hex2bin((const uint8_t*)eSK_OCE_ECKA_str, eSK_OCE_ECKA, M2M_ECC_SECRET_KEY_LEN);
-	convert_hex2bin((const uint8_t*)ePK_OCE_ECKA_str, ePK_OCE_ECKA, M2M_ECC_PUBLIC_KEY_LEN);
-	convert_hex2bin((const uint8_t*)eSK_SD_ECKA_str, eSK_SD_ECKA, M2M_ECC_SECRET_KEY_LEN);
-	convert_hex2bin((const uint8_t*)ePK_SD_ECKA_str, ePK_SD_ECKA, M2M_ECC_PUBLIC_KEY_LEN);
-	//convert_hex2bin((const uint8_t*)publikkey_ETH, publickey_buff, M2M_ECC_PUBLIC_KEY_LEN);
-	convert_hex2bin((const uint8_t*)secretkey_ETH, secretkey_buff, M2M_ECC_SECRET_KEY_LEN);
+	convert_hex2bin(eSK_OCE_ECKA_str, eSK_OCE_ECKA, M2M_ECC_SECRET_KEY_LEN);
+	convert_hex2bin(ePK_OCE_ECKA_str, ePK_OCE_ECKA, M2M_ECC_PUBLIC_KEY_LEN);
+	convert_hex2bin(eSK_SD_ECKA_str, eSK_SD_ECKA, M2M_ECC_SECRET_KEY_LEN);
+	convert_hex2bin(ePK_SD_ECKA_str, ePK_SD_ECKA, M2M_ECC_PUBLIC_KEY_LEN);
+	//convert_hex2bin(publikkey_ETH, publickey_buff, M2M_ECC_PUBLIC_KEY_LEN);
+	convert_hex2bin(secretkey_ETH, secretkey_buff, M2M_ECC_SECRET_KEY_LEN);
 
 	// --- 1 ----------------------------------------
 	//*
@@ -153,11 +152,11 @@ int ecc_main(void)
 	printf("\n\n 5. ----------------------------------------\n");
 	//mbedtls_sign_verify();
 
-	convert_hex2bin((const uint8_t*)secretkey_ETH, secretkey_buff, M2M_ECC_SECRET_KEY_LEN);
+	convert_hex2bin(secretkey_ETH, secretkey_buff, M2M_ECC_SECRET_KEY_LEN);
 	mbedtls_compute_public_keys(MBEDTLS_ECP_DP_SECP256K1, secretkey_buff, publickey_buff);
 
-	data_len = strlen(dataplain) / 2;
-	convert_hex2bin((const uint8_t*)dataplain, data_buff, data_len);
+	data_len = strlen((const char* )dataplain) / 2;
+	convert_hex2bin((const char* )dataplain, data_buff, data_len);
 	//memcpy(data_buff, dataplain, data_len);
 
 	/*
@@ -175,9 +174,9 @@ int ecc_main(void)
 
 	mbedtls_create_ecdsa_signature(MBEDTLS_ECP_DP_SECP256K1, secretkey_buff, data_buff, data_len, NULL, signature_buff);
 
-	convert_hex2bin((const uint8_t*)signature_str, signature_buff, M2M_ECC_RS_SIGNATURE_LEN);
+	convert_hex2bin(signature_str, signature_buff, M2M_ECC_RS_SIGNATURE_LEN);
 	construct_asn1_signature(signature_buff, signature_asn1);
-	convert_hex2bin((const uint8_t*)hash_keccak, hash, MBED_SHA256_DIGEST_LENGTH);
+	convert_hex2bin(hash_keccak, hash, MBED_SHA256_DIGEST_LENGTH);
 
 
 	status = mbedtls_verify_ecdsa_signature(MBEDTLS_ECP_DP_SECP256K1, publickey_buff, data_buff, data_len, hash, signature_asn1);
@@ -220,18 +219,18 @@ static void mbedtls_simulate_scp11(void)
 	unsigned char PK_OCE_ECKA[M2M_ECC_PUBLIC_KEY_LEN];
 
 	// data for  ShSs
-    const unsigned char* SK_SD_ECKA_str = "A1CE38B2FDDE7F0BFA8FD09CF8784BE813C18701EACDFC45FB190AB898A7E8AE";
-	const unsigned char* PK_OCE_ECKA_str = "04397835E8012825A13862BB20071A4E118529D14413DB4A90289CBBFA0EE641B04149C41D8425109591C8A9457E7D8624989CF9CBEB24A9751DE646E23257E823";
+    const char* SK_SD_ECKA_str = "A1CE38B2FDDE7F0BFA8FD09CF8784BE813C18701EACDFC45FB190AB898A7E8AE";
+	const char* PK_OCE_ECKA_str = "04397835E8012825A13862BB20071A4E118529D14413DB4A90289CBBFA0EE641B04149C41D8425109591C8A9457E7D8624989CF9CBEB24A9751DE646E23257E823";
 	
 	// data for ShSe
-	const unsigned char* eSK_OCE_ECKA_str = "3BE44C7D24B0A39C6D88696BB59E705D940BF7122E5944A4F9CD7BA005FFB6CC";
+	const char* eSK_OCE_ECKA_str = "3BE44C7D24B0A39C6D88696BB59E705D940BF7122E5944A4F9CD7BA005FFB6CC";
 	//const char* ePK_OCE_ECKA = "04736EED0974F46EC373E234F488DF7F110A31B8D93892D5796654BF74595692A869D838B6BE7F2378C4C270364F9C702FC357BA02FBFCEA8AFE86B362E1C73F99";
 	
 	//const char* eSK_SD_ECKA = "???";
-	const unsigned char* ePK_SD_ECKA_str = "04618DC59E98833490541C18900C8F0918462B3767FC0E93586A3B279F938730AB7178F4311DC8BFB087DC5199123945DCEF525D6BD7633FEE414837622424C0E3";
+	const char* ePK_SD_ECKA_str = "04618DC59E98833490541C18900C8F0918462B3767FC0E93586A3B279F938730AB7178F4311DC8BFB087DC5199123945DCEF525D6BD7633FEE414837622424C0E3";
 
 	// len 302
-	const unsigned char* receipt_data_str = "A60D900211019501348001888101105F494104736EED0974F46EC373E234F488DF7F110A31B8D93892D5796654BF74595692A869D838B6BE7F2378C4C270364F9C702FC357BA02FBFCEA8AFE86B362E1C73F995F494104618DC59E98833490541C18900C8F0918462B3767FC0E93586A3B279F938730AB7178F4311DC8BFB087DC5199123945DCEF525D6BD7633FEE414837622424C0E3";
+	const char* receipt_data_str = "A60D900211019501348001888101105F494104736EED0974F46EC373E234F488DF7F110A31B8D93892D5796654BF74595692A869D838B6BE7F2378C4C270364F9C702FC357BA02FBFCEA8AFE86B362E1C73F995F494104618DC59E98833490541C18900C8F0918462B3767FC0E93586A3B279F938730AB7178F4311DC8BFB087DC5199123945DCEF525D6BD7633FEE414837622424C0E3";
 	unsigned char rec_data[151];
 
 	mbedtls_generate_ecc_keypair(MBEDTLS_ECP_DP_SECP256R1, eSK_OCE_ECKA, ePK_SD_ECKA);
@@ -301,8 +300,8 @@ static void mbedtls_sign_verify(void)
 
 	const char* data = "12345678";
 	int data_len;
-	const uint8_t* SK_ECDSA = "94A9E5D3AF5A6E35A1D87726D5DA6C2CB72775C5FDD24C0604E4DE56FF6090A4";
-	const uint8_t* PK_ECDSA = "04D0FB48EFDB8EAF8C2729DE794CA570B2BCEBF4CC87AD993FF986FEC8A46B5031BC82B5B6BE3BE0277B2BCA88E64D27FAB67B1E26031CD7F45F4A288AA91C456E";
+	const char* SK_ECDSA = "94A9E5D3AF5A6E35A1D87726D5DA6C2CB72775C5FDD24C0604E4DE56FF6090A4";
+	const char* PK_ECDSA = "04D0FB48EFDB8EAF8C2729DE794CA570B2BCEBF4CC87AD993FF986FEC8A46B5031BC82B5B6BE3BE0277B2BCA88E64D27FAB67B1E26031CD7F45F4A288AA91C456E";
 
 	uint8_t data_bin[10240]; // TODO fix length
 	uint8_t secretkey_bin[M2M_ECC_SECRET_KEY_LEN];
@@ -311,8 +310,8 @@ static void mbedtls_sign_verify(void)
 	// Convert to BIN
 	data_len = strlen(data) / 2;
 
-	convert_hex2bin((const uint8_t*)data, data_bin, data_len);
-	convert_hex2bin((const uint8_t*)SK_ECDSA, secretkey_bin, M2M_ECC_SECRET_KEY_LEN);
+	convert_hex2bin(data, data_bin, data_len);
+	convert_hex2bin(SK_ECDSA, secretkey_bin, M2M_ECC_SECRET_KEY_LEN);
 
 		
 	mbedtls_create_ecdsa_signature(MBEDTLS_ECP_DP_SECP256R1, (const uint8_t*)secretkey_bin, data_bin, data_len, NULL, signature_bin);
@@ -327,7 +326,7 @@ static void mbedtls_sign_verify(void)
 	asn1_signature_bin[0x20 + 5] = 0x20;
 	memcpy(&asn1_signature_bin[0x20 + 6], &signature_bin[0x20], 0x20);
 
-	convert_hex2bin((const uint8_t*)PK_ECDSA, publickey_bin, M2M_ECC_PUBLIC_KEY_LEN);
+	convert_hex2bin(PK_ECDSA, publickey_bin, M2M_ECC_PUBLIC_KEY_LEN);
 
 	mbedtls_verify_ecdsa_signature(MBEDTLS_ECP_DP_SECP256R1, publickey_bin, data_bin, data_len, NULL, asn1_signature_bin);
 

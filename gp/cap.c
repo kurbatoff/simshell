@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#ifdef _WIN32
+
 #include "unzip.h"
 #include "tools.h"
 
@@ -298,3 +300,4 @@ void upload_cap(const char* filename)
 
 	unzClose(cap);
 }
+#endif // _WIN32
