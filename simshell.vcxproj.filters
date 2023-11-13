@@ -22,11 +22,11 @@
     <Filter Include="Source files\PCSC">
       <UniqueIdentifier>{7b35609a-a7b2-480b-8825-9e692e971ea2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source files\Crypto">
-      <UniqueIdentifier>{1c1cfa10-f909-4c91-95a5-1c852f7a2c56}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\mbedtls">
       <UniqueIdentifier>{5f9b47c9-c9e2-4a9e-85d8-faf003cd3bfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\mbed">
+      <UniqueIdentifier>{13d738d2-e582-4fa5-b4dc-2bd8c0ee7953}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -56,15 +56,6 @@
     </ClCompile>
     <ClCompile Include="gp\securechannel.c">
       <Filter>Source files\GP</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\hal_aes.c">
-      <Filter>Source files\Crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\hal_des.c">
-      <Filter>Source files\Crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\mbedwrap.c">
-      <Filter>Source files\Crypto</Filter>
     </ClCompile>
     <ClCompile Include="gp\scp03.c">
       <Filter>Source files\GP</Filter>
@@ -167,6 +158,18 @@
     </ClCompile>
     <ClCompile Include="..\Lib\mbedtls-development\library\sha512.c">
       <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbed\hal_aes.c">
+      <Filter>Source files\mbed</Filter>
+    </ClCompile>
+    <ClCompile Include="mbed\hal_des.c">
+      <Filter>Source files\mbed</Filter>
+    </ClCompile>
+    <ClCompile Include="mbed\mbedtests.c">
+      <Filter>Source files\mbed</Filter>
+    </ClCompile>
+    <ClCompile Include="mbed\mbedwrap.c">
+      <Filter>Source files\mbed</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -73,7 +73,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.\unzip;.\gp;K:\V.CPP\simshell\shell;K:\V.CPP\simshell\pcsc;K:\V.CPP\Lib\mbedtls-development\include;$(IncludePath)</IncludePath>
+    <IncludePath>.\mbed;.\unzip;.\gp;.\shell;.\pcsc;..\Lib\mbedtls-development\include;$(IncludePath)</IncludePath>
     <LibraryPath>K:\V.CPP\simshell\zlib-1.2.8\win32-build\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -209,12 +209,13 @@
     <ClCompile Include="gp\scp03.c" />
     <ClCompile Include="gp\scp11.c" />
     <ClCompile Include="gp\securechannel.c" />
+    <ClCompile Include="mbed\hal_aes.c" />
+    <ClCompile Include="mbed\hal_des.c" />
+    <ClCompile Include="mbed\mbedtests.c" />
+    <ClCompile Include="mbed\mbedwrap.c" />
     <ClCompile Include="pcsc\pcscwrap.c" />
     <ClCompile Include="shell\commands.c" />
-    <ClCompile Include="shell\hal_aes.c" />
-    <ClCompile Include="shell\hal_des.c" />
     <ClCompile Include="shell\main.c" />
-    <ClCompile Include="shell\mbedwrap.c" />
     <ClCompile Include="shell\shell.c" />
     <ClCompile Include="shell\tools.c" />
     <ClCompile Include="shell\version.c" />
