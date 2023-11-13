@@ -26,11 +26,12 @@
 #include "mbedtls/ecdsa.h"
 #include "mbedtls/sha256.h"
 #include "mbedtls/ecdh.h"
+#include "mbedtls/cmac.h"
 
 
 #define ecp_clear_precomputed( g )
 
-int myrand(void *rng_state, uint8_t *output, size_t len)
+int generate_random(void *rng_state, uint8_t *output, size_t len)
 {
     if (rng_state != NULL) {
         rng_state  = NULL;
@@ -89,35 +90,35 @@ void mbedtls_compute_ecdh_sharedsecret(int curve_id, uint8_t* SK_buff, uint8_t* 
 	mbedtls_ecdh_init( &ctx_srv );
 
 #if PRINT_DEBUG_DATA
-	dump_hexascii_buffer( " Secret key: ", SK_buff, M2M_ECC_SECRET_KEY_LEN);
-	dump_hexascii_buffer( " Public key: ", PK_buff, M2M_ECC_PUBLIC_KEY_LEN);
+	dump_hexascii_buffer(" Secret key: ", SK_buff, M2M_ECC_SECRET_KEY_LEN);
+	dump_hexascii_buffer(" Public key: ", PK_buff, M2M_ECC_PUBLIC_KEY_LEN);
 #endif
 
 
     ret = mbedtls_ecp_group_load( &ctx_srv.grp, (mbedtls_ecp_group_id)curve_id);
-    if( ret != 0 )
+    if ( ret != 0 )
     {
 #if PRINT_DEBUG_DATA
-        printf( " failed\n  ! mbedtls_ecp_group_load returned %d\n", ret );
+        printf(COLOR_RED " failed\n" COLOR_RESET " ! mbedtls_ecp_group_load returned %d\n", ret);
 #endif
     }
 
-    /*
-     * Server: read peer's key and generate shared secret
-     */
-    ret = mbedtls_mpi_lset( &ctx_srv.Qp.Z, 1 );
-    if( ret != 0 )
+    //
+    // Server: read peer's key and generate shared secret
+    //
+    ret = mbedtls_mpi_lset( &ctx_srv.Qp.Z, 1);
+    if ( ret != 0 )
     {
 #if PRINT_DEBUG_DATA
-        printf( " failed\n  ! mbedtls_mpi_lset returned %d\n", ret );
+        printf(COLOR_RED " failed\n" COLOR_RESET "  ! mbedtls_mpi_lset returned %d\n", ret );
 #endif
     }
 
     ret = mbedtls_mpi_read_binary( &ctx_srv.d, SK_buff, 0x20);
-    if( ret != 0 )
+    if ( ret != 0 )
     {
 #if PRINT_DEBUG_DATA
-        printf( " failed\n  ! mbedtls_mpi_lset returned %d\n", ret );
+        printf(COLOR_RED " failed\n" COLOR_RESET "  ! mbedtls_mpi_lset returned %d\n", ret );
 #endif
     }
 
@@ -125,7 +126,7 @@ void mbedtls_compute_ecdh_sharedsecret(int curve_id, uint8_t* SK_buff, uint8_t* 
     if( ret != 0 )
     {
 #if PRINT_DEBUG_DATA
-        printf( " failed\n  ! mbedtls_mpi_read_binary returned %d\n", ret );
+        printf(COLOR_RED " failed\n" COLOR_RESET " ! mbedtls_mpi_read_binary returned %d\n", ret );
 #endif
     }
 
@@ -133,18 +134,17 @@ void mbedtls_compute_ecdh_sharedsecret(int curve_id, uint8_t* SK_buff, uint8_t* 
     if( ret != 0 )
     {
 #if PRINT_DEBUG_DATA
-        printf( " failed\n  ! mbedtls_mpi_read_binary returned %d\n", ret );
+        printf(COLOR_RED " failed\n" COLOR_RESET " ! mbedtls_mpi_read_binary returned %d\n", ret );
 #endif
     }
 
     ret = mbedtls_ecdh_compute_shared( &ctx_srv.grp, &ctx_srv.z,
                                        &ctx_srv.Qp, &ctx_srv.d,
-									   NULL, NULL);
-                                       //mbedtls_ctr_drbg_random, &ctr_drbg );
+                                       generate_random, NULL);
     if( ret != 0 )
     {
 #if PRINT_DEBUG_DATA
-        printf( " failed\n  ! mbedtls_ecdh_compute_shared returned %d\n", ret );
+        printf(COLOR_RED " failed\n" COLOR_RESET " ! mbedtls_ecdh_compute_shared returned %d\n", ret );
 #endif
     }
 
@@ -152,7 +152,7 @@ void mbedtls_compute_ecdh_sharedsecret(int curve_id, uint8_t* SK_buff, uint8_t* 
 	mbedtls_mpi_write_binary((const mbedtls_mpi* )&ctx_srv.z, (unsigned char*)shs, M2M_ECC_SHARED_SECRET_LEN);
 
 #if PRINT_DEBUG_DATA
-	dump_hexascii_buffer(" mbed ShS = ", shs, M2M_ECC_SHARED_SECRET_LEN);
+	dump_hexascii_buffer(COLOR_GREEN " mbed ShS: " COLOR_RESET, shs, M2M_ECC_SHARED_SECRET_LEN);
 #endif
 }
 
@@ -163,7 +163,7 @@ void mbedtls_generate_ecc_keypair(int curve_id, uint8_t* eSK, uint8_t* ePK)
     
 	mbedtls_ecp_group ecgroup;
 
-	myrand(NULL, eSK, M2M_ECC_SECRET_KEY_LEN);
+	generate_random(NULL, eSK, M2M_ECC_SECRET_KEY_LEN);
 
 	mbedtls_ecp_group_init(&ecgroup);
 	mbedtls_ecp_group_load(&ecgroup, (mbedtls_ecp_group_id)curve_id);
@@ -221,8 +221,8 @@ void mbedtls_create_ecdsa_signature(int curve_id, const uint8_t secretkey[M2M_EC
 
 
 #if PRINT_DEBUG_DATA
-	//* DEBUG: print input SK, calculated PK: X, Y
 	{
+		// DEBUG: print input SK, calculated PK: X, Y
 		char XX[128];
 		int olen;
 
@@ -237,17 +237,21 @@ void mbedtls_create_ecdsa_signature(int curve_id, const uint8_t secretkey[M2M_EC
 		mbedtls_mpi_write_string((const mbedtls_mpi*)&ecdsa.Q.Y, 16, XX, sizeof(XX), (size_t*)&olen);
 		printf(" PK Y (%d): %s\n", olen, XX);
 	}
-	// */
 #endif
 
 	if (precomputed_hash != NULL) {
 		memcpy(hash, precomputed_hash, MBED_SHA256_DIGEST_LENGTH);
 	} else {
-		mbedtls_sha256_ret(data_buff, len, hash, 0);
+		mbedtls_sha256(data_buff, len, hash, 0);
 	}
 
-	ret_sign = mbedtls_ecdsa_sign_det(&ecdsa.grp, &mpir, &mpis, (const mbedtls_mpi*)&ecdsa.d,
-		hash, sizeof(hash), MBEDTLS_MD_SHA256);
+//	ret_sign = mbedtls_ecdsa_sign_det(&ecdsa.grp, &mpir, &mpis, (const mbedtls_mpi*)&ecdsa.d,
+//		hash, sizeof(hash), MBEDTLS_MD_SHA256);
+	ret_sign = mbedtls_ecdsa_sign_det_ext(&ecdsa.grp, &mpir, &mpis, (const mbedtls_mpi*)&ecdsa.d,
+		hash, sizeof(hash), MBEDTLS_MD_SHA256,
+		generate_random,
+		NULL
+		);
 
 #if PRINT_DEBUG_DATA
 	printf("Sign result: %d\n", ret_sign);
@@ -330,8 +334,8 @@ int mbedtls_verify_ecdsa_signature(int curve_id, const uint8_t publickey[M2M_ECC
 	ret_verify = mbedtls_mpi_read_binary((mbedtls_mpi* )&ecdsa.Q.Z, &hash[0], 1);
 
 #if PRINT_DEBUG_DATA
-	//* DEBUG: print input SK, calculated PK: X, Y
 	{
+		// DEBUG: print input SK, calculated PK: X, Y
 		char XX[128];
 		int olen;
 
@@ -344,13 +348,12 @@ int mbedtls_verify_ecdsa_signature(int curve_id, const uint8_t publickey[M2M_ECC
 		mbedtls_mpi_write_string((const mbedtls_mpi* )&ecdsa.Q.Z, 16, XX, sizeof(XX), (size_t* )&olen);
 		printf(" PK Z (%d): %s\n", olen, XX);
 	}
-	// */
 #endif
 
 	if (precomputed_hash != NULL) {
 		memcpy(hash, precomputed_hash, MBED_SHA256_DIGEST_LENGTH);
 	} else {
-		mbedtls_sha256_ret(data_buff, data_len, hash, 0);
+		mbedtls_sha256(data_buff, data_len, hash, 0);
 	}
 
 	ret_verify = mbedtls_ecdsa_read_signature(&ecdsa, hash, sizeof( hash ), signature_buff, 2 + signature_buff[1]);
@@ -389,5 +392,25 @@ print_hex("Hash: ", (const unsigned char *)hash, 32, 1);
 #endif
 }
 // */
+
+/**
+ * Calculates a message authentication code, using AES-128 in CBC mode. This is the algorithm specified in NIST 800-38B
+ * @param key [in] The AES-128 key to use
+ * @param *message [in] The message to calculate the MAC for
+ * @param messageLength [in] The message length
+ * @param mac [out] The calculated MAC
+ *
+ * @return none
+ */
+void calculate_CMAC_aes(uint8_t key[16], uint8_t* message, int messageLength, uint8_t cmac[16])
+{
+	mbedtls_cipher_context_t pCtx;
+
+	mbedtls_cipher_cmac_starts(&pCtx, key, 128);
+	mbedtls_cipher_cmac_update(&pCtx, message, messageLength);
+	mbedtls_cipher_cmac_finish(&pCtx, cmac);
+
+	return;
+}
 
 

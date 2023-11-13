@@ -21,6 +21,9 @@
 
 #include <stdint.h>
 
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+#define MBEDTLS_ECP_RESTARTABLE
+
 #include "mbedtls/ecp.h"
 
 #define M2M_ECC_SECRET_KEY_LEN			0x20
@@ -33,7 +36,7 @@
 
 #define PRINT_DEBUG_DATA			1
 
-int myrand(void *rng_state, uint8_t *output, size_t len);
+int generate_random(void *rng_state, uint8_t *output, size_t len);
 
 void mbedtls_compute_public_keys(int curve_id, const uint8_t SK_buff[M2M_ECC_SECRET_KEY_LEN], uint8_t PK_buff[M2M_ECC_PUBLIC_KEY_LEN]);
 void mbedtls_generate_ecc_keypair(int curve_id, uint8_t* eSK, uint8_t* ePK);
@@ -44,5 +47,7 @@ int mbedtls_verify_ecdsa_signature(int curve_id, const uint8_t publickey[M2M_ECC
 void mbedtls_compute_ecdh_sharedsecret(int curve_id, uint8_t* SK_buff, uint8_t* PK_buff, uint8_t* shs);
 
 //void mbedtls_calculate_sha256(const uint8_t* message, int messageLength, uint8_t hash[MBED_SHA256_DIGEST_LENGTH]);
+
+void calculate_CMAC_aes(uint8_t key[16], uint8_t* message, int messageLength, uint8_t cmac[16]);
 
 #endif /* __MBEDWRAP_H__ */

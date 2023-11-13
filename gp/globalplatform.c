@@ -28,6 +28,8 @@
 #include "globalplatform.h"
 #include "tools.h"
 
+#include "mbedwrap.h"
+
 #define GET_STATUS_MODE				0x02 // Expanded
 #define GET_STATUS_ISD				0x80
 #define GET_STATUS_APPLICATIONS		0x40
@@ -57,13 +59,6 @@ uint8_t KEY[] = {
 	0x40, 0x41, 0x42, 0x43,  0x44, 0x45, 0x46, 0x47,
 	0x48, 0x49, 0x4A, 0x4B,  0x4C, 0x4D, 0x4E, 0x4F
 };
-
-void generate_random(uint8_t* dst, uint8_t len)
-{
-	while (len--) {
-		*dst++ = (uint8_t)(rand() & 0xFF);
-	}
-}
 
 /**
  * @_data poniter to the 1st tag within E3 block (excluding E3 and len)
@@ -198,7 +193,7 @@ int mutual_authentication()
 int init_update()
 {
 	//random
-	generate_random(host_challenge, CHALLENGE_SZ);
+	generate_random(NULL, host_challenge, CHALLENGE_SZ);
 
 	commend_len = 0;
 	command[commend_len++] = 0x80;

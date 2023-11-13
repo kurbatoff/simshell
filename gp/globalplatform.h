@@ -30,8 +30,6 @@
 extern "C" {
 #endif
 
-void generate_random(uint8_t* dst, uint8_t len);
-
 int select_ISD();
 int mutual_authentication();
 int init_update();
