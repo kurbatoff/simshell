@@ -30,7 +30,8 @@
 
 #include "mbedwrap.h"
 
-#define GET_STATUS_MODE				0x02 // Expanded
+#define GET_STATUS_MODE_LEGACY		0x00
+#define GET_STATUS_MODE_EXPANDED	0x02
 #define GET_STATUS_ISD				0x80
 #define GET_STATUS_APPLICATIONS		0x40
 #define GET_STATUS_PACKAGES			0x10
@@ -38,6 +39,45 @@
 #define CHALLENGE_SZ		8
 #define CRYPTOGRAMM_SZ		8
 #define C_MAC_SZ			8
+
+#define KNOWN_ELF_COUNT		3
+
+typedef struct known_elf_t
+{
+	const char* name;
+	const int length;
+	const uint8_t aid[16];
+} known_elf_t;
+
+known_elf_t elf_array[KNOWN_ELF_COUNT] = {
+	{
+		"ISD-R",
+		16,
+		{0xA0, 0x00, 0x00, 0x05, 0x59, 0x10, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0x89, 0x00, 0x00, 0x01, 0x00}
+	},
+	{
+		"ECASD",
+		16,
+		{0xA0, 0x00, 0x00, 0x05, 0x59, 0x10, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0x89, 0x00, 0x00, 0x02, 0x00}
+	},
+	{
+		"ARA-M",
+		9,
+		{0xA0, 0x00, 0x00, 0x01, 0x51, 0x41, 0x43, 0x4C, 0x00,
+		0, 0, 0, 0, 0, 0, 0}
+	},
+};
+
+static void find_elf_name(uint8_t* aid, int len)
+{
+	for (int i = 0; i < KNOWN_ELF_COUNT; i++)
+	{
+		if ( (elf_array[i].length == len) && (0 == memcmp(elf_array[i].aid, aid, len)) ) {
+			printf(COLOR_MAGENTA " %s\n" COLOR_RESET, elf_array[i].name);
+			break;
+		}
+	}
+}
 
 // APDU
 static uint8_t command[256 + 5];
@@ -80,8 +120,12 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 		case 0x4F:
 			printf(" AID  :  ");
 			for (int i = 0; i < len; i++)
-				printf("%02X", _data[offset++]);
+				printf("%02X", _data[offset+i]);
+
+			find_elf_name(&_data[offset], len);
 			printf("\n");
+
+			offset += len;
 			break;
 
 		case 0x9F70:
@@ -349,7 +393,7 @@ int get_status()
 	command[commend_len++] = 0x80;
 	command[commend_len++] = INS_GP_GET_STATUS;
 	command[commend_len++] = GET_STATUS_ISD;
-	command[commend_len++] = GET_STATUS_MODE;
+	command[commend_len++] = GET_STATUS_MODE_EXPANDED;
 	command[commend_len++] = 2;
 	command[commend_len++] = 0x4F;
 	command[commend_len++] = 0x00;
@@ -383,7 +427,7 @@ int get_status()
 	command[commend_len++] = 0x80;
 	command[commend_len++] = INS_GP_GET_STATUS;
 	command[commend_len++] = GET_STATUS_APPLICATIONS;
-	command[commend_len++] = GET_STATUS_MODE;
+	command[commend_len++] = GET_STATUS_MODE_EXPANDED;
 	command[commend_len++] = 2;
 	command[commend_len++] = 0x4F;
 	command[commend_len++] = 0x00;
@@ -424,7 +468,7 @@ int get_status()
 	command[commend_len++] = 0x80;
 	command[commend_len++] = INS_GP_GET_STATUS;
 	command[commend_len++] = GET_STATUS_PACKAGES;
-	command[commend_len++] = GET_STATUS_MODE;
+	command[commend_len++] = GET_STATUS_MODE_EXPANDED;
 	command[commend_len++] = 2;
 	command[commend_len++] = 0x4F;
 	command[commend_len++] = 0x00;

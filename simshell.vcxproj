@@ -209,6 +209,7 @@
     <ClCompile Include="gp\scp03.c" />
     <ClCompile Include="gp\scp11.c" />
     <ClCompile Include="gp\securechannel.c" />
+    <ClCompile Include="gp\sw.c" />
     <ClCompile Include="mbed\hal_aes.c" />
     <ClCompile Include="mbed\hal_des.c" />
     <ClCompile Include="mbed\mbedtests.c" />

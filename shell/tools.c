@@ -179,7 +179,7 @@ void change_endian(uint8_t* buffer, int length)
 	}
 }
 
-void shift_r(unsigned char* buffer, int length)
+void shift_r(uint8_t* buffer, int length)
 {
 	int i;
 

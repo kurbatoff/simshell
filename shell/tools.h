@@ -65,7 +65,7 @@ uint16_t print_taglen(uint8_t* buff, uint16_t* length);
 uint16_t print_tlv(uint8_t* buff);
 uint8_t BERTLV_set_length(uint8_t* buffer, uint8_t len);
 
-size_t delete_symbol(uint8_t* buffer, size_t len, uint8_t symb);
+//size_t delete_symbol(uint8_t* buffer, size_t len, uint8_t symb);
 
 #if defined(__cplusplus)
 }

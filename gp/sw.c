@@ -1,4 +1,4 @@
-/**
+﻿/**
  *  Copyright (c) 2023, Intergalaxy LLC
  *  This file is part of SIMSHELL.
  *
@@ -16,21 +16,9 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef __COMMANDS_H_
-#define __COMMANDS_H_
+#include "sw.h"
 
-#define SHELL_COMMAND_COUNT		12
-
-typedef void (*shellcommand_f)(char* _cmd);
-
-typedef struct simshell_command_t
+void interpret_sw(uint16_t sw)
 {
-	const char* pcName;
-	const char* pcHelpString;
-	const char* pcShortHelp;
-	const shellcommand_f pCallBackFunction;
-} simshell_command_t;
-
-extern simshell_command_t command_array[SHELL_COMMAND_COUNT];
-
-#endif /* __COMMANDS_H_ */
+	//
+}

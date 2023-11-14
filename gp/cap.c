@@ -27,6 +27,23 @@
 #include "unzip.h"
 #include "tools.h"
 
+/*
+    // CAP file download order
+    static final byte ORDER_HEADER = (byte)1;
+    static final byte ORDER_DIRECTORY = (byte)2;
+    static final byte ORDER_IMPORT = (byte)3;
+    static final byte ORDER_APPLET = (byte)4;
+    static final byte ORDER_CLASS = (byte)5;
+    static final byte ORDER_METHOD = (byte)6;
+    static final byte ORDER_STATICFIELD = (byte)7;
+    static final byte ORDER_EXPORT = (byte)8;
+    static final byte ORDER_CONSTANTPOOL = (byte)9;
+    static final byte ORDER_REFERENCELOCATION = (byte)10;
+    static final byte ORDER_DESCRIPTOR = (byte)11;
+    //static final byte ORDER_DEBUG = (byte)12;
+*/
+
+
 static const char* COMP_HEADER		= "Header.cap";
 static const char* COMP_DIRECTORY	= "Directory.cap";
 static const char* COMP_APPLET		= "Applet.cap";
@@ -292,11 +309,11 @@ void upload_cap(const char* filename)
 	load_component(cap, COMP_CLASS);
 	load_component(cap, COMP_METHOD);
 	load_component(cap, COMP_STATICFIELD);
+	//load_component(cap, COMP_EXPORT);
 	load_component(cap, COMP_CONSTANTPOOL);
 	load_component(cap, COMP_REFLOCATION);
 	//load_component(cap, COMP_DESCRIPTOR);
 	//load_component(cap, COMP_DEBUG);
-	//load_component(cap, COMP_EXPORT);
 
 	unzClose(cap);
 }

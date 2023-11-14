@@ -171,6 +171,9 @@
     <ClCompile Include="mbed\mbedwrap.c">
       <Filter>Source files\mbed</Filter>
     </ClCompile>
+    <ClCompile Include="gp\sw.c">
+      <Filter>Source files\GP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">
