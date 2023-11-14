@@ -19,7 +19,7 @@
 #ifndef __COMMANDS_H_
 #define __COMMANDS_H_
 
-#define SHELL_COMMAND_COUNT		12
+#define SHELL_COMMAND_COUNT		13
 
 typedef void (*shellcommand_f)(char* _cmd);
 

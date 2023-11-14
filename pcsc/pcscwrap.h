@@ -63,7 +63,7 @@ uint16_t get_response(uint8_t response_len, uint8_t* response, uint16_t response
  *
  */
 pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
-	uint8_t *response, uint16_t response_size, uint16_t* cmd_len);
+	uint8_t* _response_buffer, uint16_t _response_buffer_sz, uint16_t* _response_length);
 
 pcsc_error_t pcsc_listreaders(void);
 pcsc_error_t connect_reader(void);

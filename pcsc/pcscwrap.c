@@ -63,10 +63,10 @@ uint8_t LChannel_ID;
 
 #define ISO_INS_GET_RESPONSE 0xC0
 
-uint16_t get_response(uint8_t response_len, uint8_t* response, uint16_t _response_size)
+uint16_t get_response(uint8_t response_len, uint8_t* _response_buff, uint16_t _response_buff_sz)
 {
 	uint8_t command[5];
-	uint16_t resp_size;
+	uint16_t resp_length;
 
 	command[0] = 0x00;
 	command[1] = ISO_INS_GET_RESPONSE;
@@ -74,13 +74,13 @@ uint16_t get_response(uint8_t response_len, uint8_t* response, uint16_t _respons
 	command[3] = 0x00;
 	command[4] = response_len;
 
-	pcsc_sendAPDU(command, 5, response, _response_size, &resp_size);
+	pcsc_sendAPDU(command, 5, _response_buff, _response_buff_sz, &resp_length);
 
-	return resp_size;
+	return resp_length;
 }
 
 pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
-  uint8_t *response, uint16_t response_size, uint16_t* cmd_len)
+  uint8_t *_response_buffer, uint16_t _response_buffer_sz, uint16_t* _response_length)
 {
 	pcsc_error_t error_code = PCSC_ERROR_UNKNOWN;
 	LONG rv;
@@ -111,19 +111,19 @@ pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
 	}
 
 	error_code = recvBuffer[dwRecvLength - 2] << 8 | recvBuffer[dwRecvLength-1];
-	*cmd_len = (uint16_t)dwRecvLength;
+	*_response_length = (uint16_t)dwRecvLength;
+
+	*_response_length = (uint16_t)dwRecvLength;
 
 	// Extract data if requested
-	if (NULL != response)
+	if (NULL != _response_buffer)
 	{
-		*cmd_len = (uint16_t)dwRecvLength;
-		if (*cmd_len <= sizeof(recvBuffer)) {
-			memcpy(response, recvBuffer, *cmd_len);
+		if (*_response_length <= _response_buffer_sz) {
+			memcpy(_response_buffer, recvBuffer, *_response_length);
 		}
 		else
 		{
-			printf("Response too long for buffer (%d > %d)\n",
-			*cmd_len, response_size);
+			printf("Response too long for buffer (%d > %d)\n", *_response_length, _response_buffer_sz);
 			return PCSC_ERROR_UNKNOWN;
 		}
 	}

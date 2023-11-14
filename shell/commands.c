@@ -46,8 +46,8 @@ static void cmd_auth(char* _cmd);
 static void cmd_initupdate(char* _cmd);
 static void cmd_extauthenticate(char* _cmd);
 static void cmd_ls(char* _cmd);
+static void cmd_S_send(char* _cmd);
 
-//static void cmd_S_send(char* _cmd);
 //static void cmd_S_capinfo(char* _cmd);
 //static void cmd_S_echo(char* _cmd);
 //static void cmd_S_sleep(char* _cmd);
@@ -144,6 +144,12 @@ simshell_command_t command_array[SHELL_COMMAND_COUNT] = {
 		"\n\"ls\"\n",
 		" ls                Retrieve and print GP registry (GET STATUS)\n",
 		cmd_ls
+	},
+	{
+		"send",
+		"\n\"/send\":\n Usage:\n    APDU string\n",
+		" /send             Send APDU-C to the active reader\n",
+		cmd_S_send
 	}
 };
 
@@ -206,11 +212,6 @@ static void cmd_S_term(char* _cmd)
 }
 
 /*
-	_send,
-	"\n\"/send\":\n Usage:\n    APDU string\n",
-	" /send             Send APDU-C to the active reader\n",
-	cmd_S_send
-                     
 	_capinfo,
     "\n\"/cap-info file.CAP\":\n Usage:\n    file: the .CAP file name\n",
 	" /cap-info     [-] Print .CAP file information\n",
@@ -362,7 +363,7 @@ static void cmd_S_select(char* _cmd)
  */
 static void cmd_S_send(char* _cmd)
 {
-	printf(COLOR_CYAN " /send " COLOR_RESET "under implementation..\n");
+	printf(COLOR_CYAN " /send %s" COLOR_RESET "under implementation..\n", _cmd);
 }
 
 /**

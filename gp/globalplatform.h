@@ -35,7 +35,6 @@ int mutual_authentication();
 int init_update();
 int ext_authenticate();
 int get_status();
-int put_key();
 
 #if defined(__cplusplus)
 }
