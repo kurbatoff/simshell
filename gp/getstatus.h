@@ -1,4 +1,4 @@
-/**
+﻿/**
  *  Copyright (c) 2023, Intergalaxy LLC
  *  This file is part of SIMSHELL.
  *
@@ -16,34 +16,27 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef __SHELL_H_
-#define __SHELL_H_
+#ifndef __GETSTATUS_H__
+#define __GETSTATUS_H__
 
 #include <stdint.h>
 
-#ifdef __APPLE__
-	typedef uint32_t DWORD;
-#else
-	#include <windows.h>
-#endif
+#define GET_STATUS_MODE_LEGACY		0x00
+#define GET_STATUS_MODE_EXPANDED	0x02
+#define GET_STATUS_ISD				0x80
+#define GET_STATUS_APPLICATIONS		0x40
+#define GET_STATUS_PACKAGES			0x10
 
-#define SHELL_NAME		"simsh"
-#define shell_prompt	printf(SHELL_NAME "|-> ")
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-/**
- * @brief Execute the shell command
- * @param command: command line
- */
-void SHELL_execute(char *command);
+void find_elf_name(uint8_t* aid, int len);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* __SHELL_H_ */
-
+#endif /* __GETSTATUS_H__ */
 

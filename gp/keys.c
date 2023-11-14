@@ -1,4 +1,4 @@
-/**
+﻿/**
  *  Copyright (c) 2023, Intergalaxy LLC
  *  This file is part of SIMSHELL.
  *
@@ -16,34 +16,15 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef __SHELL_H_
-#define __SHELL_H_
+#include "keys.h"
 
-#include <stdint.h>
+uint8_t KEY[] = {
+	0x40, 0x41, 0x42, 0x43,  0x44, 0x45, 0x46, 0x47,
+	0x48, 0x49, 0x4A, 0x4B,  0x4C, 0x4D, 0x4E, 0x4F
+};
 
-#ifdef __APPLE__
-	typedef uint32_t DWORD;
-#else
-	#include <windows.h>
-#endif
 
-#define SHELL_NAME		"simsh"
-#define shell_prompt	printf(SHELL_NAME "|-> ")
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-/**
- * @brief Execute the shell command
- * @param command: command line
- */
-void SHELL_execute(char *command);
-
-#if defined(__cplusplus)
+void cmd_put_keyset(uint8_t kvn)
+{
+	//
 }
-#endif
-
-#endif /* __SHELL_H_ */
-
-

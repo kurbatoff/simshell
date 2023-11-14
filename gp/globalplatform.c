@@ -22,68 +22,19 @@
 #include "pcscwrap.h"
 #include "hal_aes.h"
 #include "gp.h"
+#include "keys.h"
 #include "scp02.h"
 #include "scp03.h"
 #include "securechannel.h"
 #include "globalplatform.h"
+#include "getstatus.h"
 #include "tools.h"
 
 #include "mbedwrap.h"
 
-#define GET_STATUS_MODE_LEGACY		0x00
-#define GET_STATUS_MODE_EXPANDED	0x02
-#define GET_STATUS_ISD				0x80
-#define GET_STATUS_APPLICATIONS		0x40
-#define GET_STATUS_PACKAGES			0x10
-
 #define CHALLENGE_SZ		8
 #define CRYPTOGRAMM_SZ		8
 #define C_MAC_SZ			8
-
-#define KNOWN_ELF_COUNT		3
-
-typedef struct known_elf_t
-{
-	const char* name;
-	const int length;
-	const uint8_t aid[16];
-} known_elf_t;
-
-known_elf_t elf_array[KNOWN_ELF_COUNT] = {
-	{
-		"ISD-R",
-		16,
-		{0xA0, 0x00, 0x00, 0x05, 0x59, 0x10, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0x89, 0x00, 0x00, 0x01, 0x00}
-	},
-	{
-		"ECASD",
-		16,
-		{0xA0, 0x00, 0x00, 0x05, 0x59, 0x10, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0x89, 0x00, 0x00, 0x02, 0x00}
-	},
-	{
-		"ARA-M",
-		9,
-		{0xA0, 0x00, 0x00, 0x01, 0x51, 0x41, 0x43, 0x4C, 0x00,
-		0, 0, 0, 0, 0, 0, 0}
-	},
-};
-
-static void find_elf_name(uint8_t* aid, int len)
-{
-	for (int i = 0; i < KNOWN_ELF_COUNT; i++)
-	{
-		if ( (elf_array[i].length == len) && (0 == memcmp(elf_array[i].aid, aid, len)) ) {
-			printf(COLOR_MAGENTA " %s\n" COLOR_RESET, elf_array[i].name);
-			break;
-		}
-	}
-}
-
-// APDU
-static uint8_t command[256 + 5];
-static uint16_t commend_len;
-static uint8_t response[256 + 2];
-static uint16_t response_length;
 
 // SCP03
 static uint8_t counter[3];
@@ -94,11 +45,6 @@ static uint8_t card_cryptogramm[CRYPTOGRAMM_SZ];
 static uint8_t card_challenge[CHALLENGE_SZ];
 static uint8_t host_challenge[CHALLENGE_SZ];
 static uint8_t c_mac[C_MAC_SZ];
-
-uint8_t KEY[] = {
-	0x40, 0x41, 0x42, 0x43,  0x44, 0x45, 0x46, 0x47,
-	0x48, 0x49, 0x4A, 0x4B,  0x4C, 0x4D, 0x4E, 0x4F
-};
 
 /**
  * @_data poniter to the 1st tag within E3 block (excluding E3 and len)
@@ -205,20 +151,20 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 
 int select_ISD()
 {
-	commend_len = 0;
-	command[commend_len++] = 0x00;
-	command[commend_len++] = INS_GP_SELECT;
-	command[commend_len++] = 0x04;
-	command[commend_len++] = 0x00;
-	command[commend_len++] = 0x00;
+	cmd_len = 0;
+	command[cmd_len++] = 0x00;
+	command[cmd_len++] = INS_GP_SELECT;
+	command[cmd_len++] = 0x04;
+	command[cmd_len++] = 0x00;
+	command[cmd_len++] = 0x00;
 
-	pcsc_sendAPDU(command, commend_len, response, sizeof(response), &response_length);
+	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &resp_len);
 
-	if (0x61 == response[response_length - 2]) {
-		response_length = get_response(response[response_length - 1], response, sizeof(response));
+	if (0x61 == response[cmd_len - 2]) {
+		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
 	}
 
-	if (0x90 != response[response_length - 2]) {
+	if (0x90 != response[cmd_len - 2]) {
 		printf(COLOR_RED " Failed to select ISD\n" COLOR_RESET);
 		return -1;
 	}
@@ -239,23 +185,23 @@ int init_update()
 	//random
 	generate_random(NULL, host_challenge, CHALLENGE_SZ);
 
-	commend_len = 0;
-	command[commend_len++] = 0x80;
-	command[commend_len++] = INS_INIT_UPDATE;
-	command[commend_len++] = 0x00;
-	command[commend_len++] = 0x00;
-	command[commend_len++] = CHALLENGE_SZ;
+	cmd_len = 0;
+	command[cmd_len++] = 0x80;
+	command[cmd_len++] = INS_INIT_UPDATE;
+	command[cmd_len++] = 0x00;
+	command[cmd_len++] = 0x00;
+	command[cmd_len++] = CHALLENGE_SZ;
 	
-	memcpy(&command[commend_len], host_challenge, CHALLENGE_SZ);
-	commend_len += CHALLENGE_SZ;
+	memcpy(&command[cmd_len], host_challenge, CHALLENGE_SZ);
+	cmd_len += CHALLENGE_SZ;
 
-	pcsc_sendAPDU(command, commend_len, response, sizeof(response), &response_length);
+	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &cmd_len);
 
-	if (0x61 == response[response_length - 2]) {
-		response_length = get_response(response[response_length - 1], response, sizeof(response));
+	if (0x61 == response[cmd_len - 2]) {
+		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
 	}
 
-	if (0x90 != response[response_length - 2]) {
+	if (0x90 != response[cmd_len - 2]) {
 		printf(COLOR_RED " Failed to perform INIT UPDATE\r\n" COLOR_RESET);
 		return -1;
 	}
@@ -320,7 +266,7 @@ int ext_authenticate()
 
 		memcpy(&command[13], c_mac, C_MAC_SZ);
 
-		pcsc_sendAPDU(command, 5 + 16, response, sizeof(response), &response_length);
+		pcsc_sendAPDU(command, 5 + 16, response, sizeof(response), &cmd_len);
 
 		//			CTX.security_level = 
 		//			CTX.security_status =
@@ -375,7 +321,7 @@ int ext_authenticate()
 		memcpy(&command[13], buf_ICV, C_MAC_SZ);
 
 		pcsc_sendAPDU(command, 5 + CHALLENGE_SZ + CRYPTOGRAMM_SZ,
-			response, sizeof(response), &response_length);
+			response, sizeof(response), &cmd_len);
 
 		//			CTX.security_level = 
 		//			CTX.security_status =
@@ -389,28 +335,28 @@ int ext_authenticate()
 int get_status()
 {
 	// --- step 1: Issuer Security Domain ---
-	commend_len = 0;
-	command[commend_len++] = 0x80;
-	command[commend_len++] = INS_GP_GET_STATUS;
-	command[commend_len++] = GET_STATUS_ISD;
-	command[commend_len++] = GET_STATUS_MODE_EXPANDED;
-	command[commend_len++] = 2;
-	command[commend_len++] = 0x4F;
-	command[commend_len++] = 0x00;
+	cmd_len = 0;
+	command[cmd_len++] = 0x80;
+	command[cmd_len++] = INS_GP_GET_STATUS;
+	command[cmd_len++] = GET_STATUS_ISD;
+	command[cmd_len++] = GET_STATUS_MODE_EXPANDED;
+	command[cmd_len++] = 2;
+	command[cmd_len++] = 0x4F;
+	command[cmd_len++] = 0x00;
 
-	pcsc_sendAPDU(command, commend_len, response, sizeof(response), &response_length);
+	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &cmd_len);
 
-	if (0x61 == response[response_length - 2]) {
-		response_length = get_response(response[response_length - 1], response, sizeof(response));
+	if (0x61 == response[cmd_len - 2]) {
+		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
 	}
 
-	if (0x90 == response[response_length - 2]) {
+	if (0x90 == response[cmd_len - 2]) {
 		int offset = 0;
 		int len;
 
 		printf(COLOR_YELLOW " Issuer Security Domain\n" COLOR_RESET);
 
-		response_length -= 2; // Exclude SW
+		cmd_len -= 2; // Exclude SW
 
 		if (response[offset++] != 0xE3) {
 			printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
@@ -423,33 +369,33 @@ int get_status()
 	}
 
 	// --- step 2: Applications, including Security Domains ---
-	commend_len = 0;
-	command[commend_len++] = 0x80;
-	command[commend_len++] = INS_GP_GET_STATUS;
-	command[commend_len++] = GET_STATUS_APPLICATIONS;
-	command[commend_len++] = GET_STATUS_MODE_EXPANDED;
-	command[commend_len++] = 2;
-	command[commend_len++] = 0x4F;
-	command[commend_len++] = 0x00;
+	cmd_len = 0;
+	command[cmd_len++] = 0x80;
+	command[cmd_len++] = INS_GP_GET_STATUS;
+	command[cmd_len++] = GET_STATUS_APPLICATIONS;
+	command[cmd_len++] = GET_STATUS_MODE_EXPANDED;
+	command[cmd_len++] = 2;
+	command[cmd_len++] = 0x4F;
+	command[cmd_len++] = 0x00;
 
-	pcsc_sendAPDU(command, commend_len, response, sizeof(response), &response_length);
+	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &cmd_len);
 
-	if (0x61 == response[response_length - 2]) {
-		response_length = get_response(response[response_length - 1], response, sizeof(response));
+	if (0x61 == response[cmd_len - 2]) {
+		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
 	}
 
-	if (0x90 == response[response_length - 2]) {
+	if (0x90 == response[cmd_len - 2]) {
 		int offset = 0;
 		int len;
 
 		printf(COLOR_YELLOW " Applications, including Security Domains\n" COLOR_RESET);
 
-		response_length -= 2; // Exclude SW
+		cmd_len -= 2; // Exclude SW
 
-		if (0 == response_length > 0) {
+		if (0 == cmd_len > 0) {
 			printf(COLOR_WHITE " [none]\n" COLOR_RESET);
 		} else {
-			while (offset < response_length) {
+			while (offset < cmd_len) {
 				if (response[offset++] != 0xE3) {
 					printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
 				}
@@ -464,34 +410,34 @@ int get_status()
 	}
 
 	// --- step 3: Executable Load Files and Executable Modules ---
-	commend_len = 0;
-	command[commend_len++] = 0x80;
-	command[commend_len++] = INS_GP_GET_STATUS;
-	command[commend_len++] = GET_STATUS_PACKAGES;
-	command[commend_len++] = GET_STATUS_MODE_EXPANDED;
-	command[commend_len++] = 2;
-	command[commend_len++] = 0x4F;
-	command[commend_len++] = 0x00;
+	cmd_len = 0;
+	command[cmd_len++] = 0x80;
+	command[cmd_len++] = INS_GP_GET_STATUS;
+	command[cmd_len++] = GET_STATUS_PACKAGES;
+	command[cmd_len++] = GET_STATUS_MODE_EXPANDED;
+	command[cmd_len++] = 2;
+	command[cmd_len++] = 0x4F;
+	command[cmd_len++] = 0x00;
 
-	pcsc_sendAPDU(command, commend_len, response, sizeof(response), &response_length);
+	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &cmd_len);
 
-	if (0x61 == response[response_length - 2]) {
-		response_length = get_response(response[response_length - 1], response, sizeof(response));
+	if (0x61 == response[cmd_len - 2]) {
+		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
 	}
 
-	if (0x90 == response[response_length - 2]) {
+	if (0x90 == response[cmd_len - 2]) {
 		int offset = 0;
 		int len;
 
 		printf(COLOR_YELLOW " Executable Load Files and Executable Modules\n" COLOR_RESET);
 
-		response_length -= 2; // Exclude SW
+		cmd_len -= 2; // Exclude SW
 
-		if (0 == response_length > 0) {
+		if (0 == cmd_len > 0) {
 			printf(COLOR_WHITE " [none]\n" COLOR_RESET);
 		}
 		else {
-			while (offset < response_length) {
+			while (offset < cmd_len) {
 				if (response[offset++] != 0xE3) {
 					printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
 				}

@@ -72,7 +72,7 @@ void SHELL_execute(char *command)
 		return;
 
 	case 1:
-		// Execute single found
+		// Execute single finding
 
 		c = (simshell_command_t*)&command_array[cmd_idx];
 

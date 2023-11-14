@@ -22,6 +22,12 @@
 #include "tools.h"
 #include "pcscwrap.h"
 
+ // APDU
+uint8_t command[256 + 5];
+uint16_t cmd_len;
+uint8_t response[256 + 2];
+uint16_t resp_len;
+
 #ifdef __APPLE__
 	#include <PCSC/winscard.h>
 //	#include <PCSC/wintypes.h>
@@ -74,7 +80,7 @@ uint16_t get_response(uint8_t response_len, uint8_t* response, uint16_t _respons
 }
 
 pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
-  uint8_t *response, uint16_t response_size, uint16_t* response_length)
+  uint8_t *response, uint16_t response_size, uint16_t* cmd_len)
 {
 	pcsc_error_t error_code = PCSC_ERROR_UNKNOWN;
 	LONG rv;
@@ -105,19 +111,19 @@ pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
 	}
 
 	error_code = recvBuffer[dwRecvLength - 2] << 8 | recvBuffer[dwRecvLength-1];
-	*response_length = (uint16_t)dwRecvLength;
+	*cmd_len = (uint16_t)dwRecvLength;
 
 	// Extract data if requested
 	if (NULL != response)
 	{
-		*response_length = (uint16_t)dwRecvLength;
-		if (*response_length <= sizeof(recvBuffer)) {
-			memcpy(response, recvBuffer, *response_length);
+		*cmd_len = (uint16_t)dwRecvLength;
+		if (*cmd_len <= sizeof(recvBuffer)) {
+			memcpy(response, recvBuffer, *cmd_len);
 		}
 		else
 		{
 			printf("Response too long for buffer (%d > %d)\n",
-			*response_length, response_size);
+			*cmd_len, response_size);
 			return PCSC_ERROR_UNKNOWN;
 		}
 	}

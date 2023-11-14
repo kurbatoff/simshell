@@ -21,6 +21,13 @@
 
 #include <stdbool.h>
 
+ // APDU
+extern uint8_t command[256 + 5];
+extern uint16_t cmd_len;
+extern uint8_t response[256 + 2];
+extern uint16_t resp_len;
+
+
 #ifdef __APPLE__
 //	#include <PCSC/winscard.h>
 #endif
@@ -49,14 +56,14 @@ uint16_t get_response(uint8_t response_len, uint8_t* response, uint16_t response
  * \param _cmd_len            Length of APDU command to send
  * \param response            Buffer used to save the response; must be allocated by the user
  * \param response_size       Size of the response buffer allocated by the user
- * \param response_length     Length of the response
+ * \param cmd_len     Length of the response
  * 
  * \return                    \c PCSC_SUCCESS on success.
  * \return                    An error code on failure.
  *
  */
 pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
-	uint8_t *response, uint16_t response_size, uint16_t* response_length);
+	uint8_t *response, uint16_t response_size, uint16_t* cmd_len);
 
 pcsc_error_t pcsc_listreaders(void);
 pcsc_error_t connect_reader(void);

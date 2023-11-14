@@ -75,6 +75,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>.\mbed;.\unzip;.\gp;.\shell;.\pcsc;..\Lib\mbedtls-development\include;$(IncludePath)</IncludePath>
     <LibraryPath>K:\V.CPP\simshell\zlib-1.2.8\win32-build\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)/bin/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -204,7 +205,9 @@
     <ClCompile Include="..\Lib\mbedtls-development\library\sha512.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="gp\getstatus.c" />
     <ClCompile Include="gp\globalplatform.c" />
+    <ClCompile Include="gp\keys.c" />
     <ClCompile Include="gp\scp02.c" />
     <ClCompile Include="gp\scp03.c" />
     <ClCompile Include="gp\scp11.c" />

@@ -174,6 +174,12 @@
     <ClCompile Include="gp\sw.c">
       <Filter>Source files\GP</Filter>
     </ClCompile>
+    <ClCompile Include="gp\keys.c">
+      <Filter>Source files\GP</Filter>
+    </ClCompile>
+    <ClCompile Include="gp\getstatus.c">
+      <Filter>Source files\GP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">

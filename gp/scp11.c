@@ -40,40 +40,35 @@ static uint8_t PK_OCE_ECKA[0x41];
  */
 void cmd_scp11_perform_security_operation(void)
 {
-	uint8_t command[256 + 5];
-	uint16_t commend_len;
-	uint8_t response[256 + 2];
-	uint16_t response_length;
-
 	// --- 1 ---
 	printf(COLOR_CYAN " Step 1: Select SCP11 SSD\n" COLOR_RESET);
 
-	commend_len = 0;
-	command[commend_len++] = 0x00;
-	command[commend_len++] = INS_GP_SELECT;
-	command[commend_len++] = 0x04;
-	command[commend_len++] = 0x00;
-	command[commend_len++] = 9;
+	cmd_len = 0;
+	command[cmd_len++] = 0x00;
+	command[cmd_len++] = INS_GP_SELECT;
+	command[cmd_len++] = 0x04;
+	command[cmd_len++] = 0x00;
+	command[cmd_len++] = 9;
 
 	// scp11_ssd.
-	command[commend_len++] = 's';
-	command[commend_len++] = 'c';
-	command[commend_len++] = 'p';
-	command[commend_len++] = '1';
-	command[commend_len++] = '1';
-	command[commend_len++] = '_';
-	command[commend_len++] = 's';
-	command[commend_len++] = 's';
-	command[commend_len++] = 'd';
+	command[cmd_len++] = 's';
+	command[cmd_len++] = 'c';
+	command[cmd_len++] = 'p';
+	command[cmd_len++] = '1';
+	command[cmd_len++] = '1';
+	command[cmd_len++] = '_';
+	command[cmd_len++] = 's';
+	command[cmd_len++] = 's';
+	command[cmd_len++] = 'd';
 
-	pcsc_sendAPDU(command, commend_len, response, sizeof(response), &response_length);
+	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &cmd_len);
 
 
-	if (0x61 == response[response_length - 2]) {
-		response_length = get_response(response[response_length - 1], response, sizeof(response));
+	if (0x61 == response[cmd_len - 2]) {
+		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
 	}
 
-	if (0x90 != response[response_length - 2]) {
+	if (0x90 != response[cmd_len - 2]) {
 		printf(COLOR_RED " Failed to select SSD\n" COLOR_RESET);
 		return;
 	}
@@ -82,27 +77,27 @@ void cmd_scp11_perform_security_operation(void)
 	// --- 2 ---
 	printf(COLOR_CYAN " Step 2: a) Get SD certificate\n" COLOR_RESET);
 
-	commend_len = 0;
-	command[commend_len++] = 0x80;
-	command[commend_len++] = INS_GP_GET_DATA_CA;
-	command[commend_len++] = 0xBF;
-	command[commend_len++] = 0x21;
-	command[commend_len++] = 6;
+	cmd_len = 0;
+	command[cmd_len++] = 0x80;
+	command[cmd_len++] = INS_GP_GET_DATA_CA;
+	command[cmd_len++] = 0xBF;
+	command[cmd_len++] = 0x21;
+	command[cmd_len++] = 6;
 
-	command[commend_len++] = 0xA6;
-	command[commend_len++] = 0x04;
-	command[commend_len++] = 0x83;
-	command[commend_len++] = 0x02;
-	command[commend_len++] = 0x11;
-	command[commend_len++] = 0x20;
+	command[cmd_len++] = 0xA6;
+	command[cmd_len++] = 0x04;
+	command[cmd_len++] = 0x83;
+	command[cmd_len++] = 0x02;
+	command[cmd_len++] = 0x11;
+	command[cmd_len++] = 0x20;
 
-	pcsc_sendAPDU(command, commend_len, response, sizeof(response), &response_length);
+	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &cmd_len);
 
-	if (0x61 == response[response_length - 2]) {
-		response_length = get_response(response[response_length - 1], response, sizeof(response));
+	if (0x61 == response[cmd_len - 2]) {
+		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
 	}
 
-	if (0x90 != response[response_length - 2]) {
+	if (0x90 != response[cmd_len - 2]) {
 		printf(COLOR_RED " Failed fetch SD certificate\n" COLOR_RESET);
 		return;
 	}

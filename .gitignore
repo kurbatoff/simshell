@@ -53,4 +53,7 @@ dkms.conf
 
 .vs
 Debug
+bin/simshell.exe
+bin/simshell.pdb
+bin/simshell
 genversion.bat
