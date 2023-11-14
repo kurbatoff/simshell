@@ -18,5 +18,8 @@ SCP81 (aka GP Amd. B) to be integrated<br/>
 
 <h1>JVM</h1>
 
+<h1>Download</h1>
+Pre-built binary packages are available for <a href="intergalaxy.org/download">download</a>
+
 <h1>Issues</h1>
 For issues please use the <a href="https://github.com/kurbatoff/simshell/issues">GitHub issue tracker</a>
