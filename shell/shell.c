@@ -24,14 +24,14 @@
 #include "shell.h"
 #include "commands.h"
 
-int find_shell_command(char* _cmd, int* _idx)
+static int find_shell_command(char* _cmd, int* _idx)
 {
 	simshell_command_t* c;
 	size_t len;
 	int count = 0;
 
-	for (int i = 0; i < SHELL_COMMAND_COUNT; i++) {
-		c = (simshell_command_t*)&command_array[i];
+	for (int i = 0; i < SHELL_COMMANDS_COUNT; i++) {
+		c = (simshell_command_t*)&commands_array[i];
 
 		len = 0;
 		while (1) {
@@ -56,27 +56,27 @@ int find_shell_command(char* _cmd, int* _idx)
 /**
 * @brief Execute the shell command
 *
-* @param command: command line
+* @param _command: shell command line
 */
-void SHELL_execute(char *command)
+void SHELL_execute(char *_command)
 {
 	simshell_command_t* c;
 	int cmd_idx;
 	int found;
 
-	found = find_shell_command(command, &cmd_idx);
+	found = find_shell_command(_command, &cmd_idx);
 
 	switch (found) {
 	case 0:
-		printf("\nCommand not found. Type \"help\" for a list of available commands\n");
+		printf("\ngCMDbuff not found. Type \"help\" for a list of available command\n");
 		return;
 
 	case 1:
 		// Execute single finding
 
-		c = (simshell_command_t*)&command_array[cmd_idx];
+		c = (simshell_command_t*)&commands_array[cmd_idx];
 
-		c->pCallBackFunction(command);
+		c->pCallBackFunction(_command);
 		return;
 
 	default:

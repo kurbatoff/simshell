@@ -30,6 +30,7 @@
 #include "pcscwrap.h"
 #include "globalplatform.h"
 #include "scp11.h"
+#include "iso7816.h"
 
 static void help(char* _cmd);
 static void cmd_version(char* _cmd);
@@ -66,12 +67,12 @@ static void cmd_S_send(char* _cmd);
 
 
 // ---------------------------------------------------------------------------------------------------------------------
-// Shell commands array
+// Shell gCMDbuffs array
 // ---------------------------------------------------------------------------------------------------------------------
-simshell_command_t command_array[SHELL_COMMAND_COUNT] = {
+simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 	{
 		"help",
-		"\n\"help\": List available commands\n",
+		"\n\"help\": List available gCMDbuffs\n",
 		" help          [-] Display help information\n",
 		help
 	},
@@ -146,7 +147,7 @@ simshell_command_t command_array[SHELL_COMMAND_COUNT] = {
 		cmd_ls
 	},
 	{
-		"send",
+		"/send",
 		"\n\"/send\":\n Usage:\n    APDU string\n",
 		" /send             Send APDU-C to the active reader\n",
 		cmd_S_send
@@ -154,31 +155,31 @@ simshell_command_t command_array[SHELL_COMMAND_COUNT] = {
 };
 
 /**
- * @brief Shell command HELP callback function
+ * @brief Shell gCMDbuff HELP callback function
  *
- * @param argc: amount of help command aguments including help command itself as argv[0]
- * @param argv: help command aguments including help command itself as argv[0]
+ * @param argc: amount of help gCMDbuff aguments including help gCMDbuff itself as argv[0]
+ * @param argv: help gCMDbuff aguments including help gCMDbuff itself as argv[0]
  */
 static void help(char* _cmd)
 {
 	simshell_command_t* c;
 	simshell_command_t* cj;
 
-	int sortedlist[SHELL_COMMAND_COUNT];
+	int sortedlist[SHELL_COMMANDS_COUNT];
 
 	// Copy indexes for sorting
-	for (int i = 0; i < SHELL_COMMAND_COUNT; i++)
+	for (int i = 0; i < SHELL_COMMANDS_COUNT; i++)
 	{
 		sortedlist[i] = i;
 	}
 
-	// Sort command names alphabetically
-	for (int i = 0; i < SHELL_COMMAND_COUNT; i++)
+	// Sort gCMDbuff names alphabetically
+	for (int i = 0; i < SHELL_COMMANDS_COUNT; i++)
 	{
-		for (int j = i; j < SHELL_COMMAND_COUNT; j++)
+		for (int j = i; j < SHELL_COMMANDS_COUNT; j++)
 		{
-			c = (simshell_command_t*)&command_array[sortedlist[i]];
-			cj = (simshell_command_t*)&command_array[sortedlist[j]];
+			c = (simshell_command_t*)&commands_array[sortedlist[i]];
+			cj = (simshell_command_t*)&commands_array[sortedlist[j]];
 
 			if (strcmp(c->pcName, cj->pcName) > 0)
 			{
@@ -192,9 +193,9 @@ static void help(char* _cmd)
 	}
 
 	// Print our the sorted list
-	for (int i = 0; i < SHELL_COMMAND_COUNT; i++)
+	for (int i = 0; i < SHELL_COMMANDS_COUNT; i++)
 	{
-		c = (simshell_command_t*)&command_array[sortedlist[i]];
+		c = (simshell_command_t*)&commands_array[sortedlist[i]];
 
 		printf(" %s", c->pcShortHelp);
 	}
@@ -204,7 +205,7 @@ static void help(char* _cmd)
 /**
  * @brief /term callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_term(char* _cmd)
 {
@@ -234,7 +235,7 @@ static void cmd_S_term(char* _cmd)
 
 	_execute,
 	"\n\"/execute\"\n",
-	" /execute      [-] Execute host OS command\n",
+	" /execute      [-] Execute host OS gCMDbuff\n",
 	cmd_S_execute
 
 	_error,
@@ -296,7 +297,7 @@ static void cmd_S_term(char* _cmd)
 /**
  * @brief init-update callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_initupdate(char* _cmd)
 {
@@ -306,7 +307,7 @@ static void cmd_initupdate(char* _cmd)
 /**
  * @brief ext-authenticte callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_extauthenticate(char* _cmd)
 {
@@ -315,7 +316,7 @@ static void cmd_extauthenticate(char* _cmd)
 /**
  * @brief get-sd-certificate callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_getsdcert(char* _cmd)
 {
@@ -327,7 +328,7 @@ static void cmd_getsdcert(char* _cmd)
 /**
  * @brief auth callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_auth(char* _cmd)
 {
@@ -337,7 +338,7 @@ static void cmd_auth(char* _cmd)
 /**
  * @brief /atr callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_atr(char* _cmd)
 {
@@ -349,7 +350,7 @@ static void cmd_S_atr(char* _cmd)
 /**
  * @brief /select callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_select(char* _cmd)
 {
@@ -359,17 +360,27 @@ static void cmd_S_select(char* _cmd)
 /**
  * @brief /send callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_send(char* _cmd)
 {
-	printf(COLOR_CYAN " /send %s" COLOR_RESET "under implementation..\n", _cmd);
+	int len;
+	int offset = 6; // after "/send "
+	
+	len = strlen(_cmd);
+	gCMDlen = 0;
+	while (offset < len) {
+		gCMDbuff[gCMDlen++] = byte_from_hex_str(&_cmd[offset]);
+		offset += 2;
+	}
+
+	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
 }
 
 /**
  * @brief /cap-info callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_capinfo(char* _cmd)
 {
@@ -379,7 +390,7 @@ static void cmd_S_capinfo(char* _cmd)
 /**
  * @brief /sleep callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_sleep(char* _cmd)
 {
@@ -389,7 +400,7 @@ static void cmd_S_sleep(char* _cmd)
 /**
  * @brief /echo callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_echo(char* _cmd)
 {
@@ -399,7 +410,7 @@ static void cmd_S_echo(char* _cmd)
 /**
  * @brief /mode callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_mode(char* _cmd)
 {
@@ -410,7 +421,7 @@ static void cmd_S_mode(char* _cmd)
 /**
  * @brief /card callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_card(char* _cmd)
 {
@@ -426,7 +437,7 @@ static void cmd_S_card(char* _cmd)
 /**
  * @brief /execute callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_execute(char* _cmd)
 {
@@ -436,7 +447,7 @@ static void cmd_S_execute(char* _cmd)
 /**
  * @brief /error callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_error(char* _cmd)
 {
@@ -446,7 +457,7 @@ static void cmd_S_error(char* _cmd)
 /**
  * @brief /list-readers callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_listreaders(char* _cmd)
 {
@@ -456,7 +467,7 @@ static void cmd_S_listreaders(char* _cmd)
 /**
  * @brief set-key callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_setkey(char* _cmd)
 {
@@ -466,7 +477,7 @@ static void cmd_setkey(char* _cmd)
 /**
  * @brief put-key callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_putkeyset(char* _cmd)
 {
@@ -476,7 +487,7 @@ static void cmd_putkeyset(char* _cmd)
 /**
  * @brief get-data callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_getdata(char* _cmd)
 {
@@ -486,7 +497,7 @@ static void cmd_getdata(char* _cmd)
 /**
  * @brief ls callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_ls(char* _cmd)
 {
@@ -496,7 +507,7 @@ static void cmd_ls(char* _cmd)
 /**
  * @brief upload callback function
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_upload(char* _cmd)
 {
@@ -506,7 +517,7 @@ static void cmd_upload(char* _cmd)
 /**
  * @brief version: Shows current versions
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_version(char* _cmd)
 {
@@ -518,7 +529,7 @@ static void cmd_version(char* _cmd)
 /**
  * @brief install callback function
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_install(char* _cmd)
 {
@@ -526,9 +537,9 @@ static void cmd_install(char* _cmd)
 }
 
 /**
- * @brief /close command
+ * @brief /close gCMDbuff
  * 
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_close(char* _cmd)
 {
@@ -536,9 +547,9 @@ static void cmd_S_close(char* _cmd)
 }
 
 /**
- * @brief /set-var command
+ * @brief /set-var gCMDbuff
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_S_setvar(char* _cmd)
 {
@@ -546,9 +557,9 @@ static void cmd_S_setvar(char* _cmd)
 }
 
 /**
- * @brief milenage command
+ * @brief milenage gCMDbuff
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_milenage(char* _cmd)
 {
@@ -556,9 +567,9 @@ static void cmd_milenage(char* _cmd)
 }
 
 /**
- * @brief tuak command
+ * @brief tuak gCMDbuff
  *
- * @param _cmd: command line string
+ * @param _cmd: gCMDbuff line string
  */
 static void cmd_tuak(char* _cmd)
 {

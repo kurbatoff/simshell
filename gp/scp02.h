@@ -46,7 +46,7 @@ void scp02_generate_cryptogramms(
 	uint8_t* _hostcryptogramm, uint8_t* _cardcryptogramm);
 
 void calculate_EMV_mac(uint8_t* in_buff, int len, uint8_t* iv, uint8_t* out_buff);
-void scp02_calculate_c_mac(uint8_t* _cmd, int cmd_len, uint8_t* _key, uint8_t* _mac);
+void scp02_calculate_c_mac(uint8_t* _cmd, int gCMDlen, uint8_t* _key, uint8_t* _mac);
 
 
 void scp02_initialize_update();

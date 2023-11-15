@@ -19,7 +19,7 @@
 #ifndef __COMMANDS_H_
 #define __COMMANDS_H_
 
-#define SHELL_COMMAND_COUNT		13
+#define SHELL_COMMANDS_COUNT		13
 
 typedef void (*shellcommand_f)(char* _cmd);
 
@@ -31,6 +31,6 @@ typedef struct simshell_command_t
 	const shellcommand_f pCallBackFunction;
 } simshell_command_t;
 
-extern simshell_command_t command_array[SHELL_COMMAND_COUNT];
+extern simshell_command_t commands_array[SHELL_COMMANDS_COUNT];
 
 #endif /* __COMMANDS_H_ */

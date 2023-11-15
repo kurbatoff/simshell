@@ -1,4 +1,4 @@
-/**
+﻿/**
  *  Copyright (c) 2023, Intergalaxy LLC
  *  This file is part of SIMSHELL.
  *
@@ -16,34 +16,10 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef __SHELL_H_
-#define __SHELL_H_
+#include "iso7816.h"
 
-#include <stdint.h>
-
-#ifdef __APPLE__
-	typedef uint32_t DWORD;
-#else
-	#include <windows.h>
-#endif
-
-#define SHELL_NAME		"simsh"
-#define shell_prompt	printf(SHELL_NAME "|-> ")
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-/**
- * @brief Execute the shell command
- * @param command: shell command line
- */
-void SHELL_execute(char *gCMDbuff);
-
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __SHELL_H_ */
-
-
+ // APDU
+uint8_t gCMDbuff[256 + 5];
+uint16_t gCMDlen;
+uint8_t gRESPbuff[256 + 2];
+uint16_t gRESPlen;

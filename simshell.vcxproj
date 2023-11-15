@@ -217,6 +217,7 @@
     <ClCompile Include="mbed\hal_des.c" />
     <ClCompile Include="mbed\mbedtests.c" />
     <ClCompile Include="mbed\mbedwrap.c" />
+    <ClCompile Include="pcsc\iso7816.c" />
     <ClCompile Include="pcsc\pcscwrap.c" />
     <ClCompile Include="shell\commands.c" />
     <ClCompile Include="shell\main.c" />

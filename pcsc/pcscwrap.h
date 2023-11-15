@@ -21,24 +21,11 @@
 
 #include <stdbool.h>
 
- // APDU
-extern uint8_t command[256 + 5];
-extern uint16_t cmd_len;
-extern uint8_t response[256 + 2];
-extern uint16_t resp_len;
-
-
-#ifdef __APPLE__
-//	#include <PCSC/winscard.h>
-#endif
-#ifdef _WIN32
-//	#include <winscard.h>
-#endif
-
 #define PCSC_APDU_BUFFER_LEN            261
 
 #define PCSC_ERROR_UNKNOWN              0x6F00
 #define PCSC_SUCCESS                    0x9000
+
 typedef uint32_t pcsc_error_t;
 
 #if defined(__cplusplus)
@@ -53,10 +40,10 @@ uint16_t get_response(uint8_t response_len, uint8_t* response, uint16_t response
  * \brief                     Send an APDU command
  *
  * \param _cmd                APDU command to send
- * \param _cmd_len            Length of APDU command to send
+ * \param _gCMDlen            Length of APDU command to send
  * \param response            Buffer used to save the response; must be allocated by the user
  * \param response_size       Size of the response buffer allocated by the user
- * \param cmd_len     Length of the response
+ * \param gCMDlen     Length of the response
  * 
  * \return                    \c PCSC_SUCCESS on success.
  * \return                    An error code on failure.

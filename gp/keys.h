@@ -21,6 +21,16 @@
 
 #include <stdint.h>
 
+typedef struct sym_keyset_t
+{
+	uint8_t kvn;
+	uint8_t type; // KEY_TYPE_DES or KEY_TYPE_AES
+	uint8_t keylen; // 128 or 192 or 256
+	uint8_t enc[32];
+	uint8_t mac[32];
+	uint8_t dek[32];
+} sym_keyset_t;
+
 extern uint8_t KEY[];
 
 #if defined(__cplusplus)

@@ -180,6 +180,9 @@
     <ClCompile Include="gp\getstatus.c">
       <Filter>Source files\GP</Filter>
     </ClCompile>
+    <ClCompile Include="pcsc\iso7816.c">
+      <Filter>Source files\PCSC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">

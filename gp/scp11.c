@@ -27,7 +27,8 @@
 #include "globalplatform.h"
 #include "tools.h"
 #include "gp.h"
-//#include "sw.h"
+#include "iso7816.h"
+ //#include "sw.h"
 
 #include "mbedtls/sha256.h"
 
@@ -43,32 +44,32 @@ void cmd_scp11_perform_security_operation(void)
 	// --- 1 ---
 	printf(COLOR_CYAN " Step 1: Select SCP11 SSD\n" COLOR_RESET);
 
-	cmd_len = 0;
-	command[cmd_len++] = 0x00;
-	command[cmd_len++] = INS_GP_SELECT;
-	command[cmd_len++] = 0x04;
-	command[cmd_len++] = 0x00;
-	command[cmd_len++] = 9;
+	gCMDlen = 0;
+	gCMDbuff[gCMDlen++] = 0x00;
+	gCMDbuff[gCMDlen++] = INS_GP_SELECT;
+	gCMDbuff[gCMDlen++] = 0x04;
+	gCMDbuff[gCMDlen++] = 0x00;
+	gCMDbuff[gCMDlen++] = 9;
 
 	// scp11_ssd.
-	command[cmd_len++] = 's';
-	command[cmd_len++] = 'c';
-	command[cmd_len++] = 'p';
-	command[cmd_len++] = '1';
-	command[cmd_len++] = '1';
-	command[cmd_len++] = '_';
-	command[cmd_len++] = 's';
-	command[cmd_len++] = 's';
-	command[cmd_len++] = 'd';
+	gCMDbuff[gCMDlen++] = 's';
+	gCMDbuff[gCMDlen++] = 'c';
+	gCMDbuff[gCMDlen++] = 'p';
+	gCMDbuff[gCMDlen++] = '1';
+	gCMDbuff[gCMDlen++] = '1';
+	gCMDbuff[gCMDlen++] = '_';
+	gCMDbuff[gCMDlen++] = 's';
+	gCMDbuff[gCMDlen++] = 's';
+	gCMDbuff[gCMDlen++] = 'd';
 
-	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &cmd_len);
+	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
 
 
-	if (0x61 == response[cmd_len - 2]) {
-		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
+	if (0x61 == gRESPbuff[gRESPlen - 2]) {
+		gRESPlen = get_response(gRESPbuff[gRESPlen - 1], gRESPbuff, sizeof(gRESPbuff));
 	}
 
-	if (0x90 != response[cmd_len - 2]) {
+	if (0x90 != gRESPbuff[gRESPlen - 2]) {
 		printf(COLOR_RED " Failed to select SSD\n" COLOR_RESET);
 		return;
 	}
@@ -77,27 +78,27 @@ void cmd_scp11_perform_security_operation(void)
 	// --- 2 ---
 	printf(COLOR_CYAN " Step 2: a) Get SD certificate\n" COLOR_RESET);
 
-	cmd_len = 0;
-	command[cmd_len++] = 0x80;
-	command[cmd_len++] = INS_GP_GET_DATA_CA;
-	command[cmd_len++] = 0xBF;
-	command[cmd_len++] = 0x21;
-	command[cmd_len++] = 6;
+	gCMDlen = 0;
+	gCMDbuff[gCMDlen++] = 0x80;
+	gCMDbuff[gCMDlen++] = INS_GP_GET_DATA_CA;
+	gCMDbuff[gCMDlen++] = 0xBF;
+	gCMDbuff[gCMDlen++] = 0x21;
+	gCMDbuff[gCMDlen++] = 6;
 
-	command[cmd_len++] = 0xA6;
-	command[cmd_len++] = 0x04;
-	command[cmd_len++] = 0x83;
-	command[cmd_len++] = 0x02;
-	command[cmd_len++] = 0x11;
-	command[cmd_len++] = 0x20;
+	gCMDbuff[gCMDlen++] = 0xA6;
+	gCMDbuff[gCMDlen++] = 0x04;
+	gCMDbuff[gCMDlen++] = 0x83;
+	gCMDbuff[gCMDlen++] = 0x02;
+	gCMDbuff[gCMDlen++] = 0x11;
+	gCMDbuff[gCMDlen++] = 0x20;
 
-	pcsc_sendAPDU(command, cmd_len, response, sizeof(response), &cmd_len);
+	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
 
-	if (0x61 == response[cmd_len - 2]) {
-		cmd_len = get_response(response[cmd_len - 1], response, sizeof(response));
+	if (0x61 == gRESPbuff[gRESPlen - 2]) {
+		gRESPlen = get_response(gRESPbuff[gRESPlen - 1], gRESPbuff, sizeof(gRESPbuff));
 	}
 
-	if (0x90 != response[cmd_len - 2]) {
+	if (0x90 != gRESPbuff[gRESPlen - 2]) {
 		printf(COLOR_RED " Failed fetch SD certificate\n" COLOR_RESET);
 		return;
 	}
@@ -243,7 +244,7 @@ void cmd_scp11_mutual_authenticate(void)
 
 	mbedtls_generate_ecc_keypair(curveId, eSK_SD_ECKA, ePK_SD_ECKA);
 
-	// 3. PK_OCE_ECKA was extracted from command PERFORM SECURITY OPERATION
+	// 3. PK_OCE_ECKA was extracted from gCMDbuff PERFORM SECURITY OPERATION
 
 	
 	// 4. Get reference to incoming public key ePK_OCE_ECKA

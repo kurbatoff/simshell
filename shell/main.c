@@ -70,7 +70,7 @@ main(int argc, char* argv[])
 		if (strcmp(str, "?\n") == 0) {
 			simshell_command_t* c;
 
-			c = (simshell_command_t* ) & command_array[0];
+			c = (simshell_command_t* ) & commands_array[0];
 			c->pCallBackFunction(str);
 
 			continue;

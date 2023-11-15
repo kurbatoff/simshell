@@ -34,7 +34,7 @@ void scp03_external_authenticate(void)
 }
 
  /**
- * This procedure calculates command MAC signature
+ * This procedure calculates gCMDbuff MAC signature
  */
 void scp03_calculate_apdu_cmac(void)
 {

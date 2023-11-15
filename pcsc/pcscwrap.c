@@ -22,12 +22,6 @@
 #include "tools.h"
 #include "pcscwrap.h"
 
- // APDU
-uint8_t command[256 + 5];
-uint16_t cmd_len;
-uint8_t response[256 + 2];
-uint16_t resp_len;
-
 #ifdef __APPLE__
 	#include <PCSC/winscard.h>
 //	#include <PCSC/wintypes.h>

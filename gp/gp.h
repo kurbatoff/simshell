@@ -212,7 +212,7 @@
 
 
 /*
- * Data object tags, как они определены в GP 2.3
+ * Data object tags, as defined by GP 2.3
  */
 //#define '00'-'7F' //Reserved for private use
 #define KEY_TYPE_DES				0x80 // DES – mode (ECB/CBC) implicitly known
@@ -249,7 +249,7 @@
 //#define KEY_TYPE_ECC_	'B8' - 'EF' // RFU (asymmetric algorithms)
 #define KEY_TYPE_ECC_PARAM_REFERENCE 0xF0 // ECC key parameters reference
 //#define KEY_TYPE_ 'F1' - 'FE' // RFU (asymmetric algorithms)
-#define KEY_TYPE_FF					0xFF // Extended format (usage defined for specific APDU commands; e.g. PUT KEY)
+#define KEY_TYPE_FF					0xFF // Extended format (usage defined for specific APDU gCMDbuffs; e.g. PUT KEY)
 
 #define TAG_AID						0x4F
 #define TAG_ECC_PUBLIC_KEY			0x5F49
