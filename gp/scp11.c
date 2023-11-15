@@ -27,7 +27,6 @@
 #include "globalplatform.h"
 #include "tools.h"
 #include "gp.h"
-#include "iso7816.h"
  //#include "sw.h"
 
 #include "mbedtls/sha256.h"
@@ -41,35 +40,37 @@ static uint8_t PK_OCE_ECKA[0x41];
  */
 void cmd_scp11_perform_security_operation(void)
 {
+	apdu_t apdu;
+
 	// --- 1 ---
 	printf(COLOR_CYAN " Step 1: Select SCP11 SSD\n" COLOR_RESET);
 
-	gCMDlen = 0;
-	gCMDbuff[gCMDlen++] = 0x00;
-	gCMDbuff[gCMDlen++] = INS_GP_SELECT;
-	gCMDbuff[gCMDlen++] = 0x04;
-	gCMDbuff[gCMDlen++] = 0x00;
-	gCMDbuff[gCMDlen++] = 9;
+	apdu.cmd_len = 0;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x00;
+	apdu.cmd[ apdu.cmd_len++ ] = INS_GP_SELECT;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x04;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x00;
+	apdu.cmd[ apdu.cmd_len++ ] = 9;
 
-	// scp11_ssd.
-	gCMDbuff[gCMDlen++] = 's';
-	gCMDbuff[gCMDlen++] = 'c';
-	gCMDbuff[gCMDlen++] = 'p';
-	gCMDbuff[gCMDlen++] = '1';
-	gCMDbuff[gCMDlen++] = '1';
-	gCMDbuff[gCMDlen++] = '_';
-	gCMDbuff[gCMDlen++] = 's';
-	gCMDbuff[gCMDlen++] = 's';
-	gCMDbuff[gCMDlen++] = 'd';
+	// scp11_ssd
+	apdu.cmd[ apdu.cmd_len++ ] = 's';
+	apdu.cmd[ apdu.cmd_len++ ] = 'c';
+	apdu.cmd[ apdu.cmd_len++ ] = 'p';
+	apdu.cmd[ apdu.cmd_len++ ] = '1';
+	apdu.cmd[ apdu.cmd_len++ ] = '1';
+	apdu.cmd[ apdu.cmd_len++ ] = '_';
+	apdu.cmd[ apdu.cmd_len++ ] = 's';
+	apdu.cmd[ apdu.cmd_len++ ] = 's';
+	apdu.cmd[ apdu.cmd_len++ ] = 'd';
 
-	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 
-	if (0x61 == gRESPbuff[gRESPlen - 2]) {
-		gRESPlen = get_response(gRESPbuff[gRESPlen - 1], gRESPbuff, sizeof(gRESPbuff));
+	if (0x61 == apdu.resp[ apdu.resp_len - 2 ]) {
+		apdu.resp_len = get_response(apdu.resp[ apdu.resp_len - 1 ], apdu.resp, sizeof(apdu.resp));
 	}
 
-	if (0x90 != gRESPbuff[gRESPlen - 2]) {
+	if (0x90 != apdu.resp[ apdu.resp_len - 2 ]) {
 		printf(COLOR_RED " Failed to select SSD\n" COLOR_RESET);
 		return;
 	}
@@ -78,27 +79,27 @@ void cmd_scp11_perform_security_operation(void)
 	// --- 2 ---
 	printf(COLOR_CYAN " Step 2: a) Get SD certificate\n" COLOR_RESET);
 
-	gCMDlen = 0;
-	gCMDbuff[gCMDlen++] = 0x80;
-	gCMDbuff[gCMDlen++] = INS_GP_GET_DATA_CA;
-	gCMDbuff[gCMDlen++] = 0xBF;
-	gCMDbuff[gCMDlen++] = 0x21;
-	gCMDbuff[gCMDlen++] = 6;
+	apdu.cmd_len = 0;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x80;
+	apdu.cmd[ apdu.cmd_len++ ] = INS_GP_GET_DATA_CA;
+	apdu.cmd[ apdu.cmd_len++ ] = 0xBF;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x21;
+	apdu.cmd[ apdu.cmd_len++ ] = 6;
 
-	gCMDbuff[gCMDlen++] = 0xA6;
-	gCMDbuff[gCMDlen++] = 0x04;
-	gCMDbuff[gCMDlen++] = 0x83;
-	gCMDbuff[gCMDlen++] = 0x02;
-	gCMDbuff[gCMDlen++] = 0x11;
-	gCMDbuff[gCMDlen++] = 0x20;
+	apdu.cmd[ apdu.cmd_len++ ] = 0xA6;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x04;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x83;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x02;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x11;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x20;
 
-	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
-	if (0x61 == gRESPbuff[gRESPlen - 2]) {
-		gRESPlen = get_response(gRESPbuff[gRESPlen - 1], gRESPbuff, sizeof(gRESPbuff));
+	if (0x61 == apdu.resp[ apdu.resp_len - 2 ]) {
+		apdu.resp_len = get_response(apdu.resp[ apdu.resp_len - 1 ], apdu.resp, sizeof(apdu.resp));
 	}
 
-	if (0x90 != gRESPbuff[gRESPlen - 2]) {
+	if (0x90 != apdu.resp[ apdu.resp_len - 2 ]) {
 		printf(COLOR_RED " Failed fetch SD certificate\n" COLOR_RESET);
 		return;
 	}

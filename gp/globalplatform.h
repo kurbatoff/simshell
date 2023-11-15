@@ -34,7 +34,6 @@ int select_ISD();
 int mutual_authentication();
 int init_update();
 int ext_authenticate();
-int get_status();
 
 #if defined(__cplusplus)
 }

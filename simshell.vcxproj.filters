@@ -28,6 +28,9 @@
     <Filter Include="Source files\mbed">
       <UniqueIdentifier>{13d738d2-e582-4fa5-b4dc-2bd8c0ee7953}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source files\esim">
+      <UniqueIdentifier>{98701625-e40f-4234-b8f2-15d62b836314}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shell\main.c">
@@ -182,6 +185,9 @@
     </ClCompile>
     <ClCompile Include="pcsc\iso7816.c">
       <Filter>Source files\PCSC</Filter>
+    </ClCompile>
+    <ClCompile Include="gsma\euicc.c">
+      <Filter>Source files\esim</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

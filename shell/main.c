@@ -30,6 +30,12 @@
 #include "version.h"
 #include "tools.h"
 
+#if defined(_WIN32) || defined(WIN32)
+	#define pathSeparator '\\'
+#else
+	#define pathSeparator '/'
+#endif
+
 
 /**
 * @brief Main function
@@ -41,6 +47,8 @@
 int //__cdecl 
 main(int argc, char* argv[])
 {
+//	FILE* fp_eeprom;
+
 	char commandline[4096];
 	char* str;
 
@@ -53,6 +61,22 @@ main(int argc, char* argv[])
 	printf(COLOR_WHITE " SIM, Global Platform and JVM" COLOR_RESET " shell [Version %s]\n", version); 
 	printf(" (c) 2023 Intergalaxy. All rights reserved.\n");
 	printf("------------------------------------------------------------------------\n\n");
+
+
+	strcpy(gFolder_name, argv[0]);
+
+	len = strlen(gFolder_name);
+	while (gFolder_name[len] != pathSeparator) {
+		gFolder_name[len] = 0;
+
+		len--;
+		if (len == 0) {
+			gFolder_name[len] = 0;
+			break;
+		}
+	}
+
+	printf(" Start folder: %s\n\n", gFolder_name);
 
 	for (;;)
 	{
@@ -73,21 +97,6 @@ main(int argc, char* argv[])
 			c = (simshell_command_t* ) & commands_array[0];
 			c->pCallBackFunction(str);
 
-			continue;
-		}
-
-		// remove trailing SPACE and LF
-		len = strlen(str);
-		while (len && (str[len-1] == ' ' || str[len-1] == '\n' || str[len - 1] == '\t')) {
-			str[--len] = 0x00;
-		}
-
-		// remove leading SPACEs and TABs
-		while ((*str == ' ' || *str == '\t') && (*str != 0x00)) {
-			str++;
-		}
-
-		if (0 == strlen(str)) {
 			continue;
 		}
 

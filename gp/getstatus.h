@@ -33,6 +33,7 @@ extern "C" {
 #endif
 
 void find_elf_name(uint8_t* aid, int len);
+int get_status();
 
 #if defined(__cplusplus)
 }

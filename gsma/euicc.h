@@ -1,4 +1,4 @@
-/**
+﻿/**
  *  Copyright (c) 2023, Intergalaxy LLC
  *  This file is part of SIMSHELL.
  *
@@ -16,21 +16,33 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef __COMMANDS_H_
-#define __COMMANDS_H_
+#ifndef __EUICC_H__
+#define __EUICC_H__
 
-#define SHELL_COMMANDS_COUNT		14
+#include <stdint.h>
 
-typedef void (*shellcommand_f)(char* _cmd);
-
-typedef struct simshell_command_t
+typedef enum _esim_command_t
 {
-	const char* pcName;
-	const char* pcHelpString;
-	const char* pcShortHelp;
-	const shellcommand_f pCallBackFunction;
-} simshell_command_t;
+	ESIM_RESET = 0,
+	ESIM_EID,
+	ESIM_INFO,
+	ESIM_PL,
+	ESIM_ENABLE,
+	ESIM_DISABLE,
+	ESIM_DELETE,
+	ESIM_LOAD,
+	ESIM_ATTACH
+} esim_command_t;
 
-extern simshell_command_t commands_array[SHELL_COMMANDS_COUNT];
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
-#endif /* __COMMANDS_H_ */
+void cmd_esim(char* _cmd);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __EUICC_H__ */
+

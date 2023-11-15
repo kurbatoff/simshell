@@ -16,6 +16,8 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
+#define _CRT_SECURE_NO_WARNINGS 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +25,32 @@
 
 #include "shell.h"
 #include "commands.h"
+#include "tools.h"
+
+char gFolder_name[1024];
+
+static bool execute_file(const char* fname)
+{
+	FILE* file;
+	char fullname[1024 + 8];
+
+	sprintf(fullname, "%s%s.simsh", gFolder_name, fname);
+
+	if ((file = fopen(fullname, "r")))
+	{
+		char s[256];
+
+		printf(" Executing script: " COLOR_CYAN "%s.simsh\n\n" COLOR_RESET, fname);
+
+		while (fgets(s, sizeof(s), file) != NULL) {
+			SHELL_execute(s);
+		}
+
+		fclose(file);
+		return true;
+	}
+	return false;
+}
 
 static int find_shell_command(char* _cmd, int* _idx)
 {
@@ -63,12 +91,30 @@ void SHELL_execute(char *_command)
 	simshell_command_t* c;
 	int cmd_idx;
 	int found;
+	int len;
+
+	// remove trailing SPACE and LF
+	len = strlen(_command);
+	while (len && (_command[len - 1] == ' ' || _command[len - 1] == '\n' || _command[len - 1] == '\t')) {
+		_command[--len] = 0x00;
+	}
+
+	// remove leading SPACEs and TABs
+	while ((*_command == ' ' || *_command == '\t') && (*_command != 0x00)) {
+		_command++;
+	}
+
+	if (0 == strlen(_command)) {
+		return;
+	}
 
 	found = find_shell_command(_command, &cmd_idx);
 
 	switch (found) {
 	case 0:
-		printf("\ngCMDbuff not found. Type \"help\" for a list of available command\n");
+		if (!execute_file(_command)) {
+			printf("\nCommand not found. Type \"help\" for a list of available commands\n");
+		}
 		return;
 
 	case 1:

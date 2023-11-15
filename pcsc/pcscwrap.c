@@ -59,14 +59,14 @@ uint8_t LChannel_ID;
 
 uint16_t get_response(uint8_t response_len, uint8_t* _response_buff, uint16_t _response_buff_sz)
 {
-	uint8_t command[5];
+	uint8_t command[ 5 ];
 	uint16_t resp_length;
 
-	command[0] = 0x00;
-	command[1] = ISO_INS_GET_RESPONSE;
-	command[2] = 0x00;
-	command[3] = 0x00;
-	command[4] = response_len;
+	command[ 0 ] = 0x00;
+	command[ 1 ] = ISO_INS_GET_RESPONSE;
+	command[ 2 ] = 0x00;
+	command[ 3 ] = 0x00;
+	command[ 4 ] = response_len;
 
 	pcsc_sendAPDU(command, 5, _response_buff, _response_buff_sz, &resp_length);
 
@@ -78,7 +78,7 @@ pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
 {
 	pcsc_error_t error_code = PCSC_ERROR_UNKNOWN;
 	LONG rv;
-	uint8_t recvBuffer[PCSC_APDU_BUFFER_LEN];
+	uint8_t recvBuffer[PCSC_APDU_C_BUFF_LEN];
 
 	if (0x00 == hCard) {
 	}

@@ -21,7 +21,18 @@
 
 #include <stdbool.h>
 
-#define PCSC_APDU_BUFFER_LEN            261
+#define PCSC_APDU_C_BUFF_LEN            (256 + 5)
+#define PCSC_APDU_R_BUFF_LEN            (256 + 2)
+
+typedef struct apdu_t
+{
+	uint8_t cmd[ PCSC_APDU_C_BUFF_LEN ];
+	uint16_t cmd_len;
+	uint8_t resp[ PCSC_APDU_R_BUFF_LEN ];
+	uint16_t resp_len;
+} apdu_t;
+
+
 
 #define PCSC_ERROR_UNKNOWN              0x6F00
 #define PCSC_SUCCESS                    0x9000

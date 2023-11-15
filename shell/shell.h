@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 
+extern char gFolder_name[1024];
+
 #ifdef __APPLE__
 	typedef uint32_t DWORD;
 #else

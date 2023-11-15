@@ -28,9 +28,11 @@
 #include "tools.h"
 #include "version.h"
 #include "pcscwrap.h"
+#include "getstatus.h"
 #include "globalplatform.h"
 #include "scp11.h"
 #include "iso7816.h"
+#include "euicc.h"
 
 static void help(char* _cmd);
 static void cmd_version(char* _cmd);
@@ -151,14 +153,20 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		"\n\"/send\":\n Usage:\n    APDU string\n",
 		" /send             Send APDU-C to the active reader\n",
 		cmd_S_send
+	},
+	{
+		"esim",
+		"\n\"esim\":\n Usage:\n    |eid|pl|enable|disable|delete|load\n",
+		" esim              Execute eUICC (GSMA RSP) comamnd\n",
+		cmd_esim
 	}
 };
 
 /**
- * @brief Shell gCMDbuff HELP callback function
+ * @brief Shell command HELP callback function
  *
- * @param argc: amount of help gCMDbuff aguments including help gCMDbuff itself as argv[0]
- * @param argv: help gCMDbuff aguments including help gCMDbuff itself as argv[0]
+ * @param argc: amount of help command aguments including help command itself as argv[0]
+ * @param argv: help command aguments including help command itself as argv[0]
  */
 static void help(char* _cmd)
 {
@@ -205,7 +213,7 @@ static void help(char* _cmd)
 /**
  * @brief /term callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_term(char* _cmd)
 {
@@ -297,7 +305,7 @@ static void cmd_S_term(char* _cmd)
 /**
  * @brief init-update callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_initupdate(char* _cmd)
 {
@@ -307,7 +315,7 @@ static void cmd_initupdate(char* _cmd)
 /**
  * @brief ext-authenticte callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_extauthenticate(char* _cmd)
 {
@@ -316,7 +324,7 @@ static void cmd_extauthenticate(char* _cmd)
 /**
  * @brief get-sd-certificate callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_getsdcert(char* _cmd)
 {
@@ -328,7 +336,7 @@ static void cmd_getsdcert(char* _cmd)
 /**
  * @brief auth callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_auth(char* _cmd)
 {
@@ -338,7 +346,7 @@ static void cmd_auth(char* _cmd)
 /**
  * @brief /atr callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_atr(char* _cmd)
 {
@@ -350,7 +358,7 @@ static void cmd_S_atr(char* _cmd)
 /**
  * @brief /select callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_select(char* _cmd)
 {
@@ -360,7 +368,7 @@ static void cmd_S_select(char* _cmd)
 /**
  * @brief /send callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_send(char* _cmd)
 {
@@ -380,7 +388,7 @@ static void cmd_S_send(char* _cmd)
 /**
  * @brief /cap-info callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_capinfo(char* _cmd)
 {
@@ -390,7 +398,7 @@ static void cmd_S_capinfo(char* _cmd)
 /**
  * @brief /sleep callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_sleep(char* _cmd)
 {
@@ -400,7 +408,7 @@ static void cmd_S_sleep(char* _cmd)
 /**
  * @brief /echo callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_echo(char* _cmd)
 {
@@ -410,7 +418,7 @@ static void cmd_S_echo(char* _cmd)
 /**
  * @brief /mode callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_mode(char* _cmd)
 {
@@ -421,7 +429,7 @@ static void cmd_S_mode(char* _cmd)
 /**
  * @brief /card callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_card(char* _cmd)
 {
@@ -437,7 +445,7 @@ static void cmd_S_card(char* _cmd)
 /**
  * @brief /execute callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_execute(char* _cmd)
 {
@@ -447,7 +455,7 @@ static void cmd_S_execute(char* _cmd)
 /**
  * @brief /error callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_error(char* _cmd)
 {
@@ -457,7 +465,7 @@ static void cmd_S_error(char* _cmd)
 /**
  * @brief /list-readers callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_listreaders(char* _cmd)
 {
@@ -467,7 +475,7 @@ static void cmd_S_listreaders(char* _cmd)
 /**
  * @brief set-key callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_setkey(char* _cmd)
 {
@@ -477,7 +485,7 @@ static void cmd_setkey(char* _cmd)
 /**
  * @brief put-key callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_putkeyset(char* _cmd)
 {
@@ -487,7 +495,7 @@ static void cmd_putkeyset(char* _cmd)
 /**
  * @brief get-data callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_getdata(char* _cmd)
 {
@@ -497,7 +505,7 @@ static void cmd_getdata(char* _cmd)
 /**
  * @brief ls callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_ls(char* _cmd)
 {
@@ -507,7 +515,7 @@ static void cmd_ls(char* _cmd)
 /**
  * @brief upload callback function
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_upload(char* _cmd)
 {
@@ -517,7 +525,7 @@ static void cmd_upload(char* _cmd)
 /**
  * @brief version: Shows current versions
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_version(char* _cmd)
 {
@@ -529,7 +537,7 @@ static void cmd_version(char* _cmd)
 /**
  * @brief install callback function
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_install(char* _cmd)
 {
@@ -537,9 +545,9 @@ static void cmd_install(char* _cmd)
 }
 
 /**
- * @brief /close gCMDbuff
+ * @brief /close command
  * 
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_close(char* _cmd)
 {
@@ -547,9 +555,9 @@ static void cmd_S_close(char* _cmd)
 }
 
 /**
- * @brief /set-var gCMDbuff
+ * @brief /set-var command
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_S_setvar(char* _cmd)
 {
@@ -557,7 +565,7 @@ static void cmd_S_setvar(char* _cmd)
 }
 
 /**
- * @brief milenage gCMDbuff
+ * @brief milenage command
  *
  * @param _cmd: gCMDbuff line string
  */
@@ -567,9 +575,9 @@ static void cmd_milenage(char* _cmd)
 }
 
 /**
- * @brief tuak gCMDbuff
+ * @brief tuak command
  *
- * @param _cmd: gCMDbuff line string
+ * @param _cmd: command line string
  */
 static void cmd_tuak(char* _cmd)
 {
