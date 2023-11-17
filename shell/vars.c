@@ -16,38 +16,26 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef __SHELL_H_
-#define __SHELL_H_
+#include "vars.h" 
+#include "tools.h" 
 
-#include <stdint.h>
-
-extern char gStartFolder[1024];
-
-#ifdef __APPLE__
-	typedef uint32_t DWORD;
-#else
-	#include <windows.h>
-#endif
-
-#define SIMSHELL_PROMTH			"simsh"
-#define SIMSHELL_EXT			"simsh"
-
-#define shell_prompt	printf(SIMSHELL_PROMTH "|-> ")
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
+ /**
+  * @brief /set-var command
+  *
+  * @param _cmd: command line string
+  */
+void cmd_S_setvar(char* _cmd)
+{
+	printf(COLOR_CYAN " /set-var " COLOR_RESET "under implementation..\n");
+}
 
 /**
- * @brief Execute the shell command
- * @param command: shell command line
+ * @brief /list-vars command
+ *
+ * @param _cmd: command line string
  */
-void SHELL_execute(char *gCMDbuff);
-
-#if defined(__cplusplus)
+void cmd_S_listvars(char* _cmd)
+{
+	printf(COLOR_CYAN " /list-vars " COLOR_RESET "under implementation..\n");
 }
-#endif
-
-#endif /* __SHELL_H_ */
-
 

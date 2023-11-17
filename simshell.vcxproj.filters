@@ -189,6 +189,9 @@
     <ClCompile Include="gsma\euicc.c">
       <Filter>Source files\esim</Filter>
     </ClCompile>
+    <ClCompile Include="shell\vars.c">
+      <Filter>Source files\Shell</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">

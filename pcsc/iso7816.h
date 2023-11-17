@@ -21,12 +21,12 @@
 
 #include <stdint.h>
 
- // APDU
-extern uint8_t gCMDbuff[256 + 5];
-extern uint16_t gCMDlen;
-extern uint8_t gRESPbuff[256 + 2];
-extern uint16_t gRESPlen;
-
+#define ISO_OFFSET_CLA		0x00
+#define ISO_OFFSET_INS		0x01
+#define ISO_OFFSET_P1		0x02
+#define ISO_OFFSET_P2		0x03
+#define ISO_OFFSET_LC		0x04
+#define ISO_OFFSET_CDATA		0x05
 
 #if defined(__cplusplus)
 extern "C" {

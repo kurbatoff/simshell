@@ -29,7 +29,6 @@
 #include "globalplatform.h"
 #include "getstatus.h"
 #include "tools.h"
-#include "iso7816.h"
 
 #include "mbedwrap.h"
 
@@ -49,20 +48,22 @@ static uint8_t c_mac[C_MAC_SZ];
 
 int select_ISD()
 {
-	gCMDlen = 0;
-	gCMDbuff[ gCMDlen++ ] = 0x00;
-	gCMDbuff[ gCMDlen++ ] = INS_GP_SELECT;
-	gCMDbuff[ gCMDlen++ ] = 0x04;
-	gCMDbuff[ gCMDlen++ ] = 0x00;
-	gCMDbuff[ gCMDlen++ ] = 0x00;
+	apdu_t apdu;
 
-	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = INS_GP_SELECT;
+	apdu.cmd[apdu.cmd_len++] = 0x04;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = 0;
 
-	if (0x61 == gRESPbuff[ gRESPlen - 2 ]) {
-		gRESPlen = get_response(gRESPbuff[ gRESPlen - 1 ], gRESPbuff, sizeof(gRESPbuff));
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
+		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
 	}
 
-	if (0x90 != gRESPbuff[gRESPlen - 2]) {
+	if (0x90 != apdu.resp[apdu.resp_len - 2]) {
 		printf(COLOR_RED " Failed to select ISD\n" COLOR_RESET);
 		return -1;
 	}
@@ -80,100 +81,59 @@ int mutual_authentication()
 
 int init_update()
 {
+	apdu_t apdu;
+
 	//random
 	generate_random(NULL, host_challenge, CHALLENGE_SZ);
 
-	gCMDlen = 0;
-	gCMDbuff[ gCMDlen++ ] = 0x80;
-	gCMDbuff[ gCMDlen++ ] = INS_INIT_UPDATE;
-	gCMDbuff[ gCMDlen++ ] = 0x00;
-	gCMDbuff[ gCMDlen++ ] = 0x00;
-	gCMDbuff[ gCMDlen++ ] = CHALLENGE_SZ;
-	
-	memcpy(&gCMDbuff[ gCMDlen ], host_challenge, CHALLENGE_SZ);
-	gCMDlen += CHALLENGE_SZ;
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x80;
+	apdu.cmd[apdu.cmd_len++] = INS_INIT_UPDATE;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = CHALLENGE_SZ;
 
-	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
+	memcpy(&apdu.cmd[ apdu.cmd_len ], host_challenge, CHALLENGE_SZ);
+	apdu.cmd_len += CHALLENGE_SZ;
 
-	if (0x61 == gRESPbuff[gRESPlen - 2]) {
-		gRESPlen = get_response(gRESPbuff[ gRESPlen - 1 ], gRESPbuff, sizeof(gRESPbuff));
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
+		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
 	}
 
-	if (0x90 != gRESPbuff[gRESPlen - 2]) {
+	if (0x90 != apdu.resp[apdu.resp_len - 2]) {
 		printf(COLOR_RED " Failed to perform INIT UPDATE\r\n" COLOR_RESET);
 		return -1;
 	}
 
-	CTX.scp_index = gRESPbuff[11];
+	CTX.scp_index = apdu.resp[11];
 
 	switch (CTX.scp_index) {
 	case SECURE_CHANNEL_PROTOCOL_02:
-		memcpy(card_challenge, &gRESPbuff[ 12 ], 8); // |counter[2] | challenge[6]|
-		break;
-
-	case SECURE_CHANNEL_PROTOCOL_03:
-		memcpy(counter, &gRESPbuff[ 29 ], 3);
-		memcpy(card_challenge, &gRESPbuff[ 13 ], 8);
-		break;
-
-	default:
-		printf(COLOR_RED " Wrong (unexpected) SCP index: %02X\n" COLOR_RESET, CTX.scp_index);
-		return -1;
-	}
-
-	return 0;
-}
-
-int ext_authenticate()
-{
-	uint8_t tmp_buffer[256 + LENGTH_OF_ICV]; // for SCP03
-	int len;
-
-	switch (CTX.scp_index) {
-	case SECURE_CHANNEL_PROTOCOL_02:
+		memcpy(card_challenge, &apdu.resp[ 12 ], 8); // |counter[2] | challenge[6]|
 
 		scp02_generate_session_key(card_challenge, KEY, KEY, KEY);
 		scp02_generate_cryptogramms(host_challenge, card_challenge, host_cryptogramm, card_cryptogramm);
 
 		/*
-		#ifdef ...
-					dump_hexascii_buffer("sENC:", buf_session_ENC, 16);
-					dump_hexascii_buffer("sMAC:", buf_session_MAC, 16);
-					dump_hexascii_buffer("sDEK:", buf_session_DEK, 16);
-					dump_hexascii_buffer("hostCR:", host_cryptogramm, 8);
-					dump_hexascii_buffer("cardCR:", card_cryptogramm, 8);
-		#endif
-		*/
+		dump_hexascii_buffer("sENC:", buf_session_ENC, 16);
+		dump_hexascii_buffer("sMAC:", buf_session_MAC, 16);
+		dump_hexascii_buffer("sDEK:", buf_session_DEK, 16);
+		dump_hexascii_buffer("hostCR:", host_cryptogramm, 8);
+		dump_hexascii_buffer("cardCR:", card_cryptogramm, 8);
+		// */
 
 		// Verify card cryptogramm
-		if (memcmp(card_cryptogramm, &gRESPbuff[20], 8) != 0) {
+		if (memcmp(card_cryptogramm, &apdu.resp[20], 8) != 0) {
 			printf(COLOR_RED " Wrong card cryptogramm\n" COLOR_RESET);
 			return -1;
 		}
-
-		gCMDbuff[ 0 ] = 0x84;
-		gCMDbuff[ 1 ] = INS_EXTERNAL_AUTHENTICATE;
-		gCMDbuff[ 2 ] = 0x00;
-		gCMDbuff[ 3 ] = 0x00;
-		gCMDbuff[ 4 ] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
-
-		memcpy(&gCMDbuff[5], host_cryptogramm, 8);
-
-		memset(c_mac, 0, C_MAC_SZ);
-		scp02_calculate_c_mac(gCMDbuff, 13, buf_session_MAC, c_mac);
-
-		memcpy(&gCMDbuff[ 13 ], c_mac, C_MAC_SZ);
-
-		pcsc_sendAPDU(gCMDbuff, 5 + 16, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
-
-		//			CTX.security_level = 
-		//			CTX.security_status =
-
 		break;
 
 	case SECURE_CHANNEL_PROTOCOL_03:
-		memcpy(counter, &gRESPbuff[29], 3);
-		memcpy(card_challenge, &gRESPbuff[13], 8); // |counter[2]|challenge[6]|
+		memcpy(counter, &apdu.resp[ 29 ], 3);
+		memcpy(card_challenge, &apdu.resp[ 13 ], 8);
 
 		scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_ENC, host_challenge, 8, card_challenge, 8, buf_session_ENC, 128);
 		scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_MAC, host_challenge, 8, card_challenge, 8, buf_session_MAC, 128);
@@ -194,38 +154,67 @@ int ext_authenticate()
 		*/
 
 		// Verify card cryptogramm
-		if (memcmp(card_cryptogramm, &gRESPbuff[21], 8) != 0) {
+		if (memcmp(card_cryptogramm, &apdu.resp[21], 8) != 0) {
 			printf(COLOR_RED " Wrong card cryptogramm\n" COLOR_RESET);
 			return -1;
 		}
 
-		gCMDbuff[ 0 ] = 0x84;
-		gCMDbuff[ 1 ] = INS_EXTERNAL_AUTHENTICATE;
-		gCMDbuff[ 2 ] = 0x00;
-		gCMDbuff[ 3 ] = 0x00;
-		gCMDbuff[ 4 ] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
+		break;
 
-		memcpy(&gCMDbuff[ 5 ], host_cryptogramm, 8);
+	default:
+		printf(COLOR_RED " Wrong (unexpected) SCP index: %02X\n" COLOR_RESET, CTX.scp_index);
+		return -1;
+	}
 
+	return 0;
+}
+
+int ext_authenticate()
+{
+	apdu_t apdu;
+	uint8_t tmp_buffer[256 + LENGTH_OF_ICV]; // for SCP03
+	int len;
+
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x84;
+	apdu.cmd[apdu.cmd_len++] = INS_EXTERNAL_AUTHENTICATE;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
+
+	memcpy(&apdu.cmd[apdu.cmd_len], host_cryptogramm, 8);
+	apdu.cmd_len += 8;
+
+	switch (CTX.scp_index) {
+	case SECURE_CHANNEL_PROTOCOL_02:
+		memset(c_mac, 0, C_MAC_SZ);
+		scp02_calculate_c_mac(apdu.cmd, apdu.cmd_len, buf_session_MAC, c_mac);
+
+		memcpy(&apdu.cmd[ apdu.cmd_len ], c_mac, C_MAC_SZ);
+		apdu.cmd_len += C_MAC_SZ;
+
+		break;
+
+	case SECURE_CHANNEL_PROTOCOL_03:
 		memset(buf_ICV, 0, LENGTH_OF_ICV);
 		memcpy(tmp_buffer, buf_ICV, LENGTH_OF_ICV);
 		len = LENGTH_OF_ICV;
 
-		memcpy(&tmp_buffer[len], gCMDbuff, 13);
+		memcpy(&tmp_buffer[len], apdu.cmd, 13);
 		len += 13;
 
 		hal_AES_CMAC(tmp_buffer, len, buf_ICV, buf_session_MAC, buf_ICV);
 
-		memcpy(&gCMDbuff[13], buf_ICV, C_MAC_SZ);
-
-		pcsc_sendAPDU(gCMDbuff, 5 + CHALLENGE_SZ + CRYPTOGRAMM_SZ,
-			gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
-
-		//			CTX.security_level = 
-		//			CTX.security_status =
+		memcpy(&apdu.cmd[apdu.cmd_len], buf_ICV, C_MAC_SZ);
+		apdu.cmd_len += C_MAC_SZ;
 
 		break;
 	}
+
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	//			CTX.security_level = 
+	//			CTX.security_status =
 
 	return 0;
 }

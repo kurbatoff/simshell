@@ -27,20 +27,20 @@
 #include "commands.h"
 #include "tools.h"
 
-char gFolder_name[1024];
+char gStartFolder[1024];
 
 static bool execute_file(const char* fname)
 {
 	FILE* file;
 	char fullname[1024 + 8];
 
-	sprintf(fullname, "%s%s.simsh", gFolder_name, fname);
+	sprintf(fullname, "%s%s." SIMSHELL_EXT, gStartFolder, fname);
 
 	if ((file = fopen(fullname, "r")))
 	{
 		char s[256];
 
-		printf(" Executing script: " COLOR_CYAN "%s.simsh\n\n" COLOR_RESET, fname);
+		printf(" Executing script: " COLOR_CYAN "%s." SIMSHELL_EXT "\n\n" COLOR_RESET, fname);
 
 		while (fgets(s, sizeof(s), file) != NULL) {
 			SHELL_execute(s);

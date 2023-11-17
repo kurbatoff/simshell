@@ -16,38 +16,18 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef __SHELL_H_
-#define __SHELL_H_
+#ifndef __VARS_H_
+#define __VARS_H_
 
-#include <stdint.h>
-
-extern char gStartFolder[1024];
-
-#ifdef __APPLE__
-	typedef uint32_t DWORD;
-#else
-	#include <windows.h>
-#endif
-
-#define SIMSHELL_PROMTH			"simsh"
-#define SIMSHELL_EXT			"simsh"
-
-#define shell_prompt	printf(SIMSHELL_PROMTH "|-> ")
-
-#if defined(__cplusplus)
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Execute the shell command
- * @param command: shell command line
- */
-void SHELL_execute(char *gCMDbuff);
+void cmd_S_setvar(char* _cmd);
+void cmd_S_listvars(char* _cmd);
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#endif /* __SHELL_H_ */
-
-
+#endif /* __VARS_H_ */

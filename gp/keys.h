@@ -37,7 +37,8 @@ extern uint8_t KEY[];
 extern "C" {
 #endif
 
-void cmd_put_keyset(uint8_t kvn);
+void cmd_setkey(char* _cmd);
+void cmd_putkeyset(char* _cmd);
 
 #if defined(__cplusplus)
 }

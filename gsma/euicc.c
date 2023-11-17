@@ -71,8 +71,8 @@ void cmd_esim(char* _cmd)
 	apdu.cmd[apdu.cmd_len++] = 0x91;
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 	apdu.cmd[apdu.cmd_len++] = 0x03;
-	apdu.cmd[apdu.cmd_len++] = 0xBF;
-	apdu.cmd[apdu.cmd_len++] = 0x2D;
+	apdu.cmd[apdu.cmd_len++] = DO_GSMA_GET_PROFILE_INFO >> 8;
+	apdu.cmd[apdu.cmd_len++] = DO_GSMA_GET_PROFILE_INFO & 0xFF;
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);

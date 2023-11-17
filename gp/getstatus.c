@@ -22,8 +22,8 @@
 #include "gp.h"
 #include "getstatus.h"
 #include "pcscwrap.h"
-#include "iso7816.h"
 #include "tools.h"
+#include "iso7816.h"
 
 
 #define KNOWN_ELF_COUNT		7
@@ -82,10 +82,12 @@ void find_elf_name(uint8_t* aid, int len)
 		elf = &elf_array[i];
 
 		if ((elf->length == len) && (0 == memcmp(elf->aid, aid, len))) {
-			printf(COLOR_MAGENTA " %s\n" COLOR_RESET, elf->name);
-			break;
+			printf(COLOR_MAGENTA " %-22s" COLOR_RESET, elf->name);
+			return;;
 		}
 	}
+
+	printf("                       ");
 }
 
 /**
@@ -105,19 +107,33 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 		len = _data[offset++];
 
 		switch (tag) {
-		case 0x4F:
+		case TAG_AID: // 0x4F
 			printf(" AID  :  ");
 			for (int i = 0; i < len; i++)
 				printf("%02X", _data[offset + i]);
 
+			for (int i = 0; i < (17-len); i++)
+				printf("  ");
+
 			find_elf_name(&_data[offset], len);
+
+			//printf("\n");
+
+			offset += len;
+			break;
+
+		case 0x84:
+			printf("  EM  :  ");
+			for (int i = 0; i < len; i++)
+				printf("%02X", _data[offset + i]);
+
 			printf("\n");
 
 			offset += len;
 			break;
 
 		case 0x9F70:
-			printf(" State:  ");
+			//printf(" State:  ");
 
 			if (GET_STATUS_ISD == _type) {
 				// Table 11-6: Card Life Cycle Coding
@@ -181,135 +197,179 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 			break;
 
 		default:
+			/*
 			printf(" %02X   :  ", tag);
 			for (int i = 0; i < len; i++)
-				printf("%02X", _data[offset++]);
+				printf("%02X", _data[offset]);
+
 			printf("\n");
+			*/
+
+			offset += len;
+
 		}
 	} // while()
-
-	printf(COLOR_YELLOW " ---\n" COLOR_RESET);
 }
 
 int get_status()
 {
+	apdu_t apdu;
+	int len_do_isd = 0;
+	int len_do_apps = 0;
+	int len_do_elfs = 0;
+	uint8_t do_isd[256];// = malloc(256);
+	uint8_t do_apps[2048];// = malloc(1024);
+	uint8_t do_elfs[2048];// = malloc(1024);
+
 	// --- step 1: Issuer Security Domain ---
-	gCMDlen = 0;
-	gCMDbuff[gCMDlen++] = 0x80;
-	gCMDbuff[gCMDlen++] = INS_GP_GET_STATUS;
-	gCMDbuff[gCMDlen++] = GET_STATUS_ISD;
-	gCMDbuff[gCMDlen++] = GET_STATUS_MODE_EXPANDED;
-	gCMDbuff[gCMDlen++] = 2;
-	gCMDbuff[gCMDlen++] = 0x4F;
-	gCMDbuff[gCMDlen++] = 0x00;
+	printf(COLOR_YELLOW " Issuer Security Domain\n" COLOR_RESET);
 
-	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
+	apdu.cmd_len = 0;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x80;
+	apdu.cmd[ apdu.cmd_len++ ] = INS_GP_GET_STATUS;
+	apdu.cmd[ apdu.cmd_len++ ] = GET_STATUS_ISD;
+	apdu.cmd[ apdu.cmd_len++ ] = GET_STATUS_MODE_EXPANDED;
+	apdu.cmd[ apdu.cmd_len++ ] = 2;
+	apdu.cmd[ apdu.cmd_len++ ] = TAG_AID;
+	apdu.cmd[ apdu.cmd_len++ ] = 0x00;
 
-	if (0x61 == gRESPbuff[gRESPlen - 2]) {
-		gRESPlen = get_response(gRESPbuff[gRESPlen - 1], gRESPbuff, sizeof(gRESPbuff));
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
+		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
 	}
 
-	if (0x90 == gRESPbuff[gRESPlen - 2]) {
-		int offset = 0;
-		int len;
-
-		printf(COLOR_YELLOW " Issuer Security Domain\n" COLOR_RESET);
-
-		gRESPlen -= 2; // Exclude SW
-
-		if (gRESPbuff[offset++] != 0xE3) {
-			printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
-		}
-		else {
-			len = gRESPbuff[offset++];
-			//if 
-			print_application_status(GET_STATUS_ISD, &gRESPbuff[offset], len);
-		}
-	}
+	memcpy(&do_isd[len_do_isd], apdu.resp, apdu.resp_len - 2);
+	len_do_isd += (apdu.resp_len - 2);
 
 	// --- step 2: Applications, including Security Domains ---
-	gCMDlen = 0;
-	gCMDbuff[gCMDlen++] = 0x80;
-	gCMDbuff[gCMDlen++] = INS_GP_GET_STATUS;
-	gCMDbuff[gCMDlen++] = GET_STATUS_APPLICATIONS;
-	gCMDbuff[gCMDlen++] = GET_STATUS_MODE_EXPANDED;
-	gCMDbuff[gCMDlen++] = 2;
-	gCMDbuff[gCMDlen++] = 0x4F;
-	gCMDbuff[gCMDlen++] = 0x00;
+	printf(COLOR_YELLOW " Applications, including Security Domains\n" COLOR_RESET);
 
-	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x80;
+	apdu.cmd[apdu.cmd_len++] = INS_GP_GET_STATUS;
+	apdu.cmd[apdu.cmd_len++] = GET_STATUS_APPLICATIONS;
+	apdu.cmd[apdu.cmd_len++] = GET_STATUS_MODE_EXPANDED;
+	apdu.cmd[apdu.cmd_len++] = 2;
+	apdu.cmd[apdu.cmd_len++] = TAG_AID;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
 
-	if (0x61 == gRESPbuff[gRESPlen - 2]) {
-		gRESPlen = get_response(gRESPbuff[gRESPlen - 1], gRESPbuff, sizeof(gRESPbuff));
-	}
+	while (1) {
+		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
-	if (0x90 == gRESPbuff[gRESPlen - 2]) {
-		int offset = 0;
-		int len;
-
-		printf(COLOR_YELLOW " Applications, including Security Domains\n" COLOR_RESET);
-
-		gRESPlen -= 2; // Exclude SW
-
-		if (0 == gRESPlen) {
-			printf(COLOR_WHITE " [none]\n" COLOR_RESET);
+		if (0x61 == apdu.resp[apdu.resp_len - 2]) {
+			apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
 		}
-		else {
-			while (offset < gRESPlen) {
-				if (gRESPbuff[offset++] != 0xE3) {
-					printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
-				}
-				else {
-					len = gRESPbuff[offset++];
 
-					print_application_status(GET_STATUS_APPLICATIONS, &gRESPbuff[offset], len);
-					offset += len;
-				}
-			}
+		if ((0x63 == apdu.resp[apdu.resp_len - 2]) || (0x90 == apdu.resp[apdu.resp_len - 2])) {
+			memcpy(&do_apps[len_do_apps], apdu.resp, apdu.resp_len - 2);
+			len_do_apps += (apdu.resp_len - 2);
 		}
+
+		if ((0x63 == apdu.resp[apdu.resp_len - 2]) && (0x10 == apdu.resp[apdu.resp_len - 1])) {
+			apdu.cmd[ ISO_OFFSET_P2 ] = GET_STATUS_MODE_EXPANDED | 0x01; // Get next
+			continue;
+		}
+
+		break;
 	}
 
 	// --- step 3: Executable Load Files and Executable Modules ---
-	gCMDlen = 0;
-	gCMDbuff[gCMDlen++] = 0x80;
-	gCMDbuff[gCMDlen++] = INS_GP_GET_STATUS;
-	gCMDbuff[gCMDlen++] = GET_STATUS_PACKAGES;
-	gCMDbuff[gCMDlen++] = GET_STATUS_MODE_EXPANDED;
-	gCMDbuff[gCMDlen++] = 2;
-	gCMDbuff[gCMDlen++] = 0x4F;
-	gCMDbuff[gCMDlen++] = 0x00;
+	printf(COLOR_YELLOW " Executable Load Files and Executable Modules\n" COLOR_RESET);
 
-	pcsc_sendAPDU(gCMDbuff, gCMDlen, gRESPbuff, sizeof(gRESPbuff), &gRESPlen);
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x80;
+	apdu.cmd[apdu.cmd_len++] = INS_GP_GET_STATUS;
+	apdu.cmd[apdu.cmd_len++] = GET_STATUS_PACKAGES;
+	apdu.cmd[apdu.cmd_len++] = GET_STATUS_MODE_EXPANDED;
+	apdu.cmd[apdu.cmd_len++] = 2;
+	apdu.cmd[apdu.cmd_len++] = TAG_AID;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
 
-	if (0x61 == gRESPbuff[gRESPlen - 2]) {
-		gRESPlen = get_response(gRESPbuff[gRESPlen - 1], gRESPbuff, sizeof(gRESPbuff));
+	while (1) {
+		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+		if (0x61 == apdu.resp[apdu.resp_len - 2]) {
+			apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
+		}
+
+		if ((0x63 == apdu.resp[apdu.resp_len - 2]) || (0x90 == apdu.resp[apdu.resp_len - 2])) {
+			memcpy(&do_elfs[len_do_elfs], apdu.resp, apdu.resp_len - 2);
+			len_do_elfs += (apdu.resp_len - 2);
+		}
+
+
+		if ( (0x63 == apdu.resp[apdu.resp_len - 2]) && (0x10 == apdu.resp[apdu.resp_len - 1]) ) {
+			apdu.cmd[ ISO_OFFSET_P2 ] = GET_STATUS_MODE_EXPANDED | 0x01; // Get next
+			continue;
+		}
+
+		break;
 	}
 
-	if (0x90 == gRESPbuff[gRESPlen - 2]) {
+	// ---
+	printf(COLOR_YELLOW " Issuer Security Domain\n" COLOR_RESET);
+
+	if (do_isd[0] != 0xE3) {
+		printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
+	}
+	else {
+		int offset = 1;
+		int len;
+
+		len = do_isd[offset++];
+		//if 
+		print_application_status(GET_STATUS_ISD, &do_isd[offset], len);
+	}
+
+	printf(COLOR_YELLOW " Applications, including Security Domains\n" COLOR_RESET);
+
+	if (0 == len_do_apps) {
+		printf(COLOR_WHITE " [none]\n" COLOR_RESET);
+	}
+	else {
 		int offset = 0;
 		int len;
 
-		printf(COLOR_YELLOW " Executable Load Files and Executable Modules\n" COLOR_RESET);
+		while (offset < len_do_apps) {
+			if (do_apps[offset++] != 0xE3) {
+				printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
+			}
+			else {
+				len = do_apps[offset++];
 
-		gRESPlen -= 2; // Exclude SW
-
-		if (0 == gCMDlen > 0) {
-			printf(COLOR_WHITE " [none]\n" COLOR_RESET);
-		}
-		else {
-			while (offset < gRESPlen) {
-				if (gRESPbuff[offset++] != 0xE3) {
-					printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
-				}
-				else {
-					len = gRESPbuff[offset++];
-
-					print_application_status(GET_STATUS_PACKAGES, &gRESPbuff[offset], len);
-					offset += len;
-				}
+				print_application_status(GET_STATUS_APPLICATIONS, &do_apps[offset], len);
+				offset += len;
 			}
 		}
 	}
+
+	printf(COLOR_YELLOW " Executable Load Files and Executable Modules\n" COLOR_RESET);
+
+	if (0 == len_do_elfs) {
+		printf(COLOR_WHITE " [none]\n" COLOR_RESET);
+	}
+	else {
+		int offset = 0;
+		int len;
+
+		while (offset < len_do_elfs) {
+			if (do_elfs[offset++] != 0xE3) {
+				printf(COLOR_RED " Wrong GET STATUS data..\n" COLOR_RESET);
+			}
+			else {
+				len = do_elfs[offset++];
+
+				print_application_status(GET_STATUS_PACKAGES, &do_elfs[offset], len);
+				offset += len;
+			}
+		}
+	}
+
+
+//	free(do_elfs);
+//	free(do_apps);
+//	free(do_isd);
 
 	return 0;
 }

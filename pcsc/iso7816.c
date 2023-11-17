@@ -18,8 +18,3 @@
 
 #include "iso7816.h"
 
- // APDU
-uint8_t gCMDbuff[256 + 5];
-uint16_t gCMDlen;
-uint8_t gRESPbuff[256 + 2];
-uint16_t gRESPlen;

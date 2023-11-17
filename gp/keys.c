@@ -17,6 +17,7 @@
  */
 
 #include "keys.h"
+#include "tools.h"
 
 uint8_t KEY[] = {
 	0x40, 0x41, 0x42, 0x43,  0x44, 0x45, 0x46, 0x47,
@@ -24,7 +25,23 @@ uint8_t KEY[] = {
 };
 
 
-void cmd_put_keyset(uint8_t kvn)
+/**
+ * @brief set-key callback function
+ *
+ * @param _cmd: command line string
+ */
+void cmd_setkey(char* _cmd)
 {
-	//
+	printf(COLOR_CYAN " set-key " COLOR_RESET "under implementation..\n");
 }
+
+/**
+ * @brief put-key callback function
+ *
+ * @param _cmd: command line string
+ */
+void cmd_putkeyset(char* _cmd)
+{
+	printf(COLOR_CYAN " put-keyset " COLOR_RESET "under implementation..\n");
+}
+

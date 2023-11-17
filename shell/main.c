@@ -63,20 +63,20 @@ main(int argc, char* argv[])
 	printf("------------------------------------------------------------------------\n\n");
 
 
-	strcpy(gFolder_name, argv[0]);
+	strcpy(gStartFolder, argv[0]);
 
-	len = strlen(gFolder_name);
-	while (gFolder_name[len] != pathSeparator) {
-		gFolder_name[len] = 0;
+	len = strlen(gStartFolder);
+	while (gStartFolder[len] != pathSeparator) {
+		gStartFolder[len] = 0;
 
 		len--;
 		if (len == 0) {
-			gFolder_name[len] = 0;
+			gStartFolder[len] = 0;
 			break;
 		}
 	}
 
-	printf(" Start folder: %s\n\n", gFolder_name);
+	printf(" Start folder: %s\n\n", gStartFolder);
 
 	for (;;)
 	{

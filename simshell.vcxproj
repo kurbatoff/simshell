@@ -224,6 +224,7 @@
     <ClCompile Include="shell\main.c" />
     <ClCompile Include="shell\shell.c" />
     <ClCompile Include="shell\tools.c" />
+    <ClCompile Include="shell\vars.c" />
     <ClCompile Include="shell\version.c" />
   </ItemGroup>
   <ItemGroup>
