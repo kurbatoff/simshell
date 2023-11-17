@@ -26,7 +26,7 @@
 #include "iso7816.h"
 
 
-#define KNOWN_ELF_COUNT		7
+#define KNOWN_ELF_COUNT		8
 
 typedef struct known_elf_t
 {
@@ -52,6 +52,11 @@ static known_elf_t elf_array[KNOWN_ELF_COUNT] = {
 		{0xA0, 0x00, 0x00, 0x00, 0x62, 0x01, 0x02}
 	},
 	{
+		"GSMA RSP",
+		16,
+		{0xA0, 0x00, 0x00, 0x05, 0x59, 0x10, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0x89, 0x00, 0x00, 0x00, 0x00}
+	},
+	{
 		"ISD-R",
 		16,
 		{0xA0, 0x00, 0x00, 0x05, 0x59, 0x10, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0x89, 0x00, 0x00, 0x01, 0x00}
@@ -73,7 +78,7 @@ static known_elf_t elf_array[KNOWN_ELF_COUNT] = {
 	}
 };
 
-void find_elf_name(uint8_t* aid, int len)
+void print_elf_name22(uint8_t* _aid, int _len)
 {
 	known_elf_t* elf;
 
@@ -81,13 +86,74 @@ void find_elf_name(uint8_t* aid, int len)
 	{
 		elf = &elf_array[i];
 
-		if ((elf->length == len) && (0 == memcmp(elf->aid, aid, len))) {
-			printf(COLOR_MAGENTA " %-22s" COLOR_RESET, elf->name);
+		if ((elf->length == _len) && (0 == memcmp(elf->aid, _aid, _len))) {
+			printf(COLOR_BLUE " %-22s" COLOR_RESET, elf->name);
 			return;;
 		}
 	}
 
-	printf("                       ");
+	printf("                       "); // Alignment for not found AID
+}
+
+void print_status(uint8_t _type, uint8_t _value)
+{
+	if (GET_STATUS_ISD == _type) {
+		// Table 11-6: Card Life Cycle Coding
+		switch (_value) {
+		case 0x01:
+			printf("OP_READY");
+			break;
+		case 0x07:
+			printf("INITIALIZED");
+			break;
+		case 0x0F:
+			printf("SECURED");
+			break;
+		case 0x7F:
+			printf("CARD_LOCKED");
+			break;
+		case 0xFF:
+			printf("TERMINATED");
+			break;
+
+		default:
+			printf(COLOR_RED "Unkown Card Manager state: " COLOR_WHITE "%02X" COLOR_RESET, _value);
+		}
+	}
+
+	if (GET_STATUS_APPLICATIONS == _type) {
+		// Table 11-4: Application Life Cycle Coding
+		// Table 11-5: Security Domain Life Cycle Coding
+		switch (_value) {
+		case 0x02:
+			printf("INSTALLED");
+			break;
+		case 0x07:
+			printf("SELECTABLE");
+			break;
+		case 0x0F:
+			printf("PERSONALIZED");
+			break;
+		case 0x13:
+			printf("LOCKED");
+			break;
+
+		default:
+			printf(COLOR_RED "Unkown Application state: " COLOR_WHITE "%02X" COLOR_RESET, _value);
+		}
+	}
+
+	if (GET_STATUS_PACKAGES == _type) {
+		// Table 11-3: Executable Load File Life Cycle Coding
+		switch (_value) {
+		case 0x01:
+			printf("LOADED");
+			break;
+
+		default:
+			printf(COLOR_RED "Unkown Package state: " COLOR_WHITE "%02X" COLOR_RESET, _value);
+		}
+	}
 }
 
 /**
@@ -115,7 +181,7 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 			for (int i = 0; i < (17-len); i++)
 				printf("  ");
 
-			find_elf_name(&_data[offset], len);
+			print_elf_name22(&_data[offset], len);
 
 			//printf("\n");
 
@@ -123,7 +189,7 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 			break;
 
 		case 0x84:
-			printf("  EM  :  ");
+			printf("  EM     ");
 			for (int i = 0; i < len; i++)
 				printf("%02X", _data[offset + i]);
 
@@ -132,68 +198,13 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 			offset += len;
 			break;
 
-		case 0x9F70:
+		case TAG_LIFE_CYCLE_STATE: // 0x9F70:
 			//printf(" State:  ");
 
-			if (GET_STATUS_ISD == _type) {
-				// Table 11-6: Card Life Cycle Coding
-				switch (_data[offset]) {
-				case 0x01:
-					printf("OP_READY\n");
-					break;
-				case 0x07:
-					printf("INITIALIZED\n");
-					break;
-				case 0x0F:
-					printf("SECURED\n");
-					break;
-				case 0x7F:
-					printf("CARD_LOCKED\n");
-					break;
-				case 0xFF:
-					printf("TERMINATED\n");
-					break;
-
-				default:
-					printf(COLOR_RED "Unkown ISD state: " COLOR_WHITE "%02X\n" COLOR_RESET, _data[offset]);
-				}
-			}
-
-			if (GET_STATUS_APPLICATIONS == _type) {
-				// Table 11-4: Application Life Cycle Coding
-				// Table 11-5: Security Domain Life Cycle Coding
-				switch (_data[offset]) {
-				case 0x02:
-					printf("INSTALLED\n");
-					break;
-				case 0x07:
-					printf("SELECTABLE\n");
-					break;
-				case 0x0F:
-					printf("PERSONALIZED\n");
-					break;
-				case 0x13:
-					printf("LOCKED\n");
-					break;
-
-				default:
-					printf(COLOR_RED "Unkown Application state: " COLOR_WHITE "%02X\n" COLOR_RESET, _data[offset]);
-				}
-			}
-
-			if (GET_STATUS_PACKAGES == _type) {
-				// Table 11-3: Executable Load File Life Cycle Coding
-				switch (_data[offset]) {
-				case 0x01:
-					printf("LOADED\n");
-					break;
-
-				default:
-					printf(COLOR_RED "Unkown Package state: " COLOR_WHITE "%02X\n" COLOR_RESET, _data[offset]);
-				}
-			}
-
+			print_status(_type, _data[offset]);
+			printf("\n");
 			offset += len;
+
 			break;
 
 		default:
