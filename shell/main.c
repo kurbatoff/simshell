@@ -27,6 +27,7 @@
 
 #include "shell.h"
 #include "commands.h"
+#include "keys.h"
 #include "version.h"
 #include "tools.h"
 
@@ -77,6 +78,8 @@ main(int argc, char* argv[])
 	}
 
 	printf(" Start folder: %s\n\n", gStartFolder);
+
+	init_keys();
 
 	for (;;)
 	{

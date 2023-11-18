@@ -82,6 +82,7 @@ int mutual_authentication()
 int init_update()
 {
 	apdu_t apdu;
+	sym_keyset_t* SCPkey;
 
 	//random
 	generate_random(NULL, host_challenge, CHALLENGE_SZ);
@@ -107,13 +108,20 @@ int init_update()
 		return -1;
 	}
 
+	SCPkey = find_keyset(apdu.resp[10]);
+	if (SCPkey == NULL) {
+		printf(" ERROR: Keyset %02X not found..\n", apdu.resp[10]);
+		return -2;
+	}
+
+
 	CTX.scp_index = apdu.resp[11];
 
 	switch (CTX.scp_index) {
 	case SECURE_CHANNEL_PROTOCOL_02:
 		memcpy(card_challenge, &apdu.resp[ 12 ], 8); // |counter[2] | challenge[6]|
 
-		scp02_generate_session_key(card_challenge, KEY, KEY, KEY);
+		scp02_generate_session_key(card_challenge, SCPkey->enc, SCPkey->mac, SCPkey->dek);
 		scp02_generate_cryptogramms(host_challenge, card_challenge, host_cryptogramm, card_cryptogramm);
 
 		/*
@@ -135,10 +143,10 @@ int init_update()
 		memcpy(counter, &apdu.resp[ 29 ], 3);
 		memcpy(card_challenge, &apdu.resp[ 13 ], 8);
 
-		scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_ENC, host_challenge, 8, card_challenge, 8, buf_session_ENC, 128);
-		scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_MAC, host_challenge, 8, card_challenge, 8, buf_session_MAC, 128);
+		scp03_calculate_cryptogram(SCPkey->enc, SCP03_DERIVE_S_ENC, host_challenge, 8, card_challenge, 8, buf_session_ENC, 128);
+		scp03_calculate_cryptogram(SCPkey->mac, SCP03_DERIVE_S_MAC, host_challenge, 8, card_challenge, 8, buf_session_MAC, 128);
 		// DEK key will be used static without session key generation
-		scp03_calculate_cryptogram(KEY, SCP03_DERIVE_S_RMAC, host_challenge, 8, card_challenge, 8, buf_session_RMAC, 128);
+		scp03_calculate_cryptogram(SCPkey->mac, SCP03_DERIVE_S_RMAC, host_challenge, 8, card_challenge, 8, buf_session_RMAC, 128);
 
 		scp03_calculate_cryptogram(buf_session_MAC, SCP03_DERIVE_CARD_CRYPTOGRAMM, host_challenge, 8, card_challenge, 8, card_cryptogramm, 64);
 		scp03_calculate_cryptogram(buf_session_MAC, SCP03_DERIVE_HOST_CRYPTOGRAMM, host_challenge, 8, card_challenge, 8, host_cryptogramm, 64);

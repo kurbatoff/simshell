@@ -23,6 +23,7 @@
 
 typedef struct sym_keyset_t
 {
+	uint8_t status; // 1/0 Initialized / no
 	uint8_t kvn;
 	uint8_t type; // KEY_TYPE_DES or KEY_TYPE_AES
 	uint8_t keylen; // 128 or 192 or 256
@@ -31,14 +32,14 @@ typedef struct sym_keyset_t
 	uint8_t dek[32];
 } sym_keyset_t;
 
-extern uint8_t KEY[];
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
+void init_keys(void);
 void cmd_setkey(char* _cmd);
 void cmd_putkeyset(char* _cmd);
+sym_keyset_t* find_keyset(int kvn);
 
 #if defined(__cplusplus)
 }
