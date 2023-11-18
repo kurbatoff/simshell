@@ -220,6 +220,9 @@ static void print_application_status(uint8_t _type, uint8_t* _data, uint16_t _le
 
 		}
 	} // while()
+
+	// Print privileges
+	//printf("         (-- -- -- -- -- -- -- --) (-- -- -- -- -- -- -- --) (-- -- -- -- -- -- -- --)\n");
 }
 
 int get_status()
