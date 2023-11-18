@@ -35,6 +35,8 @@ int mutual_authentication();
 int init_update();
 int ext_authenticate();
 
+void cmd_putkeyset(char* _cmd);
+
 #if defined(__cplusplus)
 }
 #endif

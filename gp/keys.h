@@ -38,7 +38,6 @@ extern "C" {
 
 void init_keys(void);
 void cmd_setkey(char* _cmd);
-void cmd_putkeyset(char* _cmd);
 sym_keyset_t* find_keyset(int kvn);
 
 #if defined(__cplusplus)

@@ -16,11 +16,14 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
+#define _CRT_SECURE_NO_WARNINGS 
+
 #include <stdlib.h>
 #include <stdint.h>
 
 #include "pcscwrap.h"
 #include "hal_aes.h"
+#include "hal_des.h"
 #include "gp.h"
 #include "keys.h"
 #include "scp02.h"
@@ -29,6 +32,7 @@
 #include "globalplatform.h"
 #include "getstatus.h"
 #include "tools.h"
+#include "iso7816.h"
 
 #include "mbedwrap.h"
 
@@ -227,3 +231,170 @@ int ext_authenticate()
 	return 0;
 }
 
+/**
+ * @brief put-key callback function
+ *
+ * @param _cmd: command line string
+ */
+ /*
+	 cm> put-keyset 32
+		 => 80 D8 00 81 43 20 \
+		 80 10 C8 E5 7F AF C5 7D D0 45 B2 0D BF 27 48 B7 01 85 03 8B AF 47 \
+		 80 10 C8 E5 7F AF C5 7D D0 45 B2 0D BF 27 48 B7 01 85 03 8B	AF 47 \
+		 80 10 C8 E5 7F AF C5 7D D0 45 B2 0D BF 27 48 B7 01 85 03 8B AF 47 00
+		 (17769 usec [SYS])
+		 <= 20 8B AF 47 8B AF 47 8B AF 47 90 00
+	 Status: No Error
+
+	 cm> put-keyset 48
+	  => 80 D8 00 81 46 30 \
+		 88 11 10 80 D2 A5 B0 8F A0 EE 51 14 3B 45 9E 63 81 06 DF 03 50 4A 77 \
+		 88 11 10 80 D2 A5 B0 8F A0 EE 51 14 3B 45 9E 63 81 06 DF 03 50 4A 77 \
+		 88 11 10 80 D2 A5 B0 8F A0 EE 51 14 3B 45 9E 63 81 06 DF 03 50 4A 77 00
+	  (29880 usec [SYS])
+	  <= 6A 80
+	 Status: Wrong data
+	 Add new key set didn't work, try replace ...
+	  => 80 D8 30 81 46 30 88 11 10 80 D2 A5 B0 8F A0 EE
+		 51 14 3B 45 9E 63 81 06 DF 03 50 4A 77 88 11 10
+		 80 D2 A5 B0 8F A0 EE 51 14 3B 45 9E 63 81 06 DF
+		 03 50 4A 77 88 11 10 80 D2 A5 B0 8F A0 EE 51 14
+		 3B 45 9E 63 81 06 DF 03 50 4A 77 00
+	  (16142 usec [SYS])
+	  <= 30 50 4A 77 50 4A 77 50 4A 77 90 00
+	 Status: No Error
+ */
+void cmd_putkeyset(char* _cmd)
+{
+	apdu_t apdu;
+	int kvn;
+	sym_keyset_t* key = NULL;
+	uint8_t data[16];
+
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x80;
+	apdu.cmd[apdu.cmd_len++] = INS_GP_PUT_KEY;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = 0x81;
+	apdu.cmd[apdu.cmd_len++] = 0;
+
+	while (*_cmd != ' ') // skip until SPACE
+		_cmd++;
+	while (*_cmd == ' ') // skip until KVN
+		_cmd++;
+
+	if (1 != sscanf(_cmd, "%d", &kvn))
+	{
+		printf(" Wrong or missing command arg..");
+		return;
+	}
+
+	key = find_keyset(kvn);
+	if (NULL == key)
+	{
+		printf(" Failed to find KVN %d..\n", kvn);
+		return;
+	}
+
+	switch (key->type) {
+	case KEY_TYPE_DES:
+		memset(data, 0x00, sizeof(data));
+		break;
+	case KEY_TYPE_AES:
+		memset(data, 0x01, sizeof(data));
+		break;
+	}
+
+	apdu.cmd[apdu.cmd_len++] = kvn;
+
+	// --- 1 ---
+	// ENC
+	apdu.cmd[apdu.cmd_len++] = key->type;
+	if (key->type == KEY_TYPE_AES) {
+		apdu.cmd[apdu.cmd_len++] = 1 + (key->keylen / 8);
+	}
+	apdu.cmd[apdu.cmd_len++] = (key->keylen / 8);
+
+	if (CTX.scp_index == 03) {
+		hal_AES128_crypt_ECB(key->enc, (key->keylen / 8), key->dek, &apdu.cmd[apdu.cmd_len], AES_ENCRYPT);
+	}
+	else
+		hal_DES128_ECB_crypt(key->enc, (key->keylen / 8), buf_session_DEK, &apdu.cmd[apdu.cmd_len], DES_ENCRYPT);
+
+	apdu.cmd_len += (key->keylen / 8);
+
+	// KCV
+	apdu.cmd[apdu.cmd_len++] = 3;
+	if (key->type == KEY_TYPE_DES) {
+		hal_DES128_ECB_crypt(data, 16, key->enc, &apdu.cmd[apdu.cmd_len], DES_ENCRYPT);
+	} else
+	hal_AES128_crypt_ECB(data, 16, key->enc, &apdu.cmd[apdu.cmd_len], AES_ENCRYPT);
+	apdu.cmd_len += 3;
+
+	// --- 2 ---
+	// MAC
+	apdu.cmd[apdu.cmd_len++] = key->type;
+	if (key->type == KEY_TYPE_AES) {
+		apdu.cmd[apdu.cmd_len++] = 1 + (key->keylen / 8);
+	}
+	apdu.cmd[apdu.cmd_len++] = (key->keylen / 8);
+
+	if (CTX.scp_index == 03) {
+		hal_AES128_crypt_ECB(key->mac, (key->keylen / 8), key->dek, &apdu.cmd[apdu.cmd_len], AES_ENCRYPT);
+	}
+	else
+		hal_DES128_ECB_crypt(key->mac, (key->keylen / 8), buf_session_DEK, &apdu.cmd[apdu.cmd_len], DES_ENCRYPT);
+
+	apdu.cmd_len += (key->keylen / 8);
+
+	// KCV
+	apdu.cmd[apdu.cmd_len++] = 3;
+	if (key->type == KEY_TYPE_DES) {
+		hal_DES128_ECB_crypt(data, 16, key->mac, &apdu.cmd[apdu.cmd_len], DES_ENCRYPT);
+	}
+	else
+		hal_AES128_crypt_ECB(data, 16, key->mac, &apdu.cmd[apdu.cmd_len], AES_ENCRYPT);
+	apdu.cmd_len += 3;
+
+	// --- 3 ---
+	// DEK
+	apdu.cmd[apdu.cmd_len++] = key->type;
+	if (key->type == KEY_TYPE_AES) {
+		apdu.cmd[apdu.cmd_len++] = 1 + (key->keylen / 8);
+	}
+	apdu.cmd[apdu.cmd_len++] = (key->keylen / 8);
+
+	if (CTX.scp_index == 03) {
+		hal_AES128_crypt_ECB(key->dek, (key->keylen / 8), key->dek, &apdu.cmd[apdu.cmd_len], AES_ENCRYPT);
+	} else
+		hal_DES128_ECB_crypt(key->dek, (key->keylen / 8), buf_session_DEK, &apdu.cmd[apdu.cmd_len], DES_ENCRYPT);
+
+	apdu.cmd_len += (key->keylen / 8);
+
+	// KCV
+	apdu.cmd[apdu.cmd_len++] = 3;
+	if (key->type == KEY_TYPE_DES) {
+		hal_DES128_ECB_crypt(data, 16, key->dek, &apdu.cmd[apdu.cmd_len], DES_ENCRYPT);
+	}
+	else
+		hal_AES128_crypt_ECB(data, 16, key->dek, &apdu.cmd[apdu.cmd_len], AES_ENCRYPT);
+	apdu.cmd_len += 3;
+
+	// --- 4 ---
+	// Length
+	apdu.cmd[ISO1716_OFFSET_LC] = apdu.cmd_len - ISO1716_OFFSET_HEADER_LEN;
+
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	if ( (0x6A == apdu.resp[apdu.resp_len - 2]) && (0x80 == apdu.resp[apdu.resp_len - 1]) ) {
+		apdu.cmd[ISO7816_OFFSET_P1] = kvn;
+
+		printf("Add new key set didn't work, try replace ...\n");
+
+		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	}
+
+	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
+		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
+	}
+}

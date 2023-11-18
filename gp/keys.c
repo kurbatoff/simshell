@@ -188,14 +188,3 @@ void cmd_setkey(char* _cmd)
 		set_one_key(kvn, idx, type, keylen, keyvalue);
 	}
 }
-
-/**
- * @brief put-key callback function
- *
- * @param _cmd: command line string
- */
-void cmd_putkeyset(char* _cmd)
-{
-	printf(COLOR_CYAN " put-keyset " COLOR_RESET "under implementation..\n");
-}
-

@@ -281,7 +281,7 @@ int get_status()
 		}
 
 		if ((0x63 == apdu.resp[apdu.resp_len - 2]) && (0x10 == apdu.resp[apdu.resp_len - 1])) {
-			apdu.cmd[ ISO_OFFSET_P2 ] = GET_STATUS_MODE_EXPANDED | 0x01; // Get next
+			apdu.cmd[ISO7816_OFFSET_P2] = GET_STATUS_MODE_EXPANDED | 0x01; // Get next
 			continue;
 		}
 
@@ -312,9 +312,8 @@ int get_status()
 			len_do_elfs += (apdu.resp_len - 2);
 		}
 
-
 		if ( (0x63 == apdu.resp[apdu.resp_len - 2]) && (0x10 == apdu.resp[apdu.resp_len - 1]) ) {
-			apdu.cmd[ ISO_OFFSET_P2 ] = GET_STATUS_MODE_EXPANDED | 0x01; // Get next
+			apdu.cmd[ISO7816_OFFSET_P2] = GET_STATUS_MODE_EXPANDED | 0x01; // Get next
 			continue;
 		}
 

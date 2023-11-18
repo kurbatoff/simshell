@@ -21,12 +21,14 @@
 
 #include <stdint.h>
 
-#define ISO_OFFSET_CLA		0x00
-#define ISO_OFFSET_INS		0x01
-#define ISO_OFFSET_P1		0x02
-#define ISO_OFFSET_P2		0x03
-#define ISO_OFFSET_LC		0x04
-#define ISO_OFFSET_CDATA		0x05
+#define ISO7816_OFFSET_CLA		0x00
+#define ISO7816_OFFSET_INS		0x01
+#define ISO7816_OFFSET_P1		0x02
+#define ISO7816_OFFSET_P2		0x03
+#define ISO1716_OFFSET_LC		0x04
+#define ISO7816_OFFSET_CDATA	0x05
+
+#define ISO1716_OFFSET_HEADER_LEN	5
 
 #if defined(__cplusplus)
 extern "C" {
