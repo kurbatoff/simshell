@@ -49,8 +49,8 @@
   - If CLA = '00' - '0F', '40' - '4F', '60' - '6F', even or odd instruction code 'CA' or 'CB';
   - If CLA = '80' - '8F', 'C0' - 'CF' or 'E0' - 'EF', even instruction code 'CA'.
  */
-#define INS_GP_GET_DATA_CA					0xCA
-#define INS_GP_GET_DATA_CB					0xCB
+#define INS_GET_DATA_CA					0xCA
+#define INS_GET_DATA_CB					0xCB
 
 #define INS_GP_SELECT						0xA4
 #define INS_GET_RESPONSE					0xC0

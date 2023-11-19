@@ -16,6 +16,8 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
+#define _CRT_SECURE_NO_WARNINGS 
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -385,4 +387,60 @@ int get_status()
 //	free(do_isd);
 
 	return 0;
+}
+
+void cmd_getdata(char* _cmd)
+{
+	apdu_t apdu;
+	int tag;
+	int keytype;
+
+	while (*_cmd != ' ') // skip until SPACE
+		_cmd++;
+	while (*_cmd == ' ') // skip until TAG
+		_cmd++;
+
+	if (1 != sscanf(_cmd, "%04X", &tag))
+	{
+		printf(" Wrong or missing command arg..");
+		return;
+	}
+
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x80;
+	apdu.cmd[apdu.cmd_len++] = INS_GET_DATA_CA;
+	apdu.cmd[apdu.cmd_len++] = tag >> 8;
+	apdu.cmd[apdu.cmd_len++] = tag & 0xFF;
+	apdu.cmd[apdu.cmd_len++] = 0;
+
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
+		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
+	}
+
+	if (0x90 == apdu.resp[apdu.resp_len - 2]) {
+		if (DO_E0_KEYDATA == tag) {
+			int offset = 0;
+
+			apdu.resp_len -= 2; // exclude SW
+
+			offset++; // E0
+			offset++; // Length
+
+			while (offset < apdu.resp_len) {
+				if (apdu.resp[offset++] == 0xC0) {
+					offset++; // len
+					printf(" Key index   :       %d\n", apdu.resp[offset++]);
+					printf(" Key version :     %d\n", apdu.resp[offset++]);
+					keytype = apdu.resp[offset++];
+					printf("   Type & Length:    %s %d\n", (keytype == KEY_TYPE_AES ? "AES" : "DES"), apdu.resp[offset++]);
+				}
+				else {
+					printf(COLOR_RED " Wrong keydata object structure..\n" COLOR_RESET);
+					break;
+				}
+			}
+		}
+	}
 }

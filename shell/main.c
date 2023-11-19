@@ -16,6 +16,20 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
+/**
+ * TODO features
+ * 
+ * 1.     JVM CAP: /cap-info, upload, delete, install
+ * 2.     JCShell script support
+ * 3.     Lua support
+ * 4.     SCP81 in offline mode		.lua
+ * 5.     LPA in offline mode		.lua
+ * 6.     Run PCOM scripts
+ * 7. [+] get-data 00E0 etc
+ * 8.     SCP11 + ECC tests
+ * 
+ */
+
 #define _CRT_SECURE_NO_WARNINGS 
 
 #include <stdint.h>

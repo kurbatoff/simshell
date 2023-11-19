@@ -155,6 +155,12 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		cmd_ls
 	},
 	{
+		"get-data",
+		"\n\"get-data\"\n",
+		" get-data          GET DATA identified by tag\n",
+		cmd_getdata
+	},
+	{
 		"set-key",
 		"\n\"set-key\"\n",
 		" set-key       [-] Set context (shell enviroment only) Security Domain keys\n",
@@ -285,11 +291,6 @@ static void cmd_S_term(char* _cmd)
 	"\n\"get-sd-certificate arg1 arg2 arg3\":\n Usage:\n    arg1: 1|2|3|4...         \n",
 	" get-sd-certif..   Get SD certificate i.e. start SCP11 authentication\n",
 	cmd_getsdcert
-
-	getdata,
-	"\n\"get-data\"\n",
-	" get-data          GET DATA identified by tag\n",
-	cmd_getdata
 
 	upload,
 	"\n\"upload\"\n",
@@ -487,16 +488,6 @@ static void cmd_S_error(char* _cmd)
 static void cmd_S_listreaders(char* _cmd)
 {
 	printf(COLOR_CYAN " /list-readers " COLOR_RESET "under implementation..\n");
-}
-
-/**
- * @brief get-data callback function
- *
- * @param _cmd: command line string
- */
-static void cmd_getdata(char* _cmd)
-{
-	printf(COLOR_CYAN " get-data " COLOR_RESET "under implementation..\n");
 }
 
 /**

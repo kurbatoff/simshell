@@ -81,7 +81,7 @@ void cmd_scp11_perform_security_operation(void)
 
 	apdu.cmd_len = 0;
 	apdu.cmd[ apdu.cmd_len++ ] = 0x80;
-	apdu.cmd[ apdu.cmd_len++ ] = INS_GP_GET_DATA_CA;
+	apdu.cmd[ apdu.cmd_len++ ] = INS_GET_DATA_CA;
 	apdu.cmd[ apdu.cmd_len++ ] = 0xBF;
 	apdu.cmd[ apdu.cmd_len++ ] = 0x21;
 	apdu.cmd[ apdu.cmd_len++ ] = 6;

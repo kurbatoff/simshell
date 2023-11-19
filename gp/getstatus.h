@@ -34,6 +34,7 @@ extern "C" {
 
 void print_elf_name22(uint8_t* aid, int len);
 int get_status();
+void cmd_getdata(char* _cmd);
 
 #if defined(__cplusplus)
 }
