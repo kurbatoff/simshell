@@ -26,6 +26,7 @@
 #include "shell.h"
 #include "commands.h"
 #include "tools.h"
+#include "luawrap.h"
 
 char gStartFolder[1024];
 
@@ -34,11 +35,12 @@ static bool execute_file(const char* fname)
 	FILE* file;
 	char fullname[1024 + 8];
 
+	// 1. Simshell script
 	sprintf(fullname, "%s%s." SIMSHELL_EXT, gStartFolder, fname);
 
 	if ((file = fopen(fullname, "r")))
 	{
-		char s[256];
+		char s[512];
 
 		printf(" Executing script: " COLOR_CYAN "%s." SIMSHELL_EXT "\n\n" COLOR_RESET, fname);
 
@@ -49,6 +51,21 @@ static bool execute_file(const char* fname)
 		fclose(file);
 		return true;
 	}
+
+	// 2. Lua file
+	sprintf(fullname, "%s%s.lua", gStartFolder, fname);
+
+	if ((file = fopen(fullname, "r")))
+	{
+		fclose(file);
+
+		printf(" Executing Lua file: " COLOR_CYAN "%s.lua\n\n" COLOR_RESET, fname);
+
+		Lua_execute(fullname);
+
+		return true;
+	}
+
 	return false;
 }
 

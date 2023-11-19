@@ -192,6 +192,9 @@
     <ClCompile Include="shell\vars.c">
       <Filter>Source files\Shell</Filter>
     </ClCompile>
+    <ClCompile Include="lua\luawrap.c">
+      <Filter>Source files\Shell</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">
@@ -224,5 +227,8 @@
     <ClInclude Include="pcsc\pcscwrap.h">
       <Filter>Source files\PCSC</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Lua5.3\lua53.lib" />
   </ItemGroup>
 </Project>

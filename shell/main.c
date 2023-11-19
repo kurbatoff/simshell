@@ -19,15 +19,18 @@
 /**
  * TODO features
  * 
- * 1.     JVM CAP: /cap-info, upload, delete, install
- * 2.     JCShell script support
- * 3.     Lua support
- * 4.     SCP81 in offline mode		.lua
- * 5.     LPA in offline mode		.lua
- * 6.     Run PCOM scripts
- * 7. [+] get-data 00E0 etc
- * 8.     SCP11 + ECC tests
+ * 1.      JVM CAP: /cap-info, upload, delete, install
+ * 2.      JCShell script support
+ * 3.  [+] Lua support: 19 Nov 2023
+ * 4.      SCP81 in offline mode		.lua
+ * 5.      LPA in offline mode			.lua
+ * 6.      Run PCOM scripts
+ * 7.  [+] get-data 00E0 etc
+ * 8.      SCP11 + ECC tests
+ * 9.      Milenage
+ * 10.     TUAK authentication
  * 
+ * 33.     Manual
  */
 
 #define _CRT_SECURE_NO_WARNINGS 
@@ -71,6 +74,10 @@ main(int argc, char* argv[])
 	clock_t start;
 	clock_t finish;
 	//double interval;
+
+	// Workaround: CLear screen is required for proper Lua print() formatting
+	system("cls");
+	printf("\033[00;00m");
 
 	printf("------------------------------------------------------------------------\n");
 	printf(COLOR_WHITE " SIM, Global Platform and JVM" COLOR_RESET " shell [Version %s]\n", version); 

@@ -20,6 +20,7 @@
 #define __PCSCWRAP_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define PCSC_APDU_C_BUFF_LEN            (256 + 5)
 #define PCSC_APDU_R_BUFF_LEN            (256 + 2)

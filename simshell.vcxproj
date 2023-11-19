@@ -73,7 +73,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\pcsc;..\Lib\mbedtls-development\include;$(IncludePath)</IncludePath>
+    <IncludePath>.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\pcsc;..\Lib\mbedtls-development\include;$(IncludePath)</IncludePath>
     <LibraryPath>K:\V.CPP\simshell\zlib-1.2.8\win32-build\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)/bin/</OutDir>
   </PropertyGroup>
@@ -214,6 +214,7 @@
     <ClCompile Include="gp\securechannel.c" />
     <ClCompile Include="gp\sw.c" />
     <ClCompile Include="gsma\euicc.c" />
+    <ClCompile Include="lua\luawrap.c" />
     <ClCompile Include="mbed\hal_aes.c" />
     <ClCompile Include="mbed\hal_des.c" />
     <ClCompile Include="mbed\mbedtests.c" />
@@ -238,6 +239,9 @@
     <ClInclude Include="shell\shell.h" />
     <ClInclude Include="shell\tools.h" />
     <ClInclude Include="shell\version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Lua5.3\lua53.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
