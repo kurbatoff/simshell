@@ -73,7 +73,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\pcsc;..\Lib\mbedtls-development\include;$(IncludePath)</IncludePath>
+    <IncludePath>.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\pcsc;.\mbedtls-3.5.1\include;$(IncludePath)</IncludePath>
     <LibraryPath>K:\V.CPP\simshell\zlib-1.2.8\win32-build\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)/bin/</OutDir>
   </PropertyGroup>
@@ -171,38 +171,38 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Lib\mbedtls-development\library\aes.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\aesni.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\aria.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\asn1parse.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\asn1write.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\bignum.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\bignum_core.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\camellia.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\chacha20.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\chachapoly.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\cipher.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\cipher_wrap.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\cmac.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\constant_time.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\ctr_drbg.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\des.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\ecdh.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\ecdsa.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\ecp.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\ecp_curves.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\hmac_drbg.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\md.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\md5.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\nist_kw.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\platform_util.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\poly1305.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\psa_util.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\ripemd160.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\sha1.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\sha256.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\sha3.c" />
-    <ClCompile Include="..\Lib\mbedtls-development\library\sha512.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\aes.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\aesni.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\aria.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\asn1parse.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\asn1write.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\bignum.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\bignum_core.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\camellia.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\chacha20.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\chachapoly.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\cipher.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\cipher_wrap.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\cmac.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\constant_time.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\ctr_drbg.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\des.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\ecdh.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\ecdsa.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\ecp.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\ecp_curves.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\hmac_drbg.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\md.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\md5.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\nist_kw.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\platform_util.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\poly1305.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\psa_util.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\ripemd160.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\sha1.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\sha256.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\sha3.c" />
+    <ClCompile Include="mbedtls-3.5.1\library\sha512.c" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gp\getstatus.c" />

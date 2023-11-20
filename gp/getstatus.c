@@ -420,6 +420,9 @@ void cmd_getdata(char* _cmd)
 	}
 
 	if (0x90 == apdu.resp[apdu.resp_len - 2]) {
+
+		// Table 11-28: Key Information Data Structure – Basic
+		// Table 11-29: Key Information Data Structure – Extended
 		if (DO_E0_KEYDATA == tag) {
 			int offset = 0;
 

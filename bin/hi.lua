@@ -3,7 +3,8 @@
 --
 print "Hallo from inside Lua!"
 
-w = 3
+w = 1
 q = 1 + w
+a = 1 + q
 
-print(q, w, 5, q+2)
+print(a, q, w, "..", "Go!!")

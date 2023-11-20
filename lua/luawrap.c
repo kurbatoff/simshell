@@ -28,6 +28,21 @@
 #include "tools.h"
 #include "pcscwrap.h"
 
+/**
+ *
+ * C functions exported to Lua:
+ *
+ */
+static int Lua_connect_pcsc(lua_State* L);
+static int Lua_select_ISD(lua_State* L);
+static int Lua_send_apdu(lua_State* L);
+//static int Lua_sent_keyset(lua_State* L);
+//static int Lua_authenticate(lua_State* L);
+//static int Lua_upload(lua_State* L);
+//static int Lua_install(lua_State* L);
+//static int Lua_execute_shellcommand(lua_State* L);
+
+
 static int lua_popup_apdu(lua_State* L, uint8_t* apdubuff)
 {
 	int a_size;

@@ -14,8 +14,9 @@ resp = C_send_apdu(apdu)
 print(table.concat(resp, ', '))
 
 
-local apdu2 = {0, 0xC0, 0, 0 , resp[2]}
-resp = C_send_apdu(apdu2)
+local apdu = {0, 0xC0, 0, 0 , resp[2]}
+resp = C_send_apdu(apdu)
+--printf(sw)
 print(table.concat(resp, ', '))
 
 print "Congratulations!"

@@ -66,102 +66,6 @@
     <ClCompile Include="gp\scp11.c">
       <Filter>Source files\GP</Filter>
     </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\aes.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\aesni.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\aria.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\asn1parse.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\asn1write.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\bignum.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\bignum_core.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\camellia.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\chacha20.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\chachapoly.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\cipher.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\cipher_wrap.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\cmac.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\constant_time.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\ctr_drbg.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\des.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\ecdh.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\ecdsa.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\ecp.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\ecp_curves.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\hmac_drbg.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\md.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\md5.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\nist_kw.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\platform_util.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\poly1305.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\psa_util.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\ripemd160.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\sha1.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\sha3.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\sha256.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\mbedtls-development\library\sha512.c">
-      <Filter>Source files\mbedtls</Filter>
-    </ClCompile>
     <ClCompile Include="mbed\hal_aes.c">
       <Filter>Source files\mbed</Filter>
     </ClCompile>
@@ -194,6 +98,102 @@
     </ClCompile>
     <ClCompile Include="lua\luawrap.c">
       <Filter>Source files\Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\aes.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\aesni.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\aria.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\asn1parse.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\asn1write.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\bignum.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\bignum_core.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\camellia.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\chacha20.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\chachapoly.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\cipher.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\cipher_wrap.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\cmac.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\constant_time.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\ctr_drbg.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\des.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\ecdh.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\ecdsa.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\ecp.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\ecp_curves.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\hmac_drbg.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\md.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\md5.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\nist_kw.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\platform_util.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\poly1305.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\psa_util.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\ripemd160.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\sha1.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\sha3.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\sha256.c">
+      <Filter>Source files\mbedtls</Filter>
+    </ClCompile>
+    <ClCompile Include="mbedtls-3.5.1\library\sha512.c">
+      <Filter>Source files\mbedtls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

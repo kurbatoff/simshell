@@ -21,16 +21,22 @@
  * 
  * 1.      JVM CAP: /cap-info, upload, delete, install
  * 2.      JCShell script support
- * 3.  [+] Lua support: 19 Nov 2023
- * 4.      SCP81 in offline mode		.lua
- * 5.      LPA in offline mode			.lua
+ * 3.  [+] Lua support:													19 Nov 2023
+ * 4.      SCP81 in offline mode			.lua
+ * 5.      LPA in offline mode				.lua
  * 6.      Run PCOM scripts
- * 7.  [+] get-data 00E0 etc
+ * 7.  [+] get-data 00E0 etc											18 Nov 2023
  * 8.      SCP11 + ECC tests
- * 9.      Milenage
+ * 9.      Milenage							.lua
  * 10.     TUAK authentication
- * 
+ * 11.     SIM scan
+ * 12.     Crypto support: shell & Lua
+ * 13.     5G support / tests
+ *
  * 33.     Manual
+ *
+ * 41.     Articles
+ *
  */
 
 #define _CRT_SECURE_NO_WARNINGS 
