@@ -393,6 +393,7 @@ int get_status()
 		}
 	}
 
+	printf("\n");
 
 //	free(do_elfs);
 //	free(do_apps);

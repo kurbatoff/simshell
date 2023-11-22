@@ -20,7 +20,7 @@ memf = resp[3] * 256 * 256 * 256 + resp[4] * 256 * 256 + resp[5] * 256 + resp[6]
 cod = resp[7] * 256 + resp[8]
 cor = resp[9] * 256 + resp[10]
 
-print("Free user flash :", memf)
-print(" Clear on Deselect :", cod)
-print(" Clear on Reset :", cor)
+print("Free user flash:", memf)
+print(" Clear on Deselect:", cod)
+print(" Clear on Reset:", cor)
 

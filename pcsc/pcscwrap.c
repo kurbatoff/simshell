@@ -79,10 +79,10 @@ void print_reader_name()
 		printf(" [No reader selected]");
 	else {
 #ifdef _WIN32
-	printf(COLOR_GREEN " [%ls]" COLOR_RESET, mszReaders);
+	printf(COLOR_BLUE " [%ls]" COLOR_RESET, mszReaders);
 #endif
 #ifdef __APPLE__
-	printf(COLOR_GREEN " [%s]" COLOR_RESET, mszReaders);
+	printf(COLOR_BLUE " [%s]" COLOR_RESET, mszReaders);
 #endif
 	}
 }

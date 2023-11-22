@@ -26,6 +26,7 @@
 #include "shell.h"
 #include "pcscwrap.h"
 #include "commands.h"
+#include "securechannel.h"
 #include "tools.h"
 #include "luawrap.h"
 
@@ -102,7 +103,32 @@ static int find_shell_command(char* _cmd, int* _idx)
 void shell_prompt(void)
 {
 	print_reader_name();
-	printf(COLOR_BLUE " [No secure channel]" "\n" COLOR_RESET);
+
+	if (CTX.security_status == GPSYSTEM_NONE) {
+		printf(" [No secure channel]\n");
+	}
+	else if (CTX.security_status == GPSYSTEM_INITUPDATE) {
+		printf(COLOR_MAGENTA " [Init-update]" "\n" COLOR_RESET);
+	}
+	else {
+		switch (CTX.security_level) {
+		case SECURITY_LEVEL_PLAIN:
+			printf(COLOR_GREEN " [SCP %02d, Plain]" "\n" COLOR_RESET, CTX.scp_index);
+			break;
+
+		case SECURITY_LEVEL_MAC:
+			printf(COLOR_GREEN " [SCP %02d, MAC]" "\n" COLOR_RESET, CTX.scp_index);
+			break;
+
+		case SECURITY_LEVEL_ENC:
+			printf(COLOR_GREEN " [SCP %02d, ENC]" "\n" COLOR_RESET, CTX.scp_index);
+			break;
+
+		case SECURITY_LEVEL_CRMAC:
+			printf(COLOR_GREEN " [SCP %02d, CR-MAC]" "\n" COLOR_RESET, CTX.scp_index);
+			break;
+		}
+	}
 
 	printf(SIMSHELL_PROMTH "|-> ");
 }
