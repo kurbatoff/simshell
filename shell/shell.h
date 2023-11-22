@@ -32,16 +32,11 @@ extern char gStartFolder[1024];
 #define SIMSHELL_PROMTH			"simsh"
 #define SIMSHELL_EXT			"simsh"
 
-#define shell_prompt	printf(SIMSHELL_PROMTH "|-> ")
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-/**
- * @brief Execute the shell command
- * @param command: shell command line
- */
+void shell_prompt(void);
 void SHELL_execute(char *gCMDbuff);
 
 #if defined(__cplusplus)

@@ -28,7 +28,7 @@
 #include "iso7816.h"
 
 
-#define KNOWN_ELF_COUNT		8
+#define KNOWN_ELF_COUNT		10
 
 typedef struct known_elf_t
 {
@@ -77,7 +77,19 @@ static known_elf_t elf_array[KNOWN_ELF_COUNT] = {
 		"ARA-M",
 		9,
 		{0xA0, 0x00, 0x00, 0x01, 0x51, 0x41, 0x43, 0x4C, 0x00}
+	},
+	{
+		"Visa",
+		7,
+		{0xA0, 0x00, 0x00, 0x00, 0x03, 0x10, 0x10}
+	},
+	{
+		"Mastercard",
+		7,
+		{0xA0, 0x00, 0x00, 0x00, 0x04, 0x10, 0x10}
 	}
+	// 325041592E5359532E4444463031 PPSE
+	// 2PAY.SYS.DDF01
 };
 
 void print_elf_name22(uint8_t* _aid, int _len)

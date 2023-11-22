@@ -73,6 +73,20 @@ uint16_t get_response(uint8_t response_len, uint8_t* _response_buff, uint16_t _r
 	return resp_length;
 }
 
+void print_reader_name()
+{
+	if (mszReaders == NULL)
+		printf(" [No reader selected]");
+	else {
+#ifdef _WIN32
+	printf(COLOR_GREEN " [%ls]" COLOR_RESET, mszReaders);
+#endif
+#ifdef __APPLE__
+	printf(COLOR_GREEN " [%s]" COLOR_RESET, mszReaders);
+#endif
+	}
+}
+
 pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
   uint8_t *_response_buffer, uint16_t _response_buffer_sz, uint16_t* _response_length)
 {

@@ -110,7 +110,7 @@ main(int argc, char* argv[])
 
 	for (;;)
 	{
-		shell_prompt;
+		shell_prompt();
 
 		fgets(commandline, sizeof(commandline) - 1, stdin);
 		str = commandline;

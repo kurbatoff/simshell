@@ -27,6 +27,7 @@
 #define SECURITY_LEVEL_CRMAC		0x34 // SCP11
 
 #define GPSYSTEM_NONE				0x00
+#define GPSYSTEM_INITUPDATE			0x01 // Internal use
 #define GPSYSTEM_AUTHENTICATED		0x80
 
 #define LENGTH_OF_ICV				16

@@ -48,6 +48,8 @@ extern uint8_t LChannel_ID;
 
 uint16_t get_response(uint8_t response_len, uint8_t* response, uint16_t response_size);
 
+void print_reader_name(void);
+
 /**
  * \brief                     Send an APDU command
  *

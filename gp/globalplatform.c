@@ -54,6 +54,8 @@ int select_ISD()
 {
 	apdu_t apdu;
 
+	securechannel_reset_session();
+
 	apdu.cmd_len = 0;
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 	apdu.cmd[apdu.cmd_len++] = INS_GP_SELECT;
@@ -78,6 +80,10 @@ int select_ISD()
 int mutual_authentication()
 {
 	init_update();
+	if (CTX.security_status != GPSYSTEM_INITUPDATE) {
+		return -1;
+	}
+
 	ext_authenticate();
 
 	return 0;
@@ -87,6 +93,8 @@ int init_update()
 {
 	apdu_t apdu;
 	sym_keyset_t* SCPkey;
+
+	securechannel_reset_session();
 
 	//random
 	generate_random(NULL, host_challenge, CHALLENGE_SZ);
@@ -108,13 +116,13 @@ int init_update()
 	}
 
 	if (0x90 != apdu.resp[apdu.resp_len - 2]) {
-		printf(COLOR_RED " Failed to perform INIT UPDATE\r\n" COLOR_RESET);
+		printf(COLOR_RED " ERROR:" COLOR_RESET " Failed to perform INIT UPDATE\r\n");
 		return -1;
 	}
 
 	SCPkey = find_keyset(apdu.resp[10]);
 	if (SCPkey == NULL) {
-		printf(" ERROR: Keyset %02X not found..\n", apdu.resp[10]);
+		printf(COLOR_RED " ERROR:" COLOR_RESET " Keyset 0x%02X not found..\n", apdu.resp[10]);
 		return -2;
 	}
 
@@ -138,7 +146,7 @@ int init_update()
 
 		// Verify card cryptogramm
 		if (memcmp(card_cryptogramm, &apdu.resp[20], 8) != 0) {
-			printf(COLOR_RED " Wrong card cryptogramm\n" COLOR_RESET);
+			printf(COLOR_RED " ERROR:" COLOR_RESET " Wrong card cryptogramm\n");
 			return -1;
 		}
 		break;
@@ -178,6 +186,8 @@ int init_update()
 		return -1;
 	}
 
+	CTX.security_status = GPSYSTEM_INITUPDATE;
+
 	return 0;
 }
 
@@ -186,6 +196,12 @@ int ext_authenticate()
 	apdu_t apdu;
 	uint8_t tmp_buffer[256 + LENGTH_OF_ICV]; // for SCP03
 	int len;
+
+
+	if (CTX.security_status != GPSYSTEM_INITUPDATE) {
+		printf(COLOR_RED " ERROR:" COLOR_RESET " No SCP protocol found, need to run init - update first\n");
+		return -1;
+	}
 
 	apdu.cmd_len = 0;
 	apdu.cmd[apdu.cmd_len++] = 0x84;
@@ -224,6 +240,8 @@ int ext_authenticate()
 	}
 
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	CTX.security_status = GPSYSTEM_AUTHENTICATED;
 
 	//			CTX.security_level = 
 	//			CTX.security_status =

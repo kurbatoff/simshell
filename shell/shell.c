@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "shell.h"
+#include "pcscwrap.h"
 #include "commands.h"
 #include "tools.h"
 #include "luawrap.h"
@@ -96,6 +97,14 @@ static int find_shell_command(char* _cmd, int* _idx)
 	}
 
 	return count;
+}
+
+void shell_prompt(void)
+{
+	print_reader_name();
+	printf(COLOR_BLUE " [No secure channel]" "\n" COLOR_RESET);
+
+	printf(SIMSHELL_PROMTH "|-> ");
 }
 
 /**
