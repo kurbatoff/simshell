@@ -1,0 +1,42 @@
+add_library(${CMAKE_PROJECT_NAME}_MBEDTLS
+    aes.c
+    aesni.c
+    aria.c
+    asn1parse.c
+    asn1write.c
+    bignum_core.c
+    bignum.c
+    camellia.c
+    chacha20.c
+    chachapoly.c
+    cipher_wrap.c
+    cipher.c
+    cmac.c
+    constant_time.c
+    ctr_drbg.c
+    des.c
+    ecdh.c
+    ecdsa.c
+    ecp_curves_new.c
+    ecp_curves.c
+    ecp.c
+    hmac_drbg.c
+    md.c
+    md5.c
+    nist_kw.c
+    platform_util.c
+    poly1305.c
+    psa_util.c
+    ripemd160.c
+    sha1.c
+    sha3.c
+    sha256.c
+    sha512.c
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME}_MBEDTLS PUBLIC
+	${PROJECT_SOURCE_DIR}/mbedtls-3.5.1/include
+	${PROJECT_SOURCE_DIR}/Lua5.3/include
+	${PROJECT_SOURCE_DIR}/pcsc
+	${PROJECT_SOURCE_DIR}/shell
+)

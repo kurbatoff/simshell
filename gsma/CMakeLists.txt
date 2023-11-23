@@ -1,0 +1,15 @@
+add_library(${CMAKE_PROJECT_NAME}_GSMA STATIC
+	euicc.c
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME}_GSMA PUBLIC
+	${PROJECT_SOURCE_DIR}/gp
+	${PROJECT_SOURCE_DIR}/pcsc
+	${PROJECT_SOURCE_DIR}/shell
+)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}_GSMA
+	${CMAKE_PROJECT_NAME}_GP
+	${CMAKE_PROJECT_NAME}_SHELL
+	${CMAKE_PROJECT_NAME}_PCSC
+)

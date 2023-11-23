@@ -1,0 +1,36 @@
+add_library(${CMAKE_PROJECT_NAME}_SHELL STATIC
+	commands.c
+	shell.c
+	tools.c
+	vars.c
+	version.c)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}_SHELL
+	${CMAKE_PROJECT_NAME}_PCSC
+	${CMAKE_PROJECT_NAME}_GP
+	${CMAKE_PROJECT_NAME}_GSMA
+	${CMAKE_PROJECT_NAME}_LUA
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME}_SHELL PUBLIC
+	${PROJECT_SOURCE_DIR}/pcsc
+	${PROJECT_SOURCE_DIR}/gp
+	${PROJECT_SOURCE_DIR}/gsma
+	${PROJECT_SOURCE_DIR}/lua
+)
+
+
+add_executable(${CMAKE_PROJECT_NAME} main.c)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}
+	${CMAKE_PROJECT_NAME}_SHELL
+	${CMAKE_PROJECT_NAME}_PCSC
+	${CMAKE_PROJECT_NAME}_GP
+	${CMAKE_PROJECT_NAME}_GSMA
+	${CMAKE_PROJECT_NAME}_LUA
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
+	${PROJECT_SOURCE_DIR}/pcsc
+	${PROJECT_SOURCE_DIR}/gp
+)
