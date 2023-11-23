@@ -32,7 +32,7 @@
 #include "mbedtls/sha256.h"
 
 // TODO combine with other global temp buffers
-static uint8_t PK_OCE_ECKA[0x41];
+// static uint8_t PK_OCE_ECKA[0x41];
 
 /**
  *
