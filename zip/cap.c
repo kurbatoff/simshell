@@ -22,9 +22,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#ifdef _WIN32
-
-#include "unzip.h"
+#include "zip.h"
 #include "tools.h"
 
 /*
@@ -63,137 +61,122 @@ static const char* COMP_EXPORT		= "Export.cap";
  * 
  * @par _pfile_info filled with file details
  */
-static bool find_component(unzFile _cap, const char* _cname, unz_file_info* _pfile_info)
+static bool find_component(zip_t* _cap, const char* _cname, int* count, struct zip_stat* finfo)
 {
-	unz_global_info pglobal_info;
-	char szFileName[2048];
-	char extraField[32];
-	char szComment[256];
+	int len;
 
-	unzGetGlobalInfo(_cap, &pglobal_info);
-
-	for (size_t i = 0; i < pglobal_info.number_entry; i++)
+	*count = 0;
+	while ((zip_stat_index(_cap, *count, 0, finfo)) == 0)
 	{
 		char* component;
-		unsigned int len;
 
-		if (i == 0) {
-			unzGoToFirstFile(_cap);
-		}
-		else unzGoToNextFile(_cap);
+		component = (char* )&finfo->name[strlen(finfo->name) - 1];
 
-		unzGetCurrentFileInfo(_cap, _pfile_info,
-			szFileName, sizeof(szFileName),
-			extraField, sizeof(extraField),
-			szComment, sizeof(szComment));
-
-		component = &szFileName[strlen(szFileName) - 1];
 		while (*component != '/')
 			component--;
 
-		component++; // Component name start next char after '/'
-
+		component++; // next after '/'
 		len = strlen(component);
 
-		if (memcmp(_cname, component, len) == 0)
+		if (memcmp(_cname, component, len) == 0) {
 			return true;
+		}
+
+		(*count)++; 
 	}
+
 	printf("Component %s not found..\n", _cname);
 	return false;
 }
 
-static void load_component(unzFile _cap, const char* _cname)
+static void load_component(zip_t* _cap, const char* _cname)
 {
-	unz_file_info pfile_info;
-	uint8_t buffer[256];
-	unsigned int len;
-	unsigned int len_read;
+	struct zip_stat* finfo = NULL;
+	zip_file_t* fd = NULL; 
 
-	if (!find_component(_cap, _cname, &pfile_info))
+	uint8_t* buffer;
+	int len;
+	int len_read;
+	int count = 0;
+
+	finfo = malloc(sizeof(zip_stat));
+	zip_stat_init(finfo);
+
+	if (!find_component(_cap, _cname, &count, finfo))
 	{
 		return;
 	}
 
-	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, (int)pfile_info.uncompressed_size);
+	len = (int)finfo->size;
+	buffer = malloc(len); 
 
-	len = pfile_info.uncompressed_size;
-	unzOpenCurrentFile(_cap);
+	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, len);
 
-	while (len > 0) {
+	fd = zip_fopen_index(_cap, count, 0);
 
-		len_read = unzReadCurrentFile(_cap, buffer, sizeof(buffer));
-		len -= len_read;
-
-		for (size_t j = 0; j < len_read; j++)
-			printf("%02X ", buffer[j]);
-		printf("\n");
-	}
-
+    len_read = (int)zip_fread(fd, buffer, len); 
+	for (size_t j = 0; j < len_read; j++)
+		printf("%02X ", buffer[j]);
 	printf("\n");
+	printf("\n");
+
+	free(buffer);
 }
 
 void print_cap_info(const char* filename)
 {
-	unzFile cap;
-	unz_global_info pglobal_info;
-	unz_file_info pfile_info;
-	char szFileName[2048];
-	char extraField[32];
-	char szComment[256];
-	size_t len;
+	zip_t* cap = NULL; 
+	struct zip_stat* finfo = NULL;
+	zip_file_t* fd = NULL; 
+	int errorp = 0;
+	int count;
+	int len;
+
 	uint8_t buffer[256];
 	unsigned int len_read;
 
-	cap = unzOpen(filename);
-
-	if (cap == NULL) {
-		printf("Failed to open CAP file\n");
-
-		return;
-	}
-	// --- print CAP name
 	printf(" CAP file name      : " COLOR_GREEN "%s\n" COLOR_RESET, filename);
 
-	unzGetGlobalInfo(cap, &pglobal_info);
+	cap = zip_open(filename, 0, &errorp); 
+	if (cap == NULL) {
+		printf("Failed to open CAP file\n");
+		return;
+	}
 
-	printf(" CAP file components (%d)\n", (int)pglobal_info.number_entry);
-	for (size_t i = 0; i < pglobal_info.number_entry; i++)
+	finfo = malloc(sizeof(zip_stat));
+	zip_stat_init(finfo);
+
+	count = 0;
+	while ((zip_stat_index(cap, count, 0, finfo)) == 0)
 	{
 		char* component;
 
-		if (i == 0) {
-			unzGoToFirstFile(cap);
-		}
-		else unzGoToNextFile(cap);
+		len = (int)finfo->size;
+		component = (char* )&finfo->name[strlen(finfo->name) - 1];
 
-		unzGetCurrentFileInfo(cap, &pfile_info,
-			szFileName, 2048,
-			extraField, 32,
-			szComment, 256);
-
-		len = pfile_info.uncompressed_size;
-
-		component = &szFileName[strlen(szFileName) - 1];
 		while (*component != '/')
 			component--;
 
 		component++; // next after '/'
 
 		printf("   %-16s : %d bytes\n", component, (int)len);
+
+		count++; 
 	}
 
 	// --- print HEADER
-	if (find_component(cap, COMP_HEADER, &pfile_info))
+	if (find_component(cap, COMP_HEADER, &count, finfo))
 	{
 		size_t offset;
+		int len_read;
 
-		len = pfile_info.uncompressed_size;
+		len = (int)finfo->size;
 
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		unzOpenCurrentFile(cap);
-		len_read = unzReadCurrentFile(cap, buffer, len);
+		fd = zip_fopen_index(cap, count, 0);
+		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 7;
 		printf(" CAP file version   : %d.%d\n", buffer[offset], buffer[offset + 1]);
@@ -222,26 +205,25 @@ void print_cap_info(const char* filename)
 		printf("\n");
 	}
 
-
 	// --- print IMPORT
 	printf(" Import AIDs\n");
-	if (find_component(cap, COMP_IMPORT, &pfile_info))
+	if (find_component(cap, COMP_IMPORT, &count, finfo))
 	{
-		uint8_t count;
+		uint8_t impcnt;
 		size_t offset;
 
-		len = pfile_info.uncompressed_size;
+		len = (int)finfo->size;
 
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		unzOpenCurrentFile(cap);
-		len_read = unzReadCurrentFile(cap, buffer, len);
+		fd = zip_fopen_index(cap, count, 0);
+		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 3;
-		count = buffer[offset++];
+		impcnt = buffer[offset++];
 
-		while (count--)
+		while (impcnt--)
 		{
 			uint8_t min = buffer[offset++];
 			uint8_t maj = buffer[offset++];
@@ -256,23 +238,23 @@ void print_cap_info(const char* filename)
 	
 	// --- print APPLETs
 	printf(" Applets\n");
-	if (find_component(cap, COMP_APPLET, &pfile_info))
+	if (find_component(cap, COMP_APPLET, &count, finfo))
 	{
-		uint8_t count;
+		uint8_t appcnt;
 		size_t offset;
 
-		len = pfile_info.uncompressed_size;
+		len = (int)finfo->size;
 
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		unzOpenCurrentFile(cap);
-		len_read = unzReadCurrentFile(cap, buffer, len);
+		fd = zip_fopen_index(cap, count, 0);
+		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 3;
-		count = buffer[offset++];
+		appcnt = buffer[offset++];
 
-		while (count--)
+		while (appcnt--)
 		{
 			uint8_t sz = buffer[offset++];
 
@@ -285,16 +267,16 @@ void print_cap_info(const char* filename)
 		}
 	}
 
-	unzClose(cap);
-
-	printf("\n");
+	free(finfo);
+	zip_close(cap);
 }
 
 void upload_cap(const char* filename)
 {
-	unzFile cap;
+	zip_t* cap = NULL; 
+	int errorp = 0;
 
-	cap = unzOpen(filename);
+	cap = zip_open(filename, 0, &errorp); 
 
 	if (cap == NULL) {
 		printf("Failed to open CAP file %s\n", filename);
@@ -309,12 +291,11 @@ void upload_cap(const char* filename)
 	load_component(cap, COMP_CLASS);
 	load_component(cap, COMP_METHOD);
 	load_component(cap, COMP_STATICFIELD);
-	//load_component(cap, COMP_EXPORT);
+	//load_component(cap, COMP_EXPORT); // -- skip loading
 	load_component(cap, COMP_CONSTANTPOOL);
 	load_component(cap, COMP_REFLOCATION);
-	//load_component(cap, COMP_DESCRIPTOR);
-	//load_component(cap, COMP_DEBUG);
+	//load_component(cap, COMP_DESCRIPTOR); // -- skip loading
+	//load_component(cap, COMP_DEBUG); // -- skip loading
 
-	unzClose(cap);
+	zip_close(cap);
 }
-#endif // _WIN32

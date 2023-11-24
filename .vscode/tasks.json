@@ -13,6 +13,7 @@
                 "${workspaceFolder}/pcsc/*.c",
                 "${workspaceFolder}/mbed/*.c",
                 "${workspaceFolder}/lua/*.c",
+                "${workspaceFolder}/zip/cap.c",
                 "-I${workspaceFolder}/shell",
                 "-I${workspaceFolder}/gp",
                 "-I${workspaceFolder}/gsma",
@@ -59,6 +60,9 @@
                 //"-lz",
                 "-o",
                 "../bin/simshell",
+                "-L/Users/alexey/dev/lib/libzip-1.10.1/build/lib",
+                "-lzip.5.5",
+                "-lz",
                 "-framework", "PCSC"
             ],
             "options": {

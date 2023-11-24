@@ -81,9 +81,11 @@ main(int argc, char* argv[])
 	clock_t finish;
 	//double interval;
 
+#ifdef _WIN32
 	// Workaround: CLear screen is required for proper Lua print() formatting
 	system("cls");
 	printf("\033[00;00m");
+#endif
 
 	printf("------------------------------------------------------------------------\n");
 	printf(COLOR_WHITE " SIM, Global Platform and JVM" COLOR_RESET " shell [Version %s]\n", version); 
