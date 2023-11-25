@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 	// if the file provided can't 
 	// be opened/read, program 
 	// ends 
-	if (!fopen(argv[1], "r")) 
+	if (!fopen(argv[1], "r"))
 		return -2; 
 
 	// stores error codes for libzip functions 
