@@ -13,6 +13,7 @@ int main(int argc, char* argv[])
 	printf(" ZIP info application\n");
 
 	print_cap_info(argv[1]);
+	
 	upload_cap(argv[1]);
 
 	return 0; 

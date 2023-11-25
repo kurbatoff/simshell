@@ -9,14 +9,19 @@
                 "-fansi-escape-codes",
                 //"-g",
                 "-I/Users/alexey/git/simshell/shell",
+                "-I/Users/alexey/git/simshell/pcsc",
                 "-I/Users/alexey/git/simshell/cap",
+                "-I/Users/alexey/git/simshell/gp",
                 "main.c",
                 "cap.c",
+                "../shell/tools.c",
+                "../pcsc/pcscwrap.c",
                 "-o",
                 "jvmcap",
                 "-L/Users/alexey/dev/lib/libzip-1.10.1/build/lib",
                 "-lzip.5.5",
-                "-lz"
+                "-lz",
+                "-framework", "PCSC"
             ],
             "options": {
                 "cwd": "${fileDirname}"

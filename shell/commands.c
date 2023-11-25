@@ -35,6 +35,7 @@
 #include "euicc.h"
 #include "vars.h"
 #include "keys.h"
+#include "cap.h"
 
 static void help(char* _cmd);
 static void cmd_version(char* _cmd);
@@ -52,9 +53,10 @@ static void cmd_auth(char* _cmd);
 static void cmd_initupdate(char* _cmd);
 static void cmd_extauthenticate(char* _cmd);
 static void cmd_ls(char* _cmd);
+static void cmd_S_capinfo(char* _cmd);
+static void cmd_upload(char* _cmd);
 static void cmd_S_send(char* _cmd);
 
-//static void cmd_S_capinfo(char* _cmd);
 //static void cmd_S_echo(char* _cmd);
 //static void cmd_S_sleep(char* _cmd);
 //static void cmd_S_mode(char* _cmd);
@@ -62,7 +64,6 @@ static void cmd_S_send(char* _cmd);
 //static void cmd_S_error(char* _cmd);
 //static void cmd_getsdcert(char* _cmd);
 //static void cmd_getdata(char* _cmd);
-//static void cmd_upload(char* _cmd);
 //static void cmd_install(char* _cmd);
 //static void cmd_milenage(char* _cmd);
 //static void cmd_tuak(char* _cmd);
@@ -147,6 +148,18 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		"   auth sec_level\n",
 		" auth              Perform mutual authentication\n",
 		cmd_auth
+	},
+	{
+		"/cap-info",
+		"\n\"/cap-info file.CAP\":\n Usage:\n    file: the .CAP file name\n",
+		" /cap-info     [-] Print .CAP file information\n",
+		cmd_S_capinfo
+	},
+	{
+		"upload",
+		"\n\"upload\"\n",
+		" upload            Load .CAP file\n",
+		cmd_upload
 	},
 	{
 		"ls",
@@ -257,11 +270,6 @@ static void cmd_S_term(char* _cmd)
 }
 
 /*
-	_capinfo,
-    "\n\"/cap-info file.CAP\":\n Usage:\n    file: the .CAP file name\n",
-	" /cap-info     [-] Print .CAP file information\n",
-	cmd_S_capinfo
-
 	_sleep,
     "\n\"/sleep arg1\":\n Usage:\n    arg1: seconds/milliseconds\n",
 	" /sleep        [-] Suspend execution for x seconds (milliseconds)\n",
@@ -291,11 +299,6 @@ static void cmd_S_term(char* _cmd)
 	"\n\"get-sd-certificate arg1 arg2 arg3\":\n Usage:\n    arg1: 1|2|3|4...         \n",
 	" get-sd-certif..   Get SD certificate i.e. start SCP11 authentication\n",
 	cmd_getsdcert
-
-	upload,
-	"\n\"upload\"\n",
-	" upload            Load .CAP file\n",
-	cmd_upload
 
 	quit,
 	"\n\"quit\"\n\n",
@@ -410,7 +413,7 @@ static void cmd_S_send(char* _cmd)
  */
 static void cmd_S_capinfo(char* _cmd)
 {
-	printf(COLOR_CYAN " /cap-info " COLOR_RESET "under implementation..\n");
+	print_cap_info(&_cmd[10]);
 }
 
 /**
@@ -507,7 +510,7 @@ static void cmd_ls(char* _cmd)
  */
 static void cmd_upload(char* _cmd)
 {
-	printf(COLOR_CYAN " upload " COLOR_RESET "under implementation..\n");
+	upload_cap("/Users/alexey/Documents/S/lpa/rsp.cap");
 }
 
 /**

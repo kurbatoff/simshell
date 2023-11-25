@@ -24,6 +24,10 @@
 
 #include "zip.h"
 #include "tools.h"
+#include "pcscwrap.h"
+#include "gp.h"
+
+#define THE_LAST_COMPONENT		1
 
 /*
     // CAP file download order
@@ -41,7 +45,6 @@
     //static final byte ORDER_DEBUG = (byte)12;
 */
 
-
 static const char* COMP_HEADER		= "Header.cap";
 static const char* COMP_DIRECTORY	= "Directory.cap";
 static const char* COMP_APPLET		= "Applet.cap";
@@ -55,18 +58,20 @@ static const char* COMP_DESCRIPTOR	= "Descriptor.cap";
 static const char* COMP_DEBUG		= "Debug.cap";
 static const char* COMP_EXPORT		= "Export.cap";
 
+uint8_t counterP2;
+
 /**
  * @brief Look for a component (aka zip file)
  * Found file i.e. component becomes current
  * 
  * @par _pfile_info filled with file details
  */
-static bool find_component(zip_t* _cap, const char* _cname, int* count, struct zip_stat* finfo)
+static bool find_component(zip_t* _cap, const char* _cname, struct zip_stat* finfo)
 {
 	int len;
+	int count = 0;
 
-	*count = 0;
-	while ((zip_stat_index(_cap, *count, 0, finfo)) == 0)
+	while ((zip_stat_index(_cap, count, 0, finfo)) == 0)
 	{
 		char* component;
 
@@ -82,19 +87,144 @@ static bool find_component(zip_t* _cap, const char* _cname, int* count, struct z
 			return true;
 		}
 
-		(*count)++; 
+		count++; 
 	}
 
 	printf("Component %s not found..\n", _cname);
 	return false;
 }
 
-static void load_component(zip_t* _cap, const char* _cname)
+static bool install_for_load(zip_t* _cap)
 {
 	struct zip_stat* finfo = NULL;
-	zip_file_t* fd = NULL; 
+	zip_file_t* fd = NULL;
+	int count = 0;
+	int total_sz;
+	uint8_t* buffer_header;
+	int header_len;
+	apdu_t apdu;
+
+	finfo = malloc(sizeof(zip_stat));
+	zip_stat_init(finfo);
+
+	// --- 1 ---
+	if (!find_component(_cap, COMP_HEADER, finfo))
+	{
+		return false;
+	}
+	header_len = (int)finfo->size;
+	buffer_header = malloc(header_len); 
+	fd = zip_fopen_index(_cap, count, 0);
+    total_sz = (int)zip_fread(fd, buffer_header, header_len);
+
+	// --- 2 ---
+	if (find_component(_cap, COMP_DIRECTORY, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- 3 ---
+	if (find_component(_cap, COMP_IMPORT, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- 4 ---
+	if (find_component(_cap, COMP_APPLET, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- 5 ---
+	if (find_component(_cap, COMP_CLASS, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- 6 ---
+	if (find_component(_cap, COMP_METHOD, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- 7 ---
+	if (find_component(_cap, COMP_STATICFIELD, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- 8 ---
+	if (find_component(_cap, COMP_EXPORT, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- 9 ---
+	if (find_component(_cap, COMP_CONSTANTPOOL, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- 10 ---
+	if (find_component(_cap, COMP_REFLOCATION, finfo))
+		total_sz += (int)finfo->size;
+
+	// --- INSTALL for LOAD ---
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x80;
+	apdu.cmd[apdu.cmd_len++] = INS_GP_INSTALL;
+	apdu.cmd[apdu.cmd_len++] = 0x02;
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = 0; // To be updated
+
+	//
+	memcpy(&apdu.cmd[apdu.cmd_len], &buffer_header[12], 1+ buffer_header[12]);
+	apdu.cmd_len += (1+ buffer_header[12]);
+
+	//apdu.cmd[apdu.cmd_len++] = 0; // Target SD (AID length)
+	apdu.cmd[apdu.cmd_len++] = 8;
+	apdu.cmd[apdu.cmd_len++] = 0xA0;
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x01;
+	apdu.cmd[apdu.cmd_len++] = 0x51;
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = 0;
+
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = 0;
+
+	apdu.cmd[4] = apdu.cmd_len - 5;
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	//dump_hexascii_buffer("header.CAP", apdu.cmd, apdu.cmd_len);
+
+	// --- Load header.CAP ---
+	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", COMP_HEADER, header_len);
+
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x80;
+	apdu.cmd[apdu.cmd_len++] = INS_GP_LOAD;
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = counterP2++;
+	
+	apdu.cmd[apdu.cmd_len++] = 0; // to be updated
+	apdu.cmd[apdu.cmd_len++] = 0xC4;
+	if (total_sz > 255) {
+		apdu.cmd[apdu.cmd_len++] = 0x82;
+		apdu.cmd[apdu.cmd_len++] = total_sz >> 8;
+	} else
+	if (total_sz > 127) {
+		apdu.cmd[apdu.cmd_len++] = 0x81;
+	}
+	apdu.cmd[apdu.cmd_len++] = total_sz & 0xFF;
+
+	memcpy(&apdu.cmd[apdu.cmd_len], buffer_header, header_len);
+	apdu.cmd_len += header_len;
+
+	apdu.cmd[4] = apdu.cmd_len - 5;
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	//dump_hexascii_buffer("header.CAP", apdu.cmd, apdu.cmd_len);
+
+	free(buffer_header);
+	return true;
+}
+
+static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
+{
+	struct zip_stat* finfo = NULL;
+	zip_file_t* fd = NULL;
+	apdu_t apdu;
 
 	uint8_t* buffer;
+	int offset;
 	int len;
 	int len_read;
 	int count = 0;
@@ -102,8 +232,9 @@ static void load_component(zip_t* _cap, const char* _cname)
 	finfo = malloc(sizeof(zip_stat));
 	zip_stat_init(finfo);
 
-	if (!find_component(_cap, _cname, &count, finfo))
+	if (!find_component(_cap, _cname, finfo))
 	{
+		free(finfo);
 		return;
 	}
 
@@ -112,14 +243,41 @@ static void load_component(zip_t* _cap, const char* _cname)
 
 	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, len);
 
-	fd = zip_fopen_index(_cap, count, 0);
+	fd = zip_fopen_index(_cap, finfo->index, 0);
 
-    len_read = (int)zip_fread(fd, buffer, len); 
-	for (size_t j = 0; j < len_read; j++)
-		printf("%02X ", buffer[j]);
-	printf("\n");
-	printf("\n");
+    len_read = (int)zip_fread(fd, buffer, len);
 
+//	dump_hexascii_buffer(_cname, buffer, len_read);
+
+	apdu.cmd[0] = 0x80;
+	apdu.cmd[1] = INS_GP_LOAD;
+	apdu.cmd[2] = 0;
+	//apdu.cmd[3] = counterP2;
+	//apdu.cmd[4] = 0;
+	
+	offset = 0;
+	while (offset < len_read) {
+		len = len_read - offset;
+		if (len > 255)
+			len = 255;
+
+		apdu.cmd[3] = counterP2++;
+		apdu.cmd[4] = len;
+
+		memcpy(&apdu.cmd[5], &buffer[offset], len);
+		apdu.cmd_len = 5 + len;
+
+		offset += len;
+
+		if (_last && offset == len_read)
+			apdu.cmd[2] = 0x80;
+
+		//dump_hexascii_buffer(_cname, apdu.cmd, len + 5);
+		
+		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	}
+	
+	free(finfo);
 	free(buffer);
 }
 
@@ -165,7 +323,7 @@ void print_cap_info(const char* filename)
 	}
 
 	// --- print HEADER
-	if (find_component(cap, COMP_HEADER, &count, finfo))
+	if (find_component(cap, COMP_HEADER, finfo))
 	{
 		size_t offset;
 		int len_read;
@@ -175,7 +333,7 @@ void print_cap_info(const char* filename)
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		fd = zip_fopen_index(cap, count, 0);
+		fd = zip_fopen_index(cap, finfo->index, 0);
 		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 7;
@@ -183,7 +341,7 @@ void print_cap_info(const char* filename)
 		offset += 2;
 
 		printf(" Integer support    : %s\n", buffer[offset] & 0x01 ? "Yes" : "No");
-		//printf(" Export component   : %s\n", buffer[offset] & 0x02 ? "Yes" : "No");
+		printf(" Export component   : %s\n", buffer[offset] & 0x02 ? "Yes" : "No");
 		//printf(" Applet component   : %s\n", buffer[offset] & 0x04 ? "Yes" : "No");
 		offset++;
 
@@ -207,7 +365,7 @@ void print_cap_info(const char* filename)
 
 	// --- print IMPORT
 	printf(" Import AIDs\n");
-	if (find_component(cap, COMP_IMPORT, &count, finfo))
+	if (find_component(cap, COMP_IMPORT, finfo))
 	{
 		uint8_t impcnt;
 		size_t offset;
@@ -217,7 +375,7 @@ void print_cap_info(const char* filename)
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		fd = zip_fopen_index(cap, count, 0);
+		fd = zip_fopen_index(cap, finfo->index, 0);
 		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 3;
@@ -238,7 +396,7 @@ void print_cap_info(const char* filename)
 	
 	// --- print APPLETs
 	printf(" Applets\n");
-	if (find_component(cap, COMP_APPLET, &count, finfo))
+	if (find_component(cap, COMP_APPLET, finfo))
 	{
 		uint8_t appcnt;
 		size_t offset;
@@ -248,7 +406,7 @@ void print_cap_info(const char* filename)
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		fd = zip_fopen_index(cap, count, 0);
+		fd = zip_fopen_index(cap, finfo->index, 0);
 		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 3;
@@ -267,8 +425,9 @@ void print_cap_info(const char* filename)
 		}
 	}
 
-	free(finfo);
 	zip_close(cap);
+	
+	free(finfo);
 }
 
 void upload_cap(const char* filename)
@@ -284,18 +443,22 @@ void upload_cap(const char* filename)
 		return;
 	}
 
-	load_component(cap, COMP_HEADER);
-	load_component(cap, COMP_DIRECTORY);
-	load_component(cap, COMP_IMPORT);
-	load_component(cap, COMP_APPLET);
-	load_component(cap, COMP_CLASS);
-	load_component(cap, COMP_METHOD);
-	load_component(cap, COMP_STATICFIELD);
-	//load_component(cap, COMP_EXPORT); // -- skip loading
-	load_component(cap, COMP_CONSTANTPOOL);
-	load_component(cap, COMP_REFLOCATION);
-	//load_component(cap, COMP_DESCRIPTOR); // -- skip loading
-	//load_component(cap, COMP_DEBUG); // -- skip loading
+	counterP2 = 0;
+	if (!install_for_load(cap))
+		return;
+
+	//load_component(cap, COMP_HEADER, 0); // Gets loaded inside INSTALL_for_LOAD()
+	load_component(cap, COMP_DIRECTORY, 0);
+	load_component(cap, COMP_IMPORT, 0);
+	load_component(cap, COMP_APPLET, 0);
+	load_component(cap, COMP_CLASS, 0);
+	load_component(cap, COMP_METHOD, 0);
+	load_component(cap, COMP_STATICFIELD, 0);
+	load_component(cap, COMP_EXPORT, 0);
+	load_component(cap, COMP_CONSTANTPOOL, 0);
+	load_component(cap, COMP_REFLOCATION, THE_LAST_COMPONENT);
+	//load_component(cap, COMP_DESCRIPTOR, 0); // -- skip loading
+	//load_component(cap, COMP_DEBUG, THE_LAST_COMPONENT); // -- skip loading
 
 	zip_close(cap);
 }
