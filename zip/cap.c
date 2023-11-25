@@ -247,6 +247,9 @@ static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 
     len_read = (int)zip_fread(fd, buffer, len);
 
+	if (len != len_read)
+		printf(COLOR_RED "len = %d, len_read = %d" COLOR_RESET, len, len_read);
+
 //	dump_hexascii_buffer(_cname, buffer, len_read);
 
 	apdu.cmd[0] = 0x80;
@@ -274,6 +277,7 @@ static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 
 		//dump_hexascii_buffer(_cname, apdu.cmd, len + 5);
 		
+		printf(COLOR_GREEN "len = %d, len_read = %d, offset = %d\n" COLOR_RESET, len, len_read, offset);
 		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 	}
 	

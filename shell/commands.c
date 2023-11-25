@@ -35,11 +35,13 @@
 #include "euicc.h"
 #include "vars.h"
 #include "keys.h"
+#include "gp.h"
 #include "cap.h"
 
 static void help(char* _cmd);
 static void cmd_version(char* _cmd);
 
+static void cmd_S_capinfo(char* _cmd);
 static void cmd_S_listreaders(char* _cmd);
 static void cmd_S_term(char* _cmd);
 static void cmd_S_close(char* _cmd);
@@ -47,15 +49,15 @@ static void cmd_S_reset(char* _cmd);
 
 static void cmd_S_atr(char* _cmd);
 static void cmd_S_card(char* _cmd);
-
 static void cmd_S_select(char* _cmd);
+static void cmd_S_send(char* _cmd);
+
 static void cmd_auth(char* _cmd);
 static void cmd_initupdate(char* _cmd);
 static void cmd_extauthenticate(char* _cmd);
 static void cmd_ls(char* _cmd);
-static void cmd_S_capinfo(char* _cmd);
 static void cmd_upload(char* _cmd);
-static void cmd_S_send(char* _cmd);
+static void cmd_delete(char* _cmd);
 
 //static void cmd_S_echo(char* _cmd);
 //static void cmd_S_sleep(char* _cmd);
@@ -160,6 +162,12 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		"\n\"upload\"\n",
 		" upload            Load .CAP file\n",
 		cmd_upload
+	},
+	{
+		"delete",
+		"\n\"delete\" [-r] AID\n",
+		" delete            Delete Inastance or CAP file\n",
+		cmd_delete
 	},
 	{
 		"ls",
@@ -510,7 +518,75 @@ static void cmd_ls(char* _cmd)
  */
 static void cmd_upload(char* _cmd)
 {
-	upload_cap("/Users/alexey/Documents/S/lpa/rsp.cap");
+	int len;
+	int offset;
+
+	len = strlen(_cmd);
+
+	offset = 6; // just after upload
+	while (offset < len) {
+		switch (_cmd[offset]) {
+		case ' ':
+		case '\t':
+		offset++;
+			continue;
+		}
+
+		break;
+	}
+
+	upload_cap(&_cmd[offset]);
+}
+
+/**
+ * @brief delete callback function
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_delete(char* _cmd)
+{
+	apdu_t apdu;
+	int len;
+	int offset;
+	uint8_t del_all = 0;
+
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x80;
+	apdu.cmd[apdu.cmd_len++] = INS_GP_DELETE;
+	apdu.cmd[apdu.cmd_len++] = 0;
+	apdu.cmd[apdu.cmd_len++] = 0; // Might be updated
+	apdu.cmd[apdu.cmd_len++] = 0; // WIll be updated at idx 4
+	apdu.cmd[apdu.cmd_len++] = 0x4f;
+	apdu.cmd[apdu.cmd_len++] = 0; // WIll be updated at idx 6
+
+	len = strlen(_cmd);
+
+	offset = 6; // just after delete
+	while (offset < len) {
+		switch (_cmd[offset]) {
+		case ' ':
+		case '\t':
+		offset++;
+			continue;
+		}
+
+		break;
+	}
+
+	if (_cmd[offset] == '-' && _cmd[offset+1] == 'r') {
+		offset += 3;
+		apdu.cmd[3] = 0x80;
+	}
+
+	while (offset < len) {
+		apdu.cmd[apdu.cmd_len++] = byte_from_hex_str(&_cmd[offset]);
+		offset += 2;
+	}
+
+	apdu.cmd[4] = apdu.cmd_len - 5;
+	apdu.cmd[6] = apdu.cmd_len - 7;
+
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 }
 
 /**
