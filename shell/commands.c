@@ -421,7 +421,9 @@ static void cmd_S_send(char* _cmd)
  */
 static void cmd_S_capinfo(char* _cmd)
 {
+#ifdef __APPLE__
 	print_cap_info(&_cmd[10]);
+#endif
 }
 
 /**
@@ -535,7 +537,9 @@ static void cmd_upload(char* _cmd)
 		break;
 	}
 
+#ifdef __APPLE__
 	upload_cap(&_cmd[offset]);
+#endif
 }
 
 /**

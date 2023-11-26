@@ -1,8 +1,10 @@
 --
 --
 --
-print "Hallo from inside Lua!"
-print " Привет!"
+print " Hello from inside Lua!"
+
+-- Mac:
+-- print " Привет!"
 
 w = 1
 q = 1 + w

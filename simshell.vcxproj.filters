@@ -198,9 +198,6 @@
     <ClCompile Include="mbedtls-3.5.1\library\sha512.c">
       <Filter>Source files\mbedtls</Filter>
     </ClCompile>
-    <ClCompile Include="cap\cap_win.c">
-      <Filter>Source files\cap</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">
