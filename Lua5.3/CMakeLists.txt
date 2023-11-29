@@ -36,3 +36,5 @@ add_library(${CMAKE_PROJECT_NAME}_LUALIB STATIC
 target_include_directories(${CMAKE_PROJECT_NAME}_LUALIB PUBLIC
 	${PROJECT_SOURCE_DIR}/Lua5.3/include
 )
+
+target_link_libraries(${CMAKE_PROJECT_NAME}_LUALIB m)

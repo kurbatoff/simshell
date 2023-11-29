@@ -20,13 +20,12 @@
 #define __SHELL_H_
 
 #include <stdint.h>
-
 extern char gStartFolder[1024];
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
 	typedef uint32_t DWORD;
 #else
-	#include <windows.h>
+#include <windows.h>
 #endif
 
 #define SIMSHELL_PROMTH			"simsh"

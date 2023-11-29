@@ -52,6 +52,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 build/
+.vscode/
 .vs
 Debug
 bin/simshell.exe
