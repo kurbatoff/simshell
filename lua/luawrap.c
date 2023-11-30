@@ -45,16 +45,16 @@ static int Lua_send_apdu(lua_State* L);
 
 static int lua_popup_apdu(lua_State* L, uint8_t* apdubuff)
 {
-	int a_size;
+	uint32_t a_size;
 
 	luaL_checktype(L, 1, LUA_TTABLE);
 
 	// let alone excessive arguments (idiomatic), or do:
 	lua_settop(L, 1);
 
-	a_size = lua_rawlen(L, 1); // absolute indexing for arguments
+	a_size = (uint32_t)lua_rawlen(L, 1); // absolute indexing for arguments
 
-	for (int i = 1; i <= a_size; i++) {
+	for (uint32_t i = 1; i <= a_size; i++) {
 		lua_pushinteger(L, i);
 		lua_gettable(L, 1);
 

@@ -73,7 +73,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>K:\V.CPP\simshell\zlib-1.2.8\win32-build\include;.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\cap;.\pcsc;.\mbedtls-3.5.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\cap;.\pcsc;.\mbedtls-3.5.1\include;$(IncludePath)</IncludePath>
     <LibraryPath>K:\V.CPP\simshell\zlib-1.2.8\win32-build\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)/bin/</OutDir>
   </PropertyGroup>
