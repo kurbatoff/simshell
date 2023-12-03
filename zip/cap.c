@@ -54,8 +54,8 @@ static const char* COMP_CLASS		= "Class.cap";
 static const char* COMP_METHOD		= "Method.cap";
 static const char* COMP_STATICFIELD	= "StaticField.cap";
 static const char* COMP_REFLOCATION	= "RefLocation.cap";
-static const char* COMP_DESCRIPTOR	= "Descriptor.cap";
-static const char* COMP_DEBUG		= "Debug.cap";
+//static const char* COMP_DESCRIPTOR	= "Descriptor.cap";
+//static const char* COMP_DEBUG		= "Debug.cap";
 static const char* COMP_EXPORT		= "Export.cap";
 
 uint8_t counterP2;
@@ -112,9 +112,10 @@ static bool install_for_load(zip_t* _cap)
 	{
 		return false;
 	}
+
 	header_len = (int)finfo->size;
 	buffer_header = malloc(header_len); 
-	fd = zip_fopen_index(_cap, count, 0);
+	fd = zip_fopen_index(_cap, finfo->index, 0);
     total_sz = (int)zip_fread(fd, buffer_header, header_len);
 
 	// --- 2 ---
@@ -162,7 +163,7 @@ static bool install_for_load(zip_t* _cap)
 	apdu.cmd[apdu.cmd_len++] = 0; // To be updated
 
 	//
-	memcpy(&apdu.cmd[apdu.cmd_len], &buffer_header[12], 1+ buffer_header[12]);
+	memcpy(&apdu.cmd[apdu.cmd_len], &buffer_header[12], 1 + buffer_header[12]);
 	apdu.cmd_len += (1+ buffer_header[12]);
 
 	//apdu.cmd[apdu.cmd_len++] = 0; // Target SD (AID length)
@@ -211,46 +212,34 @@ static bool install_for_load(zip_t* _cap)
 	apdu.cmd[4] = apdu.cmd_len - 5;
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
-	//dump_hexascii_buffer("header.CAP", apdu.cmd, apdu.cmd_len);
-
 	free(buffer_header);
 	return true;
 }
 
 static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 {
-	struct zip_stat* finfo = NULL;
+	struct zip_stat finfo;
 	zip_file_t* fd = NULL;
 	apdu_t apdu;
 
-	uint8_t* buffer;
 	int offset;
 	int len;
 	int len_read;
-	int count = 0;
+	int idx;
 
-	finfo = malloc(sizeof(zip_stat));
-	zip_stat_init(finfo);
+	zip_stat_init(&finfo);
 
-	if (!find_component(_cap, _cname, finfo))
+	if (!find_component(_cap, _cname, &finfo))
 	{
-		free(finfo);
 		return;
 	}
 
-	len = (int)finfo->size;
-	buffer = malloc(len); 
+	idx = (int)finfo.index;
+	len = (int)finfo.size;
 
 	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, len);
 
-	fd = zip_fopen_index(_cap, finfo->index, 0);
-
-    len_read = (int)zip_fread(fd, buffer, len);
-
-	if (len != len_read)
-		printf(COLOR_RED "len = %d, len_read = %d" COLOR_RESET, len, len_read);
-
-//	dump_hexascii_buffer(_cname, buffer, len_read);
+	fd = zip_fopen_index(_cap, idx, 0);
 
 	apdu.cmd[0] = 0x80;
 	apdu.cmd[1] = INS_GP_LOAD;
@@ -259,30 +248,24 @@ static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 	//apdu.cmd[4] = 0;
 	
 	offset = 0;
-	while (offset < len_read) {
-		len = len_read - offset;
-		if (len > 255)
-			len = 255;
+	while (offset < len) {
+		len_read = len - offset;
+		if (len_read > 255)
+			len_read = 255;
+
+		len_read = (int)zip_fread(fd, &apdu.cmd[5], len_read);
 
 		apdu.cmd[3] = counterP2++;
-		apdu.cmd[4] = len;
+		apdu.cmd[4] = len_read;
+		apdu.cmd_len = 5 + len_read;
 
-		memcpy(&apdu.cmd[5], &buffer[offset], len);
-		apdu.cmd_len = 5 + len;
+		offset += len_read;
 
-		offset += len;
-
-		if (_last && offset == len_read)
+		if (_last && offset == len)
 			apdu.cmd[2] = 0x80;
 
-		//dump_hexascii_buffer(_cname, apdu.cmd, len + 5);
-		
-		printf(COLOR_GREEN "len = %d, len_read = %d, offset = %d\n" COLOR_RESET, len, len_read, offset);
 		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 	}
-	
-	free(finfo);
-	free(buffer);
 }
 
 void print_cap_info(const char* filename)
@@ -429,9 +412,9 @@ void print_cap_info(const char* filename)
 		}
 	}
 
-	zip_close(cap);
-	
 	free(finfo);
+	
+	zip_close(cap);
 }
 
 void upload_cap(const char* filename)

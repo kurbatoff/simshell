@@ -9,12 +9,19 @@
 // this is run from the command line with the zip file 
 // passed in example usage: ./program zipfile.zip 
 int main(int argc, char* argv[]) 
-{ 
+{
+	char* deafault_name = "/Users/alexey/Documents/S/lpa/rsp.cap";
+	char* name;
+
 	printf(" ZIP info application\n");
 
-	print_cap_info(argv[1]);
+	if (argc > 1)
+		name = argv[1];
+	else name = deafault_name;
+
+	print_cap_info(name);
 	
-	upload_cap(argv[1]);
+	upload_cap(name);
 
 	return 0; 
 }

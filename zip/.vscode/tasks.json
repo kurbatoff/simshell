@@ -17,7 +17,7 @@
                 "../shell/tools.c",
                 "../pcsc/pcscwrap.c",
                 "-o",
-                "jvmcap",
+                "${workspaceFolder}/jvmcap",
                 "-L/Users/alexey/dev/lib/libzip-1.10.1/build/lib",
                 "-lzip.5.5",
                 "-lz",

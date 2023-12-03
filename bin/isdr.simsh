@@ -9,4 +9,12 @@ auth
 
 ls
 
+delete A0000005591010FFFFFFFF8900000000
+
+/card
+auth
+
+/cap-info /Users/alexey/Documents/S/lpa/rsp.cap
+
 upload /Users/alexey/Documents/S/lpa/rsp.cap
+
