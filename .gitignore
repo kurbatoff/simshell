@@ -57,5 +57,5 @@ Debug
 bin/simshell.exe
 bin/simshell.pdb
 bin/simshell
-bin/jvmcap
+zip/jvmcap
 genversion.bat
