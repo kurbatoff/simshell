@@ -73,12 +73,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\cap;.\pcsc;.\mbedtls-3.5.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>K:\V.CPP\simshell\zlib-1.2.8\win32-build\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>K:\V.CPP\libzip\build\libzip;K:\V.CPP\libzip\src\libzip\lib;.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\cap;.\pcsc;.\mbedtls-3.5.1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)/bin/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>K:\V.CPP\libzip\build\libzip;K:\V.CPP\libzip\src\libzip\lib;.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\cap;.\pcsc;.\mbedtls-3.5.1\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)/bin/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -100,7 +102,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winscard.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>genversion.bat</Command>
@@ -119,6 +121,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>genversion.bat</Command>
@@ -171,6 +174,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cap\cap.c" />
     <ClCompile Include="mbedtls-3.5.1\library\aes.c" />
     <ClCompile Include="mbedtls-3.5.1\library\aesni.c" />
     <ClCompile Include="mbedtls-3.5.1\library\aria.c" />
@@ -242,7 +246,9 @@
     <ClInclude Include="shell\version.h" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="Lua5.3\lua53.lib" />
+    <Library Include="..\libzip\build\libzip\lib\Release\zip.lib" />
+    <Library Include="..\Lib\lua-5.4.6\build\Debug\Project_LUALIB.lib" />
+    <Library Include="C:\Program Files\zlib\lib\zlibstatic.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

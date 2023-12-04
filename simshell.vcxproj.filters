@@ -198,6 +198,9 @@
     <ClCompile Include="mbedtls-3.5.1\library\sha512.c">
       <Filter>Source files\mbedtls</Filter>
     </ClCompile>
+    <ClCompile Include="cap\cap.c">
+      <Filter>Source files\cap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">
@@ -235,6 +238,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="Lua5.3\lua53.lib" />
+    <Library Include="..\libzip\build\libzip\lib\Release\zip.lib" />
+    <Library Include="C:\Program Files\zlib\lib\zlibstatic.lib" />
+    <Library Include="..\Lib\lua-5.4.6\build\Debug\Project_LUALIB.lib" />
   </ItemGroup>
 </Project>

@@ -403,7 +403,7 @@ static void cmd_S_send(char* _cmd)
 	int len;
 	int offset = 6; // after "/send "
 	
-	len = strlen(_cmd);
+	len = (int)strlen(_cmd);
 
 	apdu.cmd_len = 0;
 	while (offset < len) {
@@ -421,9 +421,7 @@ static void cmd_S_send(char* _cmd)
  */
 static void cmd_S_capinfo(char* _cmd)
 {
-#ifdef __APPLE__
 	print_cap_info(&_cmd[10]);
-#endif
 }
 
 /**
@@ -523,7 +521,7 @@ static void cmd_upload(char* _cmd)
 	int len;
 	int offset;
 
-	len = strlen(_cmd);
+	len = (int)strlen(_cmd);
 
 	offset = 6; // just after upload
 	while (offset < len) {
@@ -537,9 +535,7 @@ static void cmd_upload(char* _cmd)
 		break;
 	}
 
-#ifdef __APPLE__
 	upload_cap(&_cmd[offset]);
-#endif
 }
 
 /**
@@ -563,7 +559,7 @@ static void cmd_delete(char* _cmd)
 	apdu.cmd[apdu.cmd_len++] = 0x4f;
 	apdu.cmd[apdu.cmd_len++] = 0; // WIll be updated at idx 6
 
-	len = strlen(_cmd);
+	len = (int)strlen(_cmd);
 
 	offset = 6; // just after delete
 	while (offset < len) {

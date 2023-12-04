@@ -81,7 +81,7 @@ static bool find_component(zip_t* _cap, const char* _cname, struct zip_stat* fin
 			component--;
 
 		component++; // next after '/'
-		len = strlen(component);
+		len = (int)strlen(component);
 
 		if (memcmp(_cname, component, len) == 0) {
 			return true;
@@ -96,63 +96,61 @@ static bool find_component(zip_t* _cap, const char* _cname, struct zip_stat* fin
 
 static bool install_for_load(zip_t* _cap)
 {
-	struct zip_stat* finfo = NULL;
+	struct zip_stat finfo;
 	zip_file_t* fd = NULL;
 	int count = 0;
 	int total_sz;
-	uint8_t* buffer_header;
+	uint8_t buffer_header[256];
 	int header_len;
 	apdu_t apdu;
 
-	finfo = malloc(sizeof(zip_stat));
-	zip_stat_init(finfo);
+	zip_stat_init(&finfo);
 
 	// --- 1 ---
-	if (!find_component(_cap, COMP_HEADER, finfo))
+	if (!find_component(_cap, COMP_HEADER, &finfo))
 	{
 		return false;
 	}
 
-	header_len = (int)finfo->size;
-	buffer_header = malloc(header_len); 
-	fd = zip_fopen_index(_cap, finfo->index, 0);
+	header_len = (int)finfo.size;
+	fd = zip_fopen_index(_cap, finfo.index, 0);
     total_sz = (int)zip_fread(fd, buffer_header, header_len);
 
 	// --- 2 ---
-	if (find_component(_cap, COMP_DIRECTORY, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_DIRECTORY, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- 3 ---
-	if (find_component(_cap, COMP_IMPORT, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_IMPORT, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- 4 ---
-	if (find_component(_cap, COMP_APPLET, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_APPLET, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- 5 ---
-	if (find_component(_cap, COMP_CLASS, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_CLASS, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- 6 ---
-	if (find_component(_cap, COMP_METHOD, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_METHOD, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- 7 ---
-	if (find_component(_cap, COMP_STATICFIELD, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_STATICFIELD, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- 8 ---
-	if (find_component(_cap, COMP_EXPORT, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_EXPORT, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- 9 ---
-	if (find_component(_cap, COMP_CONSTANTPOOL, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_CONSTANTPOOL, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- 10 ---
-	if (find_component(_cap, COMP_REFLOCATION, finfo))
-		total_sz += (int)finfo->size;
+	if (find_component(_cap, COMP_REFLOCATION, &finfo))
+		total_sz += (int)finfo.size;
 
 	// --- INSTALL for LOAD ---
 	apdu.cmd_len = 0;
@@ -212,7 +210,6 @@ static bool install_for_load(zip_t* _cap)
 	apdu.cmd[4] = apdu.cmd_len - 5;
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
-	free(buffer_header);
 	return true;
 }
 
@@ -271,7 +268,7 @@ static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 void print_cap_info(const char* filename)
 {
 	zip_t* cap = NULL; 
-	struct zip_stat* finfo = NULL;
+	struct zip_stat finfo;
 	zip_file_t* fd = NULL; 
 	int errorp = 0;
 	int count;
@@ -288,16 +285,15 @@ void print_cap_info(const char* filename)
 		return;
 	}
 
-	finfo = malloc(sizeof(zip_stat));
-	zip_stat_init(finfo);
+	zip_stat_init(&finfo);
 
 	count = 0;
-	while ((zip_stat_index(cap, count, 0, finfo)) == 0)
+	while ((zip_stat_index(cap, count, 0, &finfo)) == 0)
 	{
 		char* component;
 
-		len = (int)finfo->size;
-		component = (char* )&finfo->name[strlen(finfo->name) - 1];
+		len = (int)finfo.size;
+		component = (char* )&finfo.name[strlen(finfo.name) - 1];
 
 		while (*component != '/')
 			component--;
@@ -310,17 +306,17 @@ void print_cap_info(const char* filename)
 	}
 
 	// --- print HEADER
-	if (find_component(cap, COMP_HEADER, finfo))
+	if (find_component(cap, COMP_HEADER, &finfo))
 	{
 		size_t offset;
 		int len_read;
 
-		len = (int)finfo->size;
+		len = (int)finfo.size;
 
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		fd = zip_fopen_index(cap, finfo->index, 0);
+		fd = zip_fopen_index(cap, finfo.index, 0);
 		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 7;
@@ -338,31 +334,31 @@ void print_cap_info(const char* filename)
 		len = buffer[offset++];
 
 		printf(" Package AID        : ");
-		for (size_t j = 0; j < len; j++)
+		for (int j = 0; j < len; j++)
 			printf("%02X", buffer[offset++]);
 		printf("\n");
 
 		len = buffer[offset++];
 
 		printf(" Package name       : ");
-		for (size_t j = 0; j < len; j++)
+		for (int j = 0; j < len; j++)
 			printf("%c", buffer[offset++]);
 		printf("\n");
 	}
 
 	// --- print IMPORT
 	printf(" Import AIDs\n");
-	if (find_component(cap, COMP_IMPORT, finfo))
+	if (find_component(cap, COMP_IMPORT, &finfo))
 	{
 		uint8_t impcnt;
 		size_t offset;
 
-		len = (int)finfo->size;
+		len = (int)finfo.size;
 
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		fd = zip_fopen_index(cap, finfo->index, 0);
+		fd = zip_fopen_index(cap, finfo.index, 0);
 		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 3;
@@ -383,17 +379,17 @@ void print_cap_info(const char* filename)
 	
 	// --- print APPLETs
 	printf(" Applets\n");
-	if (find_component(cap, COMP_APPLET, finfo))
+	if (find_component(cap, COMP_APPLET, &finfo))
 	{
 		uint8_t appcnt;
 		size_t offset;
 
-		len = (int)finfo->size;
+		len = (int)finfo.size;
 
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		fd = zip_fopen_index(cap, finfo->index, 0);
+		fd = zip_fopen_index(cap, finfo.index, 0);
 		len_read = (int)zip_fread(fd, buffer, len); 
 
 		offset = 3;
@@ -412,8 +408,6 @@ void print_cap_info(const char* filename)
 		}
 	}
 
-	free(finfo);
-	
 	zip_close(cap);
 }
 

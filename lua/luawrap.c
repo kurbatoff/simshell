@@ -36,14 +36,14 @@
 static int Lua_connect_pcsc(lua_State* L);
 static int Lua_select_ISD(lua_State* L);
 static int Lua_send_apdu(lua_State* L);
-//static int Lua_sent_keyset(lua_State* L);
+//static int Lua_set_keyset(lua_State* L);
 //static int Lua_authenticate(lua_State* L);
 //static int Lua_upload(lua_State* L);
-//static int Lua_install(lua_State* L);
+static int Lua_install(lua_State* L);
 //static int Lua_execute_shellcommand(lua_State* L);
 
 
-static int lua_popup_apdu(lua_State* L, uint8_t* apdubuff)
+static int lua_popup_array(lua_State* L, uint8_t* apdubuff) //, int idx)
 {
 	uint32_t a_size;
 
@@ -120,7 +120,7 @@ static int Lua_send_apdu(lua_State* L)
 {
 	apdu_t apdu;
 
-	apdu.cmd_len = lua_popup_apdu(L, apdu.cmd);
+	apdu.cmd_len = lua_popup_array(L, apdu.cmd);
 
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
@@ -134,6 +134,30 @@ static int Lua_send_apdu(lua_State* L)
 	return 1;
 }
 
+static int Lua_upload(lua_State* L)
+{
+	//
+	return 0;
+}
+
+static int Lua_install(lua_State* L)
+{
+	char aid_instance[32];
+	char aid_package[32];
+	char aid_applet[32];
+	int len;
+
+	len = lua_popup_array(L, aid_instance);
+	dump_hexascii_buffer("Instance:", aid_instance, len);
+
+	len = lua_popup_array(L, aid_package);
+	dump_hexascii_buffer("Package:", aid_package, len);
+
+	len = lua_popup_array(L, aid_applet);
+	dump_hexascii_buffer("Applet:", aid_applet, len);
+
+	return 0;
+}
 
 
 void Lua_execute(char* filename)
@@ -147,6 +171,9 @@ void Lua_execute(char* filename)
 	lua_register(L, "C_connect_PCSC", Lua_connect_pcsc);
 	lua_register(L, "C_select_ISD", Lua_select_ISD);
 	lua_register(L, "C_send_apdu", Lua_send_apdu);
+	lua_register(L, "C_upload", Lua_upload);
+	lua_register(L, "C_install", Lua_install);
+	
 
 	luaL_dofile(L, filename);
 
