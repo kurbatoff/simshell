@@ -147,14 +147,14 @@ static int Lua_install(lua_State* L)
 	char aid_applet[32];
 	int len;
 
-	len = lua_popup_array(L, aid_instance);
-	dump_hexascii_buffer("Instance:", aid_instance, len);
+	len = lua_popup_array(L, (uint8_t* )aid_instance);
+	dump_hexascii_buffer("Instance:", (uint8_t* )aid_instance, len);
 
-	len = lua_popup_array(L, aid_package);
-	dump_hexascii_buffer("Package:", aid_package, len);
+	len = lua_popup_array(L, (uint8_t* )aid_package);
+	dump_hexascii_buffer("Package:", (uint8_t* )aid_package, len);
 
-	len = lua_popup_array(L, aid_applet);
-	dump_hexascii_buffer("Applet:", aid_applet, len);
+	len = lua_popup_array(L, (uint8_t* )aid_applet);
+	dump_hexascii_buffer("Applet:", (uint8_t* )aid_applet, len);
 
 	return 0;
 }

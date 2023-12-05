@@ -13,7 +13,7 @@
                 "${workspaceFolder}/pcsc/*.c",
                 "${workspaceFolder}/mbed/*.c",
                 "${workspaceFolder}/lua/*.c",
-                "${workspaceFolder}/zip/cap.c",
+                "${workspaceFolder}/cap/cap.c",
                 "-I${workspaceFolder}/shell",
                 "-I${workspaceFolder}/gp",
                 "-I${workspaceFolder}/gsma",
