@@ -18,3 +18,4 @@ auth
 upload /Users/alexey/Documents/S/lpa/rsp.cap
 
 /cap-info M:\eclipse.oxygen\ISDR\bin\org\intergalaxy\rsp\javacard\rsp.cap
+upload M:\eclipse.oxygen\ISDR\bin\org\intergalaxy\rsp\javacard\rsp.cap
