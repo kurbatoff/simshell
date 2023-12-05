@@ -19,3 +19,7 @@ upload /Users/alexey/Documents/S/lpa/rsp.cap
 
 /cap-info M:\eclipse.oxygen\ISDR\bin\org\intergalaxy\rsp\javacard\rsp.cap
 upload M:\eclipse.oxygen\ISDR\bin\org\intergalaxy\rsp\javacard\rsp.cap
+
+
+install -i a0000005591010ffffffff8900000100  -q C9#() a0000005591010ffffffff8900000000 a0000005591010ffffffff8900000100
+install -i a0000005591010ffffffff8900000200  -q C9#() a0000005591010ffffffff8900000000 a0000005591010ffffffff8900000200
