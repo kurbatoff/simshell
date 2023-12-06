@@ -259,7 +259,7 @@ void dump_hexascii_buffer(const char* name, const uint8_t* recvbuf, size_t len)
 
 	i = len % 16;
 	if (i > 0) {
-		print_ascii(&recvbuf[len - i], i);
+		print_ascii(&recvbuf[len - i], (int)i);
 	}
 }
 
