@@ -8,8 +8,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -Wextra \
 )
 
 if(UNIX OR APPLE)
-	message("ROOT: ${UNIX} ${APPLE}")
+	set(LIBZIP_LIBRARY zip)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I/usr/include/PCSC")
+elseif(WIN32)
+	set(LIBZIP_LIBRARY libzip)
 endif()
 
 add_subdirectory(gp)

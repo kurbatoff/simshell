@@ -10,5 +10,5 @@ target_include_directories(${CMAKE_PROJECT_NAME}_CAP PUBLIC
 
 target_link_libraries(${CMAKE_PROJECT_NAME}_CAP
 	${CMAKE_PROJECT_NAME}_SHELL
-	libzip
+	${LIBZIP_LIBRARY}
 )

@@ -7,9 +7,7 @@ target_include_directories(${CMAKE_PROJECT_NAME}_PCSC PUBLIC
 )
 
 if(UNIX OR APPLE)
-	message("PCSC: ${UNIX} ${APPLE}")
 	target_link_libraries(${CMAKE_PROJECT_NAME}_PCSC pcsclite)
-else(WIN32)
-	message("PCSC: WIN32")
+elseif(WIN32)
 	target_link_libraries(${CMAKE_PROJECT_NAME}_PCSC winscard)
 endif()

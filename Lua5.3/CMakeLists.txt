@@ -38,6 +38,5 @@ target_include_directories(${CMAKE_PROJECT_NAME}_LUALIB PUBLIC
 )
 
 if(UNIX OR APPLE)
-	message("Lua5.3: ${UNIX} ${APPLE}")
 	target_link_libraries(${CMAKE_PROJECT_NAME}_LUALIB m)
 endif()
