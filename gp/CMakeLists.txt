@@ -1,5 +1,4 @@
 add_library(${CMAKE_PROJECT_NAME}_GP STATIC
-	cap.c
 	getstatus.c
 	globalplatform.c
 	keys.c
