@@ -21,8 +21,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <zip.h>
 
-#include "zip.h"
 #include "tools.h"
 #include "pcscwrap.h"
 #include "gp.h"

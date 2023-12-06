@@ -109,7 +109,7 @@ void print_elf_name22(uint8_t* _aid, int _len)
 	printf("                       "); // Alignment for not found AID
 }
 
-void print_status(uint8_t _type, uint8_t _value)
+static void print_status(uint8_t _type, uint8_t _value)
 {
 	if (GET_STATUS_ISD == _type) {
 		// Table 11-6: Card Life Cycle Coding
