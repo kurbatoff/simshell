@@ -31,6 +31,9 @@
     <Filter Include="Source files\esim">
       <UniqueIdentifier>{98701625-e40f-4234-b8f2-15d62b836314}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source files\cap">
+      <UniqueIdentifier>{ec791d62-67ad-41f2-b7a3-37dac96a226e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shell\main.c">
@@ -195,6 +198,9 @@
     <ClCompile Include="mbedtls-3.5.1\library\sha512.c">
       <Filter>Source files\mbedtls</Filter>
     </ClCompile>
+    <ClCompile Include="cap\cap.c">
+      <Filter>Source files\cap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">
@@ -227,8 +233,13 @@
     <ClInclude Include="pcsc\pcscwrap.h">
       <Filter>Source files\PCSC</Filter>
     </ClInclude>
+    <ClInclude Include="cap\cap.h">
+      <Filter>Source files\cap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="Lua5.3\lua53.lib" />
+    <Library Include="..\libzip\build\libzip\lib\Release\zip.lib" />
+    <Library Include="C:\Program Files\zlib\lib\zlibstatic.lib" />
+    <Library Include="..\Lib\lua-5.4.6\build\Debug\Project_LUALIB.lib" />
   </ItemGroup>
 </Project>

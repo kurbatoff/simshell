@@ -146,7 +146,7 @@ void SHELL_execute(char *_command)
 	int len;
 
 	// remove trailing SPACE and LF
-	len = strlen(_command);
+	len = (int)strlen(_command);
 	while (len && (_command[len - 1] == ' ' || _command[len - 1] == '\n' || _command[len - 1] == '\t')) {
 		_command[--len] = 0x00;
 	}
@@ -157,6 +157,11 @@ void SHELL_execute(char *_command)
 	}
 
 	if (0 == strlen(_command)) {
+		return;
+	}
+
+	// Skip comment line
+	if ('#' == _command[0]) {
 		return;
 	}
 

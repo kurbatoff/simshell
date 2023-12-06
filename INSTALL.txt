@@ -1,0 +1,69 @@
+
+ ----------------------------------
+ --- A. mbedTLS
+ ----------------------------------
+
+
+ ----------------------------------
+ --- B. Lua
+ ----------------------------------
+
+
+ ----------------------------------
+ --- C. libzip & zlib
+ ----------------------------------
+
+ Windows
+
+ Pre-requisites
+ a. CMake (https://cmake.org/download/) must be accessible via PATH variable
+ b. Visual Studio 2022
+    msbuild must be accessible via PATH variable
+    Example: PATH = %PATH%;“C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin”
+ c. zlib (https://github.com/madler/zlib/releases)
+ d. libzip (https://github.com/nih-at/libzip/releases/)
+
+ 1. Create root directory and sub folders
+   
+    mkdir libzip
+    cd libzip
+    mkdir src, build
+
+ 2. Download the sources
+    
+    cd src
+    git clone https://github.com/madler/zlib.git
+    git clone https://github.com/nih-at/libzip.git
+    cd ..
+
+ 3. Build the libraries
+   
+    # Create build directory
+    cd build
+    mkdir zlib, libzip
+    
+    # Build zlib
+    cd zlib
+    cmake -B . -S ../../src/zlib -A x64 -G "Visual Studio 17 2022"
+    msbuild zlib.sln /p:Configuration="Release"
+    cmake --install . --config Release
+    cd ../..
+
+    # Build libzip
+    cd build/libzip
+    cmake -D ZLIB_INCLUDE_DIR="C:\Program Files\zlib\include" -D ZLIB_LIBRARY="C:\Program Files\zlib\lib\zlibstatic.lib" -D ZLIB_LINK_LIBRARY_NAME="zlibstatic.lib" -D BUILD_SHARED_LIBS=OFF -D LIBZIP_DO_INSTALL=ON -B . -S ../../src/libzip -A x64
+    msbuild libzip.sln /p:Configuration="Release"
+
+    The libs are ready
+
+ 4. The libraries are:
+
+    C:\Program Files\zlib\lib\zlibstatic.lib
+    .\build\libzip\lib\Release\zip.lib
+
+ 5. Include directories:
+   
+    .\src\libzip\lib
+    .\build\libzip
+
+    

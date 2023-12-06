@@ -19,7 +19,7 @@
 /**
  * TODO features
  * 
- * 1.      JVM CAP: /cap-info, upload, delete, install
+ * 1.      JVM CAP, IJC: /cap-info, upload, delete, install
  * 2.      JCShell script support
  * 3.  [+] Lua support:													19 Nov 2023
  * 4.      SCP81 in offline mode			.lua
@@ -81,9 +81,11 @@ main(int argc, char* argv[])
 	clock_t finish;
 	//double interval;
 
+#ifdef _WIN32
 	// Workaround: CLear screen is required for proper Lua print() formatting
 	system("cls");
 	printf("\033[00;00m");
+#endif
 
 	printf("------------------------------------------------------------------------\n");
 	printf(COLOR_WHITE " SIM, Global Platform and JVM" COLOR_RESET " shell [Version %s]\n", version); 

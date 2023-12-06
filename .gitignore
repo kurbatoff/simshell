@@ -55,8 +55,10 @@ dkms.conf
 build/
 .vscode/
 .vs
+build
 Debug
 bin/simshell.exe
 bin/simshell.pdb
 bin/simshell
+zip/jvmcap
 genversion.bat

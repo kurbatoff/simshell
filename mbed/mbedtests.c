@@ -155,7 +155,7 @@ int ecc_main(void)
 	convert_hex2bin(secretkey_ETH, secretkey_buff, M2M_ECC_SECRET_KEY_LEN);
 	mbedtls_compute_public_keys(MBEDTLS_ECP_DP_SECP256K1, secretkey_buff, publickey_buff);
 
-	data_len = strlen((const char* )dataplain) / 2;
+	data_len = (int)(strlen((const char* )dataplain) / 2);
 	convert_hex2bin((const char* )dataplain, data_buff, data_len);
 	//memcpy(data_buff, dataplain, data_len);
 
@@ -308,7 +308,7 @@ static void mbedtls_sign_verify(void)
 	uint8_t publickey_bin[M2M_ECC_PUBLIC_KEY_LEN];
 
 	// Convert to BIN
-	data_len = strlen(data) / 2;
+	data_len = (int)(strlen(data) / 2);
 
 	convert_hex2bin(data, data_bin, data_len);
 	convert_hex2bin(SK_ECDSA, secretkey_bin, M2M_ECC_SECRET_KEY_LEN);
