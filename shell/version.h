@@ -24,8 +24,8 @@ extern "C" {
 #endif
 
 #define MAJOR "0"
-#define MINOR "01"
-#define BUILD "24"
+#define MINOR "02"
+#define BUILD "31"
 
 extern char* version;
 
