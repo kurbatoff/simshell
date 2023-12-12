@@ -22,7 +22,7 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-//#include "euicc.h"
+#include "shell.h"
 #include "gp.h"
 #include "cap.h"
 #include "tools.h"
@@ -43,7 +43,7 @@ static int Lua_send_apdu(lua_State* L);
 //static int Lua_authenticate(lua_State* L);
 //static int Lua_upload(lua_State* L);
 static int Lua_install(lua_State* L);
-//static int Lua_execute_shellcommand(lua_State* L);
+static int Lua_execute_shellcommand(lua_State* L);
 
 static void lua_strcopy(lua_State* L, int idx, char* dest, int maxlen)
 {
@@ -261,6 +261,16 @@ static int Lua_install(lua_State* L)
 	return 0;
 }
 
+static int Lua_execute_shellcommand(lua_State* L)
+{
+	char command[1024];
+
+	lua_strcopy(L, 1, command, 1023);
+
+	SHELL_execute(command);
+
+	return 0;
+}
 
 void Lua_execute(char* filename)
 {
@@ -275,7 +285,8 @@ void Lua_execute(char* filename)
 	lua_register(L, "C_send_apdu", Lua_send_apdu);
 	lua_register(L, "C_upload", Lua_upload);
 	lua_register(L, "C_install", Lua_install);
-	
+	lua_register(L, "C_execute", Lua_execute_shellcommand);
+
 
 	luaL_dofile(L, filename);
 
