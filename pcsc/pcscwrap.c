@@ -22,11 +22,13 @@
 #include "tools.h"
 #include "pcscwrap.h"
 
+#if defined(__APPLE__)
+	typedef uint32_t DWORD;
+#endif
 #if defined(__APPLE__) || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
 	#include <PCSC/winscard.h>
 
 	//typedef const int* LPTSTR;
-	typedef uint32_t DWORD;
 	typedef uint8_t BYTE;
 	typedef long LONG;
 
