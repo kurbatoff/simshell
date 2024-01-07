@@ -1,4 +1,6 @@
 
-/cap-info cap/tracker.cap
+#/cap-info cap/tracker.cap
 
 #/cap-info cap/mimsi.ijc
+
+/cap2ijc cap/tracker.cap

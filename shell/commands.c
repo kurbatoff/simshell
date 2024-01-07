@@ -42,6 +42,7 @@ static void help(char* _cmd);
 static void cmd_version(char* _cmd);
 
 static void cmd_S_capinfo(char* _cmd);
+static void cmd_S_cap2ijc(char* _cmd);
 static void cmd_S_listreaders(char* _cmd);
 static void cmd_S_term(char* _cmd);
 static void cmd_S_close(char* _cmd);
@@ -158,9 +159,15 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		cmd_S_capinfo
 	},
 	{
+		"/cap2ijc",
+		"\n\"/cap2ijc file.CAP\":\n Usage:\n    file: the .CAP file name\n",
+		" /cap2ijc      [-] Convert .CAP file into .IJC format\n",
+		cmd_S_cap2ijc
+	},
+	{
 		"upload",
 		"\n\"upload\"\n",
-		" upload            Load .CAP file\n",
+		" upload            Load .CAP or .IJC file\n",
 		cmd_upload
 	},
 	{
@@ -422,6 +429,16 @@ static void cmd_S_send(char* _cmd)
 static void cmd_S_capinfo(char* _cmd)
 {
 	print_cap_info(&_cmd[10]);
+}
+
+/**
+ * @brief /cap2ijc callback function
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_S_cap2ijc(char* _cmd)
+{
+	cap2ijc(&_cmd[9]);
 }
 
 /**

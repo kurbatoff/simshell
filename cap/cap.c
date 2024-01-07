@@ -62,16 +62,16 @@
 
 static const char* COMP_HEADER		= "Header.cap";
 static const char* COMP_DIRECTORY	= "Directory.cap";
-static const char* COMP_APPLET		= "Applet.cap";
 static const char* COMP_IMPORT		= "Import.cap";
-static const char* COMP_CONSTANTPOOL	= "ConstantPool.cap";
+static const char* COMP_APPLET		= "Applet.cap";
 static const char* COMP_CLASS		= "Class.cap";
 static const char* COMP_METHOD		= "Method.cap";
 static const char* COMP_STATICFIELD	= "StaticField.cap";
-static const char* COMP_REFLOCATION	= "RefLocation.cap";
-//static const char* COMP_DESCRIPTOR	= "Descriptor.cap";
-//static const char* COMP_DEBUG		= "Debug.cap";
 static const char* COMP_EXPORT		= "Export.cap";
+static const char* COMP_CONSTANTPOOL = "ConstantPool.cap";
+static const char* COMP_REFLOCATION	= "RefLocation.cap";
+static const char* COMP_DESCRIPTOR	= "Descriptor.cap"; // Only for cap2ijc
+static const char* COMP_DEBUG		= "Debug.cap"; // Only for cap2ijc
 
 uint8_t counterP2;
 
@@ -138,7 +138,8 @@ static bool find_component_zip(zip_t* _cap, const char* _cname, struct zip_stat*
 		count++; 
 	}
 
-	printf("Component %s not found..\n", _cname);
+	printf(" Not found:" COLOR_YELLOW " %s " COLOR_RESET "\n", _cname);
+
 	return false;
 }
 
@@ -261,6 +262,47 @@ static bool install_for_load(zip_t* _cap)
 	return true;
 }
 
+static int copy_component(zip_t* _cap, const char* _cname, FILE* _dest)
+{
+	struct zip_stat finfo;
+	zip_file_t* fd = NULL;
+	uint8_t component[256];
+
+	int offset;
+	int len;
+	int len_read;
+	int idx;
+
+	zip_stat_init(&finfo);
+
+	if (!find_component_zip(_cap, _cname, &finfo))
+	{
+		return 0;
+	}
+
+	idx = (int)finfo.index;
+	len = (int)finfo.size;
+
+	printf("Start copying " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, len);
+
+	fd = zip_fopen_index(_cap, idx, 0);
+
+	offset = 0;
+	while (offset < len) {
+		len_read = len - offset;
+		if (len_read > 255)
+			len_read = 255;
+
+		len_read = (int)zip_fread(fd, component, len_read);
+
+		fwrite(component, 1, len_read, _dest);
+
+		offset += len_read;
+	}
+
+	return len;
+}
+
 static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 {
 	struct zip_stat finfo;
@@ -291,7 +333,7 @@ static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 	apdu.cmd[2] = 0;
 	//apdu.cmd[3] = counterP2;
 	//apdu.cmd[4] = 0;
-	
+
 	offset = 0;
 	while (offset < len) {
 		len_read = len - offset;
@@ -495,4 +537,46 @@ void upload_cap(const char* filename)
 	//load_component(cap, COMP_DEBUG, THE_LAST_COMPONENT); // -- skip loading
 
 	zip_close(cap);
+}
+
+void cap2ijc(char* _capname)
+{
+	zip_t* cap = NULL;
+	FILE* fijc;
+	int errorp = 0;
+	int flen;
+
+	cap = zip_open(_capname, 0, &errorp);
+
+	if (cap == NULL) {
+		printf("Failed to open CAP file %s\n", _capname);
+
+		return;
+	}
+
+	flen = (int)strlen(_capname);
+	_capname[flen - 3] = 'i';
+	_capname[flen - 2] = 'j';
+	_capname[flen - 1] = 'c';
+
+	fijc = fopen(_capname, "wb+");
+
+	flen = 0;
+	flen += copy_component(cap, COMP_HEADER, fijc);
+	flen += copy_component(cap, COMP_DIRECTORY, fijc);
+	flen += copy_component(cap, COMP_IMPORT, fijc);
+	flen += copy_component(cap, COMP_APPLET, fijc);
+	flen += copy_component(cap, COMP_CLASS, fijc);
+	flen += copy_component(cap, COMP_METHOD, fijc);
+	flen += copy_component(cap, COMP_STATICFIELD, fijc);
+	flen += copy_component(cap, COMP_EXPORT, fijc);
+	flen += copy_component(cap, COMP_CONSTANTPOOL, fijc);
+	flen += copy_component(cap, COMP_REFLOCATION, fijc);
+	flen += copy_component(cap, COMP_DESCRIPTOR, fijc);
+	flen += copy_component(cap, COMP_DEBUG, fijc);
+
+	zip_close(cap);
+	fclose(fijc);
+
+	printf("\n Total IJC size: %d bytes\n", flen);
 }
