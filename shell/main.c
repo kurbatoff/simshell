@@ -20,6 +20,7 @@
  * TODO features
  * 
  * 1.       JVM CAP, IJC: /cap-info, upload, delete, install
+ * 1.a      cap2ijc converter
  * 2.       JCShell script support
  * 3.   [+] Lua support:													19 Nov 2023
  * 4.   [+] Lua: execute JCShell command									12 Dec 2023
@@ -29,14 +30,18 @@
  * 8.       SIM scan
  * 9.       Crypto support: shell & Lua
  * 10.      5G support / tests
- * 11.      Lua application:
+ * 11.      Lua applications:
  * 11.a     SCP81 in offline mode			.lua
  * 11.b.    LPA in offline mode				.lua
  * 11.c     Milenage						.lua
  * 11.d     TUAK authentication				.lua
  * 11.e     Crypto pack						.lua
+ * 12.      ATR parsing
+ * 13.      JRCP client
  *
- * 33.      Manual
+ * 21.      Shell functions: remember list of commands, Mac support, etc
+ * 
+ * 31.      Manual
  *
  * 41.     Articles
  *
@@ -92,7 +97,7 @@ main(int argc, char* argv[])
 
 	printf("------------------------------------------------------------------------\n");
 	printf(COLOR_WHITE " SIM, Global Platform and JVM" COLOR_RESET " shell [Version %s]\n", version); 
-	printf(" (c) 2023 Intergalaxy. All rights reserved.\n");
+	printf(" (c) 2023, 2024 Intergalaxy. All rights reserved.\n");
 	printf("------------------------------------------------------------------------\n\n");
 
 
@@ -109,7 +114,7 @@ main(int argc, char* argv[])
 		}
 	}
 
-	printf(" Start folder: %s\n\n", gStartFolder);
+	printf(" Start folder: %s\n", gStartFolder);
 
 	init_keys();
 

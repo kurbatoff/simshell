@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-void print_cap_info(const char* filename);
+void print_cap_info(const char* _filename);
 void upload_cap(const char* filename);
 
 #ifdef __cplusplus

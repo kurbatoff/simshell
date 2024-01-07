@@ -16,6 +16,8 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -45,6 +47,19 @@
     //static final byte ORDER_DEBUG = (byte)12;
 */
 
+#define COMP_HEADER_IDX				1
+#define COMP_DIRECTORY_IDX			2
+#define COMP_IMPORT_IDX				3
+#define COMP_APPLET_IDX				4
+#define COMP_CLASS_IDX				5
+#define COMP_METHOD_IDX				6
+#define COMP_STATICFIELD_IDX		7
+#define COMP_EXPORT_IDX				8
+#define COMP_CONSTANTPOOL_IDX		9
+#define COMP_REFERENCELOCATION_IDX	10
+#define COMP_DESCRIPTOR_IDX			11
+#define COMP_DEBUG_IDX				12
+
 static const char* COMP_HEADER		= "Header.cap";
 static const char* COMP_DIRECTORY	= "Directory.cap";
 static const char* COMP_APPLET		= "Applet.cap";
@@ -60,13 +75,46 @@ static const char* COMP_EXPORT		= "Export.cap";
 
 uint8_t counterP2;
 
+static bool is_IJC(const char* _fname)
+{
+	FILE* fp;
+	uint8_t header[8];
+	bool yesIJC = false;
+
+	fp = fopen(_fname, "rb");
+
+	if (NULL == fp) {
+		printf(" Failed to open file %s..\n", _fname);
+
+		return false;
+	}
+
+	fread(header, 1, sizeof(header), fp);
+	//dump_hexascii_buffer("Header", header, sizeof(header));
+
+	if ( (header[0] == 1) // Header idx
+		&& (header[1] == 0) // Header length: 1st byte
+		&& (header[3] == 0xDE) // 4 bytes of magic world
+		&& (header[4] == 0xCA)
+		&& (header[5] == 0xFF)
+		&& (header[6] == 0xED)
+		)
+	{
+		yesIJC = true;
+	}
+
+	fclose(fp);
+
+	return yesIJC;
+}
+
 /**
  * @brief Look for a component (aka zip file)
  * Found file i.e. component becomes current
  * 
  * @par _pfile_info filled with file details
  */
-static bool find_component(zip_t* _cap, const char* _cname, struct zip_stat* finfo)
+static bool find_component_zip(zip_t* _cap, const char* _cname, struct zip_stat* finfo)
 {
 	int len;
 	int count = 0;
@@ -107,7 +155,7 @@ static bool install_for_load(zip_t* _cap)
 	zip_stat_init(&finfo);
 
 	// --- 1 ---
-	if (!find_component(_cap, COMP_HEADER, &finfo))
+	if (!find_component_zip(_cap, COMP_HEADER, &finfo))
 	{
 		return false;
 	}
@@ -117,39 +165,39 @@ static bool install_for_load(zip_t* _cap)
     total_sz = (int)zip_fread(fd, buffer_header, header_len);
 
 	// --- 2 ---
-	if (find_component(_cap, COMP_DIRECTORY, &finfo))
+	if (find_component_zip(_cap, COMP_DIRECTORY, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- 3 ---
-	if (find_component(_cap, COMP_IMPORT, &finfo))
+	if (find_component_zip(_cap, COMP_IMPORT, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- 4 ---
-	if (find_component(_cap, COMP_APPLET, &finfo))
+	if (find_component_zip(_cap, COMP_APPLET, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- 5 ---
-	if (find_component(_cap, COMP_CLASS, &finfo))
+	if (find_component_zip(_cap, COMP_CLASS, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- 6 ---
-	if (find_component(_cap, COMP_METHOD, &finfo))
+	if (find_component_zip(_cap, COMP_METHOD, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- 7 ---
-	if (find_component(_cap, COMP_STATICFIELD, &finfo))
+	if (find_component_zip(_cap, COMP_STATICFIELD, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- 8 ---
-	if (find_component(_cap, COMP_EXPORT, &finfo))
+	if (find_component_zip(_cap, COMP_EXPORT, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- 9 ---
-	if (find_component(_cap, COMP_CONSTANTPOOL, &finfo))
+	if (find_component_zip(_cap, COMP_CONSTANTPOOL, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- 10 ---
-	if (find_component(_cap, COMP_REFLOCATION, &finfo))
+	if (find_component_zip(_cap, COMP_REFLOCATION, &finfo))
 		total_sz += (int)finfo.size;
 
 	// --- INSTALL for LOAD ---
@@ -226,7 +274,7 @@ static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 
 	zip_stat_init(&finfo);
 
-	if (!find_component(_cap, _cname, &finfo))
+	if (!find_component_zip(_cap, _cname, &finfo))
 	{
 		return;
 	}
@@ -265,7 +313,7 @@ static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 	}
 }
 
-void print_cap_info(const char* filename)
+void print_cap_info(const char* _filename)
 {
 	zip_t* cap = NULL; 
 	struct zip_stat finfo;
@@ -277,9 +325,14 @@ void print_cap_info(const char* filename)
 	uint8_t buffer[256];
 	unsigned int len_read;
 
-	printf(" CAP file name      : " COLOR_GREEN "%s\n" COLOR_RESET, filename);
+	printf(" CAP file name: " COLOR_GREEN "%s\n" COLOR_RESET, _filename);
 
-	cap = zip_open(filename, 0, &errorp); 
+	if (is_IJC(_filename)) {
+		printf(".IJC files are not yet supported..\n");
+		return;
+	}
+
+	cap = zip_open(_filename, 0, &errorp); 
 	if (cap == NULL) {
 		printf("Failed to open CAP file\n");
 		return;
@@ -306,7 +359,7 @@ void print_cap_info(const char* filename)
 	}
 
 	// --- print HEADER
-	if (find_component(cap, COMP_HEADER, &finfo))
+	if (find_component_zip(cap, COMP_HEADER, &finfo))
 	{
 		size_t offset;
 		int len_read;
@@ -348,7 +401,7 @@ void print_cap_info(const char* filename)
 
 	// --- print IMPORT
 	printf(" Import AIDs\n");
-	if (find_component(cap, COMP_IMPORT, &finfo))
+	if (find_component_zip(cap, COMP_IMPORT, &finfo))
 	{
 		uint8_t impcnt;
 		size_t offset;
@@ -379,7 +432,7 @@ void print_cap_info(const char* filename)
 	
 	// --- print APPLETs
 	printf(" Applets\n");
-	if (find_component(cap, COMP_APPLET, &finfo))
+	if (find_component_zip(cap, COMP_APPLET, &finfo))
 	{
 		uint8_t appcnt;
 		size_t offset;

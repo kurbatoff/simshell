@@ -76,6 +76,8 @@ uint16_t get_response(uint8_t response_len, uint8_t* _response_buff, uint16_t _r
 
 void print_reader_name()
 {
+	printf("\n");
+
 	if (mszReaders == NULL)
 		printf(" [No reader selected]");
 	else {
