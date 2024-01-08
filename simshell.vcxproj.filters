@@ -34,6 +34,9 @@
     <Filter Include="Source files\cap">
       <UniqueIdentifier>{ec791d62-67ad-41f2-b7a3-37dac96a226e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source files\pcom">
+      <UniqueIdentifier>{c3377c2b-c1c1-4cfb-9339-113e41b16a60}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shell\main.c">
@@ -201,6 +204,9 @@
     <ClCompile Include="cap\cap.c">
       <Filter>Source files\cap</Filter>
     </ClCompile>
+    <ClCompile Include="pcom\libApduEngine.c">
+      <Filter>Source files\pcom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">
@@ -235,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="cap\cap.h">
       <Filter>Source files\cap</Filter>
+    </ClInclude>
+    <ClInclude Include="pcom\libApduEngine.h">
+      <Filter>Source files\pcom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

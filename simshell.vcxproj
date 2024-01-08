@@ -223,6 +223,7 @@
     <ClCompile Include="mbed\hal_des.c" />
     <ClCompile Include="mbed\mbedtests.c" />
     <ClCompile Include="mbed\mbedwrap.c" />
+    <ClCompile Include="pcom\libApduEngine.c" />
     <ClCompile Include="pcsc\iso7816.c" />
     <ClCompile Include="pcsc\pcscwrap.c" />
     <ClCompile Include="shell\commands.c" />
@@ -239,6 +240,7 @@
     <ClInclude Include="gp\scp02.h" />
     <ClInclude Include="gp\scp03.h" />
     <ClInclude Include="gp\scp11.h" />
+    <ClInclude Include="pcom\libApduEngine.h" />
     <ClInclude Include="pcsc\pcscwrap.h" />
     <ClInclude Include="shell\commands.h" />
     <ClInclude Include="shell\shell.h" />

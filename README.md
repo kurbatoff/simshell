@@ -17,10 +17,11 @@ SCP11 (aka GP Amd. F) under development<br/>
 SCP81 (aka GP Amd. B) to be integrated<br/>
 
 <h1>JVM</h1>
-Both CAP and IJC files are supported for upload
+Both CAP and IJC files are supported for upload<br/>
+CAP 2 IJC converting function
 
 <h1>Download</h1>
-Pre-built binary packages are note yet available
+Pre-built binary packages are not yet available
 
 <h1>Issues</h1>
 For issues please use the <a href="https://github.com/kurbatoff/simshell/issues">GitHub issue tracker</a>
