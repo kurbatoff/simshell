@@ -29,6 +29,7 @@
 #include "securechannel.h"
 #include "tools.h"
 #include "luawrap.h"
+#include "libApduEngine.h"
 
 char gStartFolder[1024];
 
@@ -64,6 +65,20 @@ static bool execute_file(const char* fname)
 		printf(" Executing Lua file: " COLOR_CYAN "%s.lua\n\n" COLOR_RESET, fname);
 
 		Lua_execute(fullname);
+
+		return true;
+	}
+
+	// 3. PCOM file
+	sprintf(fullname, "%s%s.pcom", gStartFolder, fname);
+
+	if ((file = fopen(fullname, "r")))
+	{
+		fclose(file);
+
+		printf(" Executing PCOM file: " COLOR_CYAN "%s.pcom\n\n" COLOR_RESET, fname);
+
+		execute_PCOM(fullname);
 
 		return true;
 	}

@@ -949,6 +949,7 @@ int execute_OneLine(const char* _fileline)
             apdu.cmd[i] = byte_from_hex_str(&cmd[i * 2]);
             i++;
         }
+        apdu.cmd_len = i;
 
         pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 

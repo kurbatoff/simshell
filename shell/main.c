@@ -25,7 +25,7 @@
  * 2.a      Delete, install
  * 3.   [+] Lua support														19 Nov 2023
  * 4.   [+] Lua: execute JCShell command									12 Dec 2023
- * 5.       Run PCOM scripts
+ * 5.   [+] Run PCOM scripts												10 Jan 2024
  * 6.   [+] get-data 00E0 etc												18 Nov 2023
  * 7.       SCP11 + ECC tests
  * 8.       SIM scan

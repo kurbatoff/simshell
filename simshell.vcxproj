@@ -79,7 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>K:\V.CPP\libzip\build\libzip;K:\V.CPP\libzip\src\libzip\lib;.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\cap;.\pcsc;.\mbedtls-3.5.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>K:\V.CPP\libzip\build\libzip;K:\V.CPP\libzip\src\libzip\lib;.\Lua5.3\include;.\lua;.\mbed;.\unzip;.\gp;.\shell;.\gsma;.\cap;.\pcom;.\pcsc;.\mbedtls-3.5.1\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)/bin/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
