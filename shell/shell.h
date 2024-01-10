@@ -29,7 +29,8 @@ extern char gStartFolder[1024];
 #endif
 
 #define SIMSHELL_PROMTH			"simsh"
-#define SIMSHELL_EXT			"simsh"
+#define SIMSHELL_EXT2			".simsh"
+#define SIMSHELL_EXT2_LEN		6
 
 #if defined(__cplusplus)
 extern "C" {

@@ -31,59 +31,154 @@
 #include "luawrap.h"
 #include "libApduEngine.h"
 
+
+typedef enum _config_bits_t
+{
+	FILE_NOT_EXISTS = 0,
+	SCRIPT_TYPE_SIMSHELL,
+	SCRIPT_TYPE_JCSHELL,
+	SCRIPT_TYPE_LUA,
+	SCRIPT_TYPE_PCOM,
+} scrypt_type_t;
+
 char gStartFolder[1024];
+
+
 
 static bool execute_file(const char* fname)
 {
 	FILE* file;
 	char fullname[1024 + 8];
+	scrypt_type_t stype = FILE_NOT_EXISTS;
 
-	// 1. Simshell script
-	sprintf(fullname, "%s%s." SIMSHELL_EXT, gStartFolder, fname);
-
-	if ((file = fopen(fullname, "r")))
+	// 1, If the file exists 'As is'
+	if ((file = fopen(fname, "r")))
 	{
-		char s[512];
+		size_t flen;
+		size_t elen;
 
-		printf(" Executing script: " COLOR_CYAN "%s." SIMSHELL_EXT "\n\n" COLOR_RESET, fname);
+		fclose(file);
+
+		strcpy(fullname, fname);
+
+		flen = strlen(fname);
+
+		elen = 5; // '.pcom'
+		if (memcmp((const void* )".pcom", &fname[flen-elen], elen) == 0) {
+			stype = SCRIPT_TYPE_PCOM;
+		}
+		
+		if (FILE_NOT_EXISTS == stype) {
+			elen = 4; // '.lua'
+			if (memcmp((const void*)".lua", &fname[flen - elen], elen) == 0) {
+				stype = SCRIPT_TYPE_PCOM;
+			}
+		}
+
+		if (FILE_NOT_EXISTS == stype) {
+			elen = SIMSHELL_EXT2_LEN;
+			if (memcmp((const void*)SIMSHELL_EXT2, &fname[flen - elen], elen) == 0) {
+				stype = SCRIPT_TYPE_PCOM;
+			}
+		}
+	}
+
+	// 2. Simshell script
+	if (FILE_NOT_EXISTS == stype) {
+		sprintf(fullname, "%s%s" SIMSHELL_EXT2, gStartFolder, fname);
+
+		if ((file = fopen(fullname, "r")))
+		{
+			fclose(file);
+			stype = SCRIPT_TYPE_SIMSHELL;
+		}
+	}
+
+	if (FILE_NOT_EXISTS == stype) {
+		sprintf(fullname, "%s" SIMSHELL_EXT2, fname);
+
+		if ((file = fopen(fullname, "r")))
+		{
+			fclose(file);
+			stype = SCRIPT_TYPE_SIMSHELL;
+		}
+	}
+
+	// 3. Lua file
+	if (FILE_NOT_EXISTS == stype) {
+		sprintf(fullname, "%s%s.lua", gStartFolder, fname);
+
+		if ((file = fopen(fullname, "r")))
+		{
+			fclose(file);
+			stype = SCRIPT_TYPE_LUA;
+		}
+	}
+
+	if (FILE_NOT_EXISTS == stype) {
+		sprintf(fullname, "%s.lua", fname);
+
+		if ((file = fopen(fullname, "r")))
+		{
+			fclose(file);
+			stype = SCRIPT_TYPE_LUA;
+		}
+	}
+
+	// 4. PCOM file
+	if (FILE_NOT_EXISTS == stype) {
+		sprintf(fullname, "%s%s.pcom", gStartFolder, fname);
+
+		if ((file = fopen(fullname, "r")))
+		{
+			fclose(file);
+			stype = SCRIPT_TYPE_PCOM;
+		}
+	}
+
+	if (FILE_NOT_EXISTS == stype) {
+		sprintf(fullname, "%s.pcom", fname);
+
+		if ((file = fopen(fullname, "r")))
+		{
+			fclose(file);
+			stype = SCRIPT_TYPE_PCOM;
+		}
+	}
+
+	switch (stype) {
+	case FILE_NOT_EXISTS:
+		return false;
+
+	case SCRIPT_TYPE_SIMSHELL:
+	case SCRIPT_TYPE_JCSHELL:
+	{
+		char s[1024];
+
+		file = fopen(fullname, "r");
+
+		printf(" Executing script: " COLOR_CYAN "%s\n\n" COLOR_RESET, fullname);
 
 		while (fgets(s, sizeof(s), file) != NULL) {
 			SHELL_execute(s);
 		}
 
 		fclose(file);
-		return true;
 	}
-
-	// 2. Lua file
-	sprintf(fullname, "%s%s.lua", gStartFolder, fname);
-
-	if ((file = fopen(fullname, "r")))
-	{
-		fclose(file);
-
-		printf(" Executing Lua file: " COLOR_CYAN "%s.lua\n\n" COLOR_RESET, fname);
-
+	break;
+	
+	case SCRIPT_TYPE_LUA:
+		printf(" Executing Lua file: " COLOR_CYAN "%s\n\n" COLOR_RESET, fullname);
 		Lua_execute(fullname);
+		break;
 
-		return true;
-	}
-
-	// 3. PCOM file
-	sprintf(fullname, "%s%s.pcom", gStartFolder, fname);
-
-	if ((file = fopen(fullname, "r")))
-	{
-		fclose(file);
-
-		printf(" Executing PCOM file: " COLOR_CYAN "%s.pcom\n\n" COLOR_RESET, fname);
-
+	case SCRIPT_TYPE_PCOM:
+		printf(" Executing PCOM file: " COLOR_CYAN "%s\n\n" COLOR_RESET, fullname);
 		execute_PCOM(fullname);
-
-		return true;
+		break;
 	}
 
-	return false;
+	return true;
 }
 
 static int find_shell_command(char* _cmd, int* _idx)
