@@ -22,7 +22,8 @@
  * 1.       JVM CAP, IJC: /cap-info, upload
  * 1.a      cap2ijc converter												07 JAN 2024
  * 2.       JCShell script support
- * 2.a      Delete, install
+ * 2.a      Variables, # and %
+ * 2.b      Delete, install
  * 3.   [+] Lua support														19 Nov 2023
  * 4.   [+] Lua: execute JCShell command									12 Dec 2023
  * 5.   [+] Run PCOM scripts												10 Jan 2024
@@ -38,7 +39,8 @@
  * 11.d     TUAK authentication				.lua
  * 11.e     Crypto pack						.lua
  * 12.      ATR parsing
- * 13.      JRCP client
+ * 13.      GP APDU parsing (last or current)
+ * 14.      JRCP client
  *
  * 21.      Shell functions: remember list of commands, Mac support, etc
  * 

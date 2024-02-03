@@ -90,7 +90,7 @@ static bool is_IJC(const char* _fname)
 	}
 
 	fread(header, 1, sizeof(header), fp);
-	//dump_hexascii_buffer("Header", header, sizeof(header));
+	dump_hexascii_buffer("Header", header, sizeof(header));
 
 	if ( (header[0] == 1) // Header idx
 		&& (header[1] == 0) // Header length: 1st byte
@@ -355,40 +355,20 @@ static void load_component(zip_t* _cap, const char* _cname, uint8_t _last)
 	}
 }
 
-void print_cap_info(const char* _filename)
+static void print_components_zip(zip_t* _cap, struct zip_stat* _finfo)
 {
-	zip_t* cap = NULL; 
-	struct zip_stat finfo;
-	zip_file_t* fd = NULL; 
-	int errorp = 0;
 	int count;
 	int len;
-
-	uint8_t buffer[256];
-	unsigned int len_read;
-
-	printf(" CAP file name: " COLOR_GREEN "%s\n" COLOR_RESET, _filename);
-
-	if (is_IJC(_filename)) {
-		printf(".IJC files are not yet supported..\n");
-		return;
-	}
-
-	cap = zip_open(_filename, 0, &errorp); 
-	if (cap == NULL) {
-		printf("Failed to open CAP file\n");
-		return;
-	}
-
-	zip_stat_init(&finfo);
+	int cname;
 
 	count = 0;
-	while ((zip_stat_index(cap, count, 0, &finfo)) == 0)
+	while ((zip_stat_index(_cap, count, 0, _finfo)) == 0)
 	{
 		char* component;
 
-		len = (int)finfo.size;
-		component = (char* )&finfo.name[strlen(finfo.name) - 1];
+		len = (int)_finfo->size;
+		cname = (int)strlen(_finfo->name);
+		component = (char* )&_finfo->name[cname - 1];
 
 		while (*component != '/')
 			component--;
@@ -397,22 +377,28 @@ void print_cap_info(const char* _filename)
 
 		printf("   %-16s : %d bytes\n", component, (int)len);
 
-		count++; 
+		count++;
 	}
+}
 
-	// --- print HEADER
-	if (find_component_zip(cap, COMP_HEADER, &finfo))
+static void print_header_zip(zip_t* _cap, struct zip_stat* _finfo)
+{
+	int len;
+	uint8_t buffer[256];
+	zip_file_t* fd = NULL;
+
+	if (find_component_zip(_cap, COMP_HEADER, _finfo))
 	{
 		size_t offset;
 		int len_read;
 
-		len = (int)finfo.size;
+		len = (int)_finfo->size;
 
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
-		fd = zip_fopen_index(cap, finfo.index, 0);
-		len_read = (int)zip_fread(fd, buffer, len); 
+		fd = zip_fopen_index(_cap, _finfo->index, 0);
+		len_read = (int)zip_fread(fd, buffer, len);
 
 		offset = 7;
 		printf(" CAP file version   : %d.%d\n", buffer[offset], buffer[offset + 1]);
@@ -440,6 +426,41 @@ void print_cap_info(const char* _filename)
 			printf("%c", buffer[offset++]);
 		printf("\n");
 	}
+}
+
+void print_cap_info(const char* _filename)
+{
+	zip_t* cap = NULL; 
+	struct zip_stat finfo;
+	zip_file_t* fd = NULL; 
+	int errorp = 0;
+	int len;
+	bool is_zip;
+
+	uint8_t buffer[256];
+	unsigned int len_read;
+
+	printf(" CAP file name: " COLOR_GREEN "%s\n" COLOR_RESET, _filename);
+
+	is_zip = !is_IJC(_filename);
+
+	if (is_zip) {
+		cap = zip_open(_filename, 0, &errorp);
+		if (cap == NULL) {
+			printf("Failed to open CAP file\n");
+			return;
+		}
+
+		zip_stat_init(&finfo);
+
+		print_components_zip(cap, &finfo);
+		print_header_zip(cap, &finfo);
+	}
+	else {
+
+	}
+
+
 
 	// --- print IMPORT
 	printf(" Import AIDs\n");
