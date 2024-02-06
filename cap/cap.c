@@ -49,16 +49,31 @@
 
 #define COMP_HEADER_IDX				1
 #define COMP_DIRECTORY_IDX			2
-#define COMP_IMPORT_IDX				3
-#define COMP_APPLET_IDX				4
-#define COMP_CLASS_IDX				5
-#define COMP_METHOD_IDX				6
-#define COMP_STATICFIELD_IDX		7
-#define COMP_EXPORT_IDX				8
-#define COMP_CONSTANTPOOL_IDX		9
-#define COMP_REFERENCELOCATION_IDX	10
+#define COMP_APPLET_IDX				3
+#define COMP_IMPORT_IDX				4
+#define COMP_CONSTANTPOOL_IDX		5
+#define COMP_CLASS_IDX				6
+#define COMP_METHOD_IDX				7
+#define COMP_STATICFIELD_IDX		8
+#define COMP_REFERENCELOCATION_IDX	9
+#define COMP_EXPORT_IDX				10
 #define COMP_DESCRIPTOR_IDX			11
 #define COMP_DEBUG_IDX				12
+
+/*
+#define HEADER_ORDER			1
+#define DIRECTORY_ORDER			2
+#define IMPORT_ORDER			3
+#define APPLET_ORDER			4
+#define CLASS_ORDER				5
+#define METHOD_ORDER			6
+#define STATICFIELD_ORDER		7
+#define EXPORT_ORDER			8
+#define CONSTANTPOOL_ORDER		9
+#define REFERENCELOCATION_ORDER	10
+#define DESCRIPTOR_ORDER		11
+#define DEBUG_ORDER				12
+*/
 
 static const char* COMP_HEADER		= "Header.cap";
 static const char* COMP_DIRECTORY	= "Directory.cap";
@@ -90,10 +105,11 @@ static bool is_IJC(const char* _fname)
 	}
 
 	fread(header, 1, sizeof(header), fp);
-	dump_hexascii_buffer("Header", header, sizeof(header));
+//	dump_hexascii_buffer("Header", header, sizeof(header));
 
 	if ( (header[0] == 1) // Header idx
 		&& (header[1] == 0) // Header length: 1st byte
+		// ..length second byte
 		&& (header[3] == 0xDE) // 4 bytes of magic world
 		&& (header[4] == 0xCA)
 		&& (header[5] == 0xFF)
@@ -380,6 +396,79 @@ static void print_components_zip(zip_t* _cap, struct zip_stat* _finfo)
 		count++;
 	}
 }
+static void print_header(uint8_t* _buffer)
+{
+	int len;
+	int offset;
+
+	offset = 7;
+	printf(" CAP file version   : %d.%d\n", _buffer[offset], _buffer[offset + 1]);
+	offset += 2;
+
+	printf(" Integer support    : %s\n", _buffer[offset] & 0x01 ? "Yes" : "No");
+	printf(" Export component   : %s\n", _buffer[offset] & 0x02 ? "Yes" : "No");
+	//printf(" Applet component   : %s\n", _buffer[offset] & 0x04 ? "Yes" : "No");
+	offset++;
+
+	printf(" Package version    : %d.%d\n", _buffer[offset], _buffer[offset + 1]);
+	offset += 2;
+
+	len = _buffer[offset++];
+
+	printf(" Package AID        : ");
+	for (int j = 0; j < len; j++)
+		printf("%02X", _buffer[offset++]);
+	printf("\n");
+
+	len = _buffer[offset++];
+
+	printf(" Package name       : ");
+	for (int j = 0; j < len; j++)
+		printf("%c", _buffer[offset++]);
+	printf("\n");
+}
+
+static void print_import(uint8_t* _buffer)
+{
+	int offset;
+	uint8_t impcnt;
+
+	offset = 3;
+	impcnt = _buffer[offset++];
+
+	while (impcnt--)
+	{
+		uint8_t min = _buffer[offset++];
+		uint8_t maj = _buffer[offset++];
+		uint8_t sz = _buffer[offset++];
+
+		printf("   ");
+		for (size_t j = 0; j < sz; j++)
+			printf("%02X", _buffer[offset++]);
+		printf("  version %d.%d\n", maj, min);
+	}
+}
+
+static void print_applet(uint8_t* _buffer)
+{
+	int offset;
+	uint8_t appcnt;
+
+	offset = 3;
+	appcnt = _buffer[offset++];
+
+	while (appcnt--)
+	{
+		uint8_t sz = _buffer[offset++];
+
+		printf("   ");
+		for (size_t j = 0; j < sz; j++)
+			printf("%02X", _buffer[offset++]);
+		printf("\n");
+
+		offset += 2; // u2 install_method_offset
+	}
+}
 
 static void print_header_zip(zip_t* _cap, struct zip_stat* _finfo)
 {
@@ -389,7 +478,6 @@ static void print_header_zip(zip_t* _cap, struct zip_stat* _finfo)
 
 	if (find_component_zip(_cap, COMP_HEADER, _finfo))
 	{
-		size_t offset;
 		int len_read;
 
 		len = (int)_finfo->size;
@@ -400,32 +488,226 @@ static void print_header_zip(zip_t* _cap, struct zip_stat* _finfo)
 		fd = zip_fopen_index(_cap, _finfo->index, 0);
 		len_read = (int)zip_fread(fd, buffer, len);
 
-		offset = 7;
-		printf(" CAP file version   : %d.%d\n", buffer[offset], buffer[offset + 1]);
-		offset += 2;
-
-		printf(" Integer support    : %s\n", buffer[offset] & 0x01 ? "Yes" : "No");
-		printf(" Export component   : %s\n", buffer[offset] & 0x02 ? "Yes" : "No");
-		//printf(" Applet component   : %s\n", buffer[offset] & 0x04 ? "Yes" : "No");
-		offset++;
-
-		printf(" Package version    : %d.%d\n", buffer[offset], buffer[offset + 1]);
-		offset += 2;
-
-		len = buffer[offset++];
-
-		printf(" Package AID        : ");
-		for (int j = 0; j < len; j++)
-			printf("%02X", buffer[offset++]);
-		printf("\n");
-
-		len = buffer[offset++];
-
-		printf(" Package name       : ");
-		for (int j = 0; j < len; j++)
-			printf("%c", buffer[offset++]);
-		printf("\n");
+		print_header(buffer);
 	}
+}
+
+static void print_import_zip(zip_t* _cap, struct zip_stat* _finfo)
+{
+	int len;
+	uint8_t buffer[256];
+	zip_file_t* fd = NULL;
+
+	if (find_component_zip(_cap, COMP_IMPORT, _finfo))
+	{
+		int len_read;
+
+		len = (int)_finfo->size;
+
+		if (len > sizeof(buffer))
+			len = sizeof(buffer);
+
+		fd = zip_fopen_index(_cap, _finfo->index, 0);
+		len_read = (int)zip_fread(fd, buffer, len);
+
+		print_import(buffer);
+	}
+}
+
+
+static void print_applet_zip(zip_t* _cap, struct zip_stat* _finfo)
+{
+	int len;
+	uint8_t buffer[256];
+	zip_file_t* fd = NULL;
+
+	if (find_component_zip(_cap, COMP_APPLET, _finfo))
+	{
+		int len_read;
+
+		len = (int)_finfo->size;
+
+		if (len > sizeof(buffer))
+			len = sizeof(buffer);
+
+		fd = zip_fopen_index(_cap, _finfo->index, 0);
+		len_read = (int)zip_fread(fd, buffer, len);
+
+		print_applet(buffer);
+	}
+}
+
+static void print_components_icj(const char* _fname)
+{
+	FILE* fp;
+	uint8_t buffer[8];
+	int comp_len;
+
+	fp = fopen(_fname, "rb");
+
+	if (NULL == fp) {
+		printf(" Failed to open file %s..\n", _fname);
+
+		return;
+	}
+
+	while (1) {
+		if (0 == fread(buffer, 1, 3, fp))
+			break;
+		
+		//printf("Component : %02X %02X %02X\n", buffer[0], buffer[1], buffer[2]);
+
+		comp_len = (buffer[1] << 8) + buffer[2];
+
+		switch (buffer[0]) {
+		case COMP_HEADER_IDX:
+			printf("   %-16s :", COMP_HEADER);
+			break;
+		case COMP_DIRECTORY_IDX:
+			printf("   %-16s :", COMP_DIRECTORY);
+			break;
+		case COMP_IMPORT_IDX:
+			printf("   %-16s :", COMP_IMPORT);
+			break;
+		case COMP_APPLET_IDX:
+			printf("   %-16s :", COMP_APPLET);
+			break;
+		case COMP_CLASS_IDX:
+			printf("   %-16s :", COMP_CLASS);
+			break;
+		case COMP_METHOD_IDX:
+			printf("   %-16s :", COMP_METHOD);
+			break;
+		case COMP_STATICFIELD_IDX:
+			printf("   %-16s :", COMP_STATICFIELD);
+			break;
+		case COMP_EXPORT_IDX:
+			printf("   %-16s :", COMP_EXPORT);
+			break;
+		case COMP_CONSTANTPOOL_IDX:
+			printf("   %-16s :", COMP_CONSTANTPOOL);
+			break;
+		case COMP_REFERENCELOCATION_IDX:
+			printf("   %-16s :", COMP_REFLOCATION);
+			break;
+		case COMP_DESCRIPTOR_IDX:
+			printf("   %-16s :", COMP_DESCRIPTOR);
+			break;
+		case COMP_DEBUG_IDX:
+			printf("   %-16s :", COMP_DEBUG);
+			break;
+		default:
+			printf(" Unknown component: %d bytes\n", comp_len);
+		}
+		printf(" %d bytes\n", comp_len + 3);
+
+		fseek(fp, comp_len, SEEK_CUR);
+	}
+
+	fclose(fp);
+}
+
+static void print_header_ijc(const char* _filename)
+{
+	uint8_t buffer[256];
+	FILE* fp;
+	int comp_len;
+
+	fp = fopen(_filename, "rb");
+
+	if (NULL == fp) {
+		printf(" Failed to open file %s..\n", _filename);
+
+		return;
+	}
+
+	while (1) {
+		if (0 == fread(buffer, 1, 3, fp))
+			break;
+
+		comp_len = (buffer[1] << 8) + buffer[2];
+
+		if (buffer[0] == COMP_HEADER_IDX)
+		{
+			fread(&buffer[3], 1, comp_len, fp);
+
+			//dump_hexascii_buffer("Header", buffer, comp_len+3);
+			print_header(buffer);
+			break;
+		}
+
+		fseek(fp, comp_len, SEEK_CUR);
+	}
+
+	fclose(fp);
+}
+
+static void print_import_ijc(const char* _filename)
+{
+	uint8_t buffer[256];
+	FILE* fp;
+	int comp_len;
+
+	fp = fopen(_filename, "rb");
+
+	if (NULL == fp) {
+		printf(" Failed to open file %s..\n", _filename);
+
+		return;
+	}
+
+	while (1) {
+		if (0 == fread(buffer, 1, 3, fp))
+			break;
+
+		comp_len = (buffer[1] << 8) + buffer[2];
+
+		if (buffer[0] == COMP_IMPORT_IDX)
+		{
+			fread(&buffer[3], 1, comp_len, fp);
+
+			//dump_hexascii_buffer("Import", buffer, comp_len + 3);
+			print_import(buffer);
+		}
+
+		fseek(fp, comp_len, SEEK_CUR);
+	}
+
+	fclose(fp);
+}
+
+static void print_applet_ijc(const char* _filename)
+{
+	uint8_t buffer[256];
+	FILE* fp;
+	int comp_len;
+
+	fp = fopen(_filename, "rb");
+
+	if (NULL == fp) {
+		printf(" Failed to open file %s..\n", _filename);
+
+		return;
+	}
+
+	while (1) {
+		if (0 == fread(buffer, 1, 3, fp))
+			break;
+
+		comp_len = (buffer[1] << 8) + buffer[2];
+
+		if (buffer[0] == COMP_APPLET_IDX)
+		{
+			fread(&buffer[3], 1, comp_len, fp);
+
+			//dump_hexascii_buffer("Applet", buffer, comp_len + 3);
+			print_applet(buffer);
+		}
+
+		fseek(fp, comp_len, SEEK_CUR);
+	}
+
+	fclose(fp);
 }
 
 void print_cap_info(const char* _filename)
@@ -434,11 +716,7 @@ void print_cap_info(const char* _filename)
 	struct zip_stat finfo;
 	zip_file_t* fd = NULL; 
 	int errorp = 0;
-	int len;
 	bool is_zip;
-
-	uint8_t buffer[256];
-	unsigned int len_read;
 
 	printf(" CAP file name: " COLOR_GREEN "%s\n" COLOR_RESET, _filename);
 
@@ -457,74 +735,31 @@ void print_cap_info(const char* _filename)
 		print_header_zip(cap, &finfo);
 	}
 	else {
-
+		print_components_icj(_filename);
+		print_header_ijc(_filename);
 	}
-
-
 
 	// --- print IMPORT
 	printf(" Import AIDs\n");
-	if (find_component_zip(cap, COMP_IMPORT, &finfo))
-	{
-		uint8_t impcnt;
-		size_t offset;
-
-		len = (int)finfo.size;
-
-		if (len > sizeof(buffer))
-			len = sizeof(buffer);
-
-		fd = zip_fopen_index(cap, finfo.index, 0);
-		len_read = (int)zip_fread(fd, buffer, len); 
-
-		offset = 3;
-		impcnt = buffer[offset++];
-
-		while (impcnt--)
-		{
-			uint8_t min = buffer[offset++];
-			uint8_t maj = buffer[offset++];
-			uint8_t sz = buffer[offset++];
-
-			printf("   ");
-			for (size_t j = 0; j < sz; j++)
-				printf("%02X", buffer[offset++]);
-			printf("  version %d.%d\n", maj, min);
-		}
+	if (is_zip) {
+		print_import_zip(cap, &finfo);
+	}
+	else {
+		print_import_ijc(_filename);
 	}
 	
 	// --- print APPLETs
 	printf(" Applets\n");
-	if (find_component_zip(cap, COMP_APPLET, &finfo))
-	{
-		uint8_t appcnt;
-		size_t offset;
-
-		len = (int)finfo.size;
-
-		if (len > sizeof(buffer))
-			len = sizeof(buffer);
-
-		fd = zip_fopen_index(cap, finfo.index, 0);
-		len_read = (int)zip_fread(fd, buffer, len); 
-
-		offset = 3;
-		appcnt = buffer[offset++];
-
-		while (appcnt--)
-		{
-			uint8_t sz = buffer[offset++];
-
-			printf("   ");
-			for (size_t j = 0; j < sz; j++)
-				printf("%02X", buffer[offset++]);
-			printf("\n");
-
-			offset += 2; // u2 install_method_offset
-		}
+	if (is_zip) {
+		print_applet_zip(cap, &finfo);
+	}
+	else {
+		print_applet_ijc(_filename);
 	}
 
-	zip_close(cap);
+	if (is_zip) {
+		zip_close(cap);
+	}
 }
 
 void upload_cap(const char* filename)

@@ -19,11 +19,13 @@
 /**
  * TODO features
  * 
- * 1.       JVM CAP, IJC: /cap-info, upload
+ * 1.       JVM CAP, IJC: /cap-info											06 FEB 2024
  * 1.a      cap2ijc converter												07 JAN 2024
+ * 1.b      IJC upload
  * 2.       JCShell script support
  * 2.a      Variables, # and %
  * 2.b      Delete, install
+ * 2.c      auth mac, auth enc
  * 3.   [+] Lua support														19 Nov 2023
  * 4.   [+] Lua: execute JCShell command									12 Dec 2023
  * 5.   [+] Run PCOM scripts												10 Jan 2024
