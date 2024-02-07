@@ -157,7 +157,7 @@ static int Lua_upload(lua_State* L)
 
 	printf(" Uploading CAP: %s\n", filename);
 
-	upload_cap((const char* )filename);
+	upload((const char* )filename);
 
 	return 0;
 }

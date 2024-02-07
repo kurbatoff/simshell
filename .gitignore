@@ -61,5 +61,6 @@ bin/simshell.exe
 bin/simshell.pdb
 bin/simshell
 bin/cap
+bin/logs
 zip/jvmcap
 genversion.bat

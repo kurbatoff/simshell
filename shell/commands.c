@@ -552,7 +552,7 @@ static void cmd_upload(char* _cmd)
 		break;
 	}
 
-	upload_cap(&_cmd[offset]);
+	upload(&_cmd[offset]);
 }
 
 /**

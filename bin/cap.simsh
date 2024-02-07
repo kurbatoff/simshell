@@ -1,6 +1,11 @@
 
-#/cap-info K:\V.CPP\simshell\bin\cap\tracker.cap
-
-/cap-info K:\V.CPP\simshell\bin\cap\tracker.ijc
-
 #/cap2ijc cap/tracker.cap
+
+#/cap-info K:\V.CPP\simshell\bin\cap\tracker.cap
+#upload K:\V.CPP\simshell\bin\cap\tracker.cap
+
+#/cap-info K:\V.CPP\simshell\bin\cap\tracker.ijc
+upload K:\V.CPP\simshell\bin\cap\tracker.ijc
+
+
+

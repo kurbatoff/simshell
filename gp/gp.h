@@ -19,6 +19,9 @@
 #ifndef __GP_H__
 #define __GP_H__
 
+static uint8_t GP_ISD[] = { 0xA0, 0, 0, 0x01, 0x51, 0, 0, 0 };
+
+
 #define KEY_IDX_TOKEN_VERIFICATION			0x70
 #define KEY_IDX_RECEIPT_GENERATION			0x71
 #define KEY_IDX_DAP_VERIFICATION			0x73
@@ -75,8 +78,8 @@
 
 
 // Target instance type
-#define TARGET_SECURITY_DOMAIN			0x33
-#define TARGET_APPLICATION				0xAA
+//#define TARGET_SECURITY_DOMAIN			0x33
+//#define TARGET_APPLICATION				0xAA
 
 /*
  * Security domains and application privileges, as defined by GP 2.3

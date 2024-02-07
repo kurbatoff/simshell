@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 void print_cap_info(const char* _filename);
-void upload_cap(const char* filename);
+void upload(const char* filename);
 void cap2ijc(char* _capname);
 
 #ifdef __cplusplus
