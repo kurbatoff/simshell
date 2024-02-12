@@ -1,40 +1,61 @@
+DEFUN printc
+  /printf "${2}\n"
+END
+try
+  @color
+catch 1
+end
 
+/set-var myDir                "${script.name;dirname}"
+/set-var path ${myDir}
+/set-var Allow_ALL	E20EE1044F00C100E306D00101D10101
+
+
+DEFUN read_all_rules
+/card
+/echo select ARA-M
+/select A00000015141434C00
+
+printc magenta STEP1: get ALL data from ARA-M
+send 80CAFF4000 FF40*9000
+/set-var -g all_rules_len ${last.response.data;s0,10}
+
+/set-var next_count 0
+while ${last.response.status} == "9000"
+  /set-var next_count $(/expr ${next_count} + 1)
+  printc cyan get NEXT data: count ... ${next_count}
+  send 80CAFF6000
+end
+END
+
+
+/reset
 /card
 set-key 32/1/DES-ECB/404142434445464748494a4b4c4d4e4f 32/2/DES-ECB/404142434445464748494a4b4c4d4e4f 32/3/DES-ECB/404142434445464748494a4b4c4d4e4f
 auth
 
+-delete -r A00000015141434C
+upload "M:\eclipse.oxygen\ARA\bin\esim\me\ara\javacard\ara.cap"
+install -i A00000015141434C00 -q C9#() A00000015141434C A00000015141434C00
+
 ls -f
 
+
+/card
 /select A00000015141434C00
-auth mac
+auth
 
-
-#
-# --- 1 --------------------------------------------------------------------------------
-#
 /echo ------------ remove ALL ARA
 send 80E29000#(F1#())00 9000
 
-#
-# --- 2 --------------------------------------------------------------------------------
-#
-# Allow ALL
-/set-var Allow_ALL	E20EE1044F00C100E306D00101D10101
+printc greaan Read ALL rules
+send 80CAFF4000 FF40#()9000
+
+/echo ******** Update all are allowed rules into ARA-M ********
 send 80E29000#(F0#(${Allow_ALL}))
 
-
-#
-# --- 3 --------------------------------------------------------------------------------
-#
-/set-var HASH 2205957841BE9CE168EFD9F881D1B4807346FE15
-
-send "80E2 9000 #(F0#(E2#(E1#(4F00 C1#(${HASH})) E3#(D00101D10101))))"
-
-#
-# --- 4 --------------------------------------------------------------------------------
-#
-/echo Read ALL rules
-send 80CAFF4000 FF40*9000
+printc greaan Read ALL rules
+send 80CAFF4000 FF40#(${Allow_ALL})9000
 
 
 /echo Done.

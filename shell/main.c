@@ -19,9 +19,9 @@
 /**
  * TODO features
  * 
- * 1.       JVM CAP, IJC: /cap-info											06 FEB 2024		v. 0.03.34
- * 1.a      cap2ijc converter												07 JAN 2024
- * 1.b      IJC upload														08 FEB 2024
+ * 1.       JVM CAP, IJC: /cap-info											06 FEB 2024		v. ..
+ * 1.a      cap2ijc converter												07 JAN 2024		v. ..
+ * 1.b      IJC upload														08 FEB 2024		v. 0.03.34
  * 2.       JCShell script support
  * 2.a      Variables, # and %
  * 2.b      Delete, install

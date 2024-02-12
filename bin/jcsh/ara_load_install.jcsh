@@ -1,0 +1,23 @@
+
+/set-var myDir                "${script.name;dirname}"
+/set-var path ${myDir}
+
+
+/reset
+
+try
+  /card -a A00000015153504B
+catch 1
+  /card
+end
+
+set-key 32/1/DES-ECB/404142434445464748494a4b4c4d4e4f 32/2/DES-ECB/404142434445464748494a4b4c4d4e4f 32/3/DES-ECB/404142434445464748494a4b4c4d4e4f
+auth mac
+
+-delete -r A00000015141434C
+upload "${myDir}/cap/ara.cap"
+install -i A00000015141434C00 -q C9#() A00000015141434C A00000015141434C00
+
+ls -f
+
+/echo Done.

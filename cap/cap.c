@@ -90,6 +90,22 @@ static const char* COMP_DEBUG		= "Debug.cap"; // Only for cap2ijc
 
 uint8_t counterP2;
 
+#define COMPONENT_COUNT		12
+static const char* COMP_NAMES[COMPONENT_COUNT] = {
+	"Header.cap",
+	"Directory.cap",
+	"Applet.cap",
+	"Import.cap",
+	"ConstantPool.cap",
+	"Class.cap",
+	"Method.cap",
+	"StaticField.cap",
+	"RefLocation.cap",
+	"Export.cap",
+	"Descriptor.cap",
+	"Debug.cap"
+};
+
 static bool is_IJC(const char* _fname)
 {
 	FILE* fp;
@@ -159,7 +175,7 @@ static bool find_component_zip(zip_t* _cap, const char* _cname, struct zip_stat*
 	return false;
 }
 
-static void install_for_load_APDU(uint8_t* _buffer_header, int _total_sz)
+static bool install_for_load_APDU(uint8_t* _buffer_header, int _total_sz)
 {
 	apdu_t apdu;
 	int header_len;
@@ -216,6 +232,8 @@ static void install_for_load_APDU(uint8_t* _buffer_header, int _total_sz)
 
 	apdu.cmd[4] = apdu.cmd_len - 5;
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	return true;
 }
 
 static int load_size_cap(zip_t* _cap, struct zip_stat* _finfo)
@@ -348,7 +366,7 @@ static int copy_component(zip_t* _cap, const char* _cname, FILE* _dest)
 	return len;
 }
 
-static void load_component_ijc(FILE* _fp, int _comp_idx, uint8_t _last)
+static bool load_component_ijc(FILE* _fp, int _comp_idx, uint8_t _last)
 {
 	apdu_t apdu;
 
@@ -369,23 +387,12 @@ static void load_component_ijc(FILE* _fp, int _comp_idx, uint8_t _last)
 		if (_comp_idx == buffer[0]) {
 			len = 3 + comp_len;
 
-			printf("Start loading " COLOR_YELLOW);
-
-			switch (_comp_idx) {
-				case COMP_HEADER_IDX: printf(COMP_HEADER); break;
-				case COMP_DIRECTORY_IDX: printf(COMP_DIRECTORY); break;
-				case COMP_APPLET_IDX: printf(COMP_APPLET); break;
-				case COMP_IMPORT_IDX: printf(COMP_IMPORT); break;
-				case COMP_CONSTANTPOOL_IDX: printf(COMP_CONSTANTPOOL); break;
-				case COMP_CLASS_IDX: printf(COMP_CLASS); break;
-				case COMP_METHOD_IDX: printf(COMP_METHOD); break;
-				case COMP_STATICFIELD_IDX: printf(COMP_STATICFIELD); break;
-				case COMP_REFERENCELOCATION_IDX: printf(COMP_REFLOCATION); break;
-				case COMP_EXPORT_IDX: printf(COMP_EXPORT); break;
-				case COMP_DESCRIPTOR_IDX: printf(COMP_DESCRIPTOR); break;
-				case COMP_DEBUG_IDX: printf(COMP_DEBUG); break;
+			if (_comp_idx < COMPONENT_COUNT) {
+				printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", COMP_NAMES[_comp_idx], len);
 			}
-			printf(COLOR_RESET " (%d byte)\n", len);
+			else {
+				printf("Start loading " COLOR_RED "Component %d" COLOR_RESET " (%d byte)\n", _comp_idx, len);
+			}
 
 			apdu.cmd[0] = 0x80;
 			apdu.cmd[1] = INS_GP_LOAD;
@@ -412,6 +419,10 @@ static void load_component_ijc(FILE* _fp, int _comp_idx, uint8_t _last)
 					apdu.cmd[2] = 0x80;
 
 				pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+				apdu.sw_ = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
+
+				if (apdu.sw_ != 0x9000 && apdu.sw_ != 0x6101)
+					return false;
 			}
 
 			break;
@@ -419,9 +430,11 @@ static void load_component_ijc(FILE* _fp, int _comp_idx, uint8_t _last)
 
 		fseek(_fp, comp_len, SEEK_CUR);
 	}
+
+	return true;
 }
 
-static void load_component_zip(zip_t* _cap, const char* _cname, uint8_t _last)
+static bool load_component_zip(zip_t* _cap, const char* _cname, uint8_t _last)
 {
 	struct zip_stat finfo;
 	zip_file_t* fd = NULL;
@@ -436,7 +449,7 @@ static void load_component_zip(zip_t* _cap, const char* _cname, uint8_t _last)
 
 	if (!find_component_zip(_cap, _cname, &finfo))
 	{
-		return;
+		return false;
 	}
 
 	idx = (int)finfo.index;
@@ -470,7 +483,13 @@ static void load_component_zip(zip_t* _cap, const char* _cname, uint8_t _last)
 			apdu.cmd[2] = 0x80;
 
 		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+		apdu.sw_ = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
+
+		if (apdu.sw_ != 0x9000 && apdu.sw_ != 0x6101)
+			return false;
 	}
+
+	return true;
 }
 
 static void print_components_zip(zip_t* _cap, struct zip_stat* _finfo)
@@ -851,9 +870,7 @@ static bool install_for_load_zip(zip_t* _cap)
 
 	total_sz += load_size_cap(_cap, &finfo);
 
-	install_for_load_APDU(buffer_header, total_sz);
-
-	return true;
+	return install_for_load_APDU(buffer_header, total_sz);
 }
 
 void static upload_cap(const char* filename)
@@ -874,17 +891,30 @@ void static upload_cap(const char* filename)
 		return;
 
 	//load_component_zip(cap, COMP_HEADER, 0); // Gets loaded inside INSTALL_for_LOAD()
-	load_component_zip(cap, COMP_DIRECTORY, 0);
-	load_component_zip(cap, COMP_IMPORT, 0);
-	load_component_zip(cap, COMP_APPLET, 0);
-	load_component_zip(cap, COMP_CLASS, 0);
-	load_component_zip(cap, COMP_METHOD, 0);
-	load_component_zip(cap, COMP_STATICFIELD, 0);
-	load_component_zip(cap, COMP_EXPORT, 0);
-	load_component_zip(cap, COMP_CONSTANTPOOL, 0);
-	load_component_zip(cap, COMP_REFLOCATION, THE_LAST_COMPONENT);
-	//load_component_zip(cap, COMP_DESCRIPTOR, 0); // -- skip loading
-	//load_component_zip(cap, COMP_DEBUG, THE_LAST_COMPONENT); // -- skip loading
+	if (!load_component_zip(cap, COMP_DIRECTORY, 0))
+		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_IMPORT, 0))
+		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_APPLET, 0))
+		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_CLASS, 0))
+		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_METHOD, 0))
+		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_STATICFIELD, 0))
+		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_EXPORT, 0))
+		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_CONSTANTPOOL, 0))
+		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_REFLOCATION, THE_LAST_COMPONENT))
+		goto end_load_cap;
+	//if (!load_component_zip(cap, COMP_DESCRIPTOR, 0)) // -- skip loading
+	//	goto end_load_cap;
+	//if (!load_component_zip(cap, COMP_DEBUG, 0))
+	//	goto end_load_cap;
+
+end_load_cap:
 
 	zip_close(cap);
 }
@@ -933,18 +963,30 @@ void static upload_ijc(const char* _filename)
 	}
 
 	//load_component_ijc(fp, COMP_HEADER_IDX, 0); // Gets loaded inside INSTALL_for_LOAD()
-	load_component_ijc(fp, COMP_DIRECTORY_IDX, 0);
-	load_component_ijc(fp, COMP_IMPORT_IDX, 0);
-	load_component_ijc(fp, COMP_APPLET_IDX, 0);
-	load_component_ijc(fp, COMP_CLASS_IDX, 0);
-	load_component_ijc(fp, COMP_METHOD_IDX, 0);
-	load_component_ijc(fp, COMP_STATICFIELD_IDX, 0);
-	load_component_ijc(fp, COMP_EXPORT_IDX, 0);
-	load_component_ijc(fp, COMP_CONSTANTPOOL_IDX, 0);
-	load_component_ijc(fp, COMP_REFERENCELOCATION_IDX, THE_LAST_COMPONENT);
-	//load_component_ijc(fp, COMP_DESCRIPTOR_IDX, 0); // -- skip loading
-	//load_component_ijc(fp, COMP_DEBUG_IDX, THE_LAST_COMPONENT); // -- skip loading
+	if (!load_component_ijc(fp, COMP_DIRECTORY_IDX, 0))
+		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_IMPORT_IDX, 0))
+		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_APPLET_IDX, 0))
+		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_CLASS_IDX, 0))
+		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_METHOD_IDX, 0))
+		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_STATICFIELD_IDX, 0))
+		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_EXPORT_IDX, 0))
+		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_CONSTANTPOOL_IDX, 0))
+		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_REFERENCELOCATION_IDX, THE_LAST_COMPONENT))
+		goto end_load_zip;
+	//if (!load_component_ijc(fp, COMP_DESCRIPTOR_IDX, 0)) // -- skip loading
+	//	goto end_load_zip;
+	//if (!load_component_ijc(fp, THE_LAST_COMPONENT, 0)) // -- skip loading
+	//	goto end_load_zip;
 
+end_load_zip:
 	fclose(fp);
 }
 
