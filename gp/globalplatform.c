@@ -437,25 +437,33 @@ void securechannel_wrap(uint8_t* cmd, uint16_t* cmd_len)
 		return;
 
 	if ((CTX.security_level & SECURITY_LEVEL_MAC) == SECURITY_LEVEL_MAC) {
+		uint8_t tmp_buffer[256 + LENGTH_OF_ICV]; // for SCP03
 
-		cmd[4] += 8;
+		cmd[4] += C_MAC_SZ;
 		cmd[0] |= 0x04;
 
 		switch (CTX.scp_index) {
 		case SECURE_CHANNEL_PROTOCOL_02:
 			scp02_calculate_c_mac(cmd, (int)*cmd_len, buf_session_MAC, c_mac);
-			memcpy(&cmd[*cmd_len], c_mac, 8);
+			memcpy(&cmd[*cmd_len], c_mac, C_MAC_SZ);
 			break;
 
 		case SECURE_CHANNEL_PROTOCOL_03:
+			memcpy(tmp_buffer, buf_ICV, LENGTH_OF_ICV);
+			memcpy(&tmp_buffer[LENGTH_OF_ICV], cmd, *cmd_len);
+
+			hal_AES_CMAC(tmp_buffer, *cmd_len + LENGTH_OF_ICV, buf_ICV, buf_session_MAC, buf_ICV);
+
+			memcpy(&cmd[*cmd_len], buf_ICV, C_MAC_SZ);
 			break;
+
 		case SECURE_CHANNEL_PROTOCOL_11:
 			break;
 		default:
 			;
 		}
 
-		*cmd_len += 8;
+		*cmd_len += C_MAC_SZ;
 	}
 }
 

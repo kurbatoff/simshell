@@ -26,8 +26,9 @@
  * 2.       JCShell script support
  * 2.a      Variables, # and %
  * 2.b      Delete, install
- * 2.c      auth mac, auth enc
- * 2.d      get-cplc, set-cplc
+ * 2.c  [+] auth mac                                                        10 MAR 2024		v. 0.03.35
+ * 2.d      auth enc
+ * 2.e      get-cplc, set-cplc
  * 3.   [+] Lua support														19 Nov 2023
  * 4.   [+] Lua: execute JCShell command									12 Dec 2023
  * 5.   [+] Run PCOM scripts												10 Jan 2024

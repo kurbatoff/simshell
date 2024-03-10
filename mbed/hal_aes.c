@@ -171,7 +171,7 @@ void hal_AES256_crypt_CBC( uint8_t* data_buffer, uint16_t len, uint8_t* iv, uint
 	mbedtls_aes_free( &actx );
 }
 
-void hal_AES_CMAC( uint8_t* data_buffer, uint8_t length, uint8_t* iv, uint8_t* key_buffer, uint8_t* Out_Buffer )
+void hal_AES_CMAC( uint8_t* data_buffer, uint16_t length, uint8_t* iv, uint8_t* key_buffer, uint8_t* Out_Buffer )
 {
 	const mbedtls_cipher_info_t* cipher_info;
 	cipher_info = mbedtls_cipher_info_from_type( MBEDTLS_CIPHER_AES_128_ECB );

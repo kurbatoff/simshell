@@ -39,7 +39,7 @@ void hal_AES128_crypt_CBC( uint8_t* data_buffer, uint16_t len, uint8_t* iv, uint
 void hal_AES192_crypt_CBC( uint8_t* data_buffer, uint16_t len, uint8_t* iv, uint8_t* key_buffer, uint8_t* Out_Buffer, uint8_t Mode );
 void hal_AES256_crypt_CBC( uint8_t* data_buffer, uint16_t len, uint8_t* iv, uint8_t* key_buffer, uint8_t* Out_Buffer, uint8_t Mode );
 
-void hal_AES_CMAC( uint8_t* data_buffer, uint8_t length, uint8_t* iv, uint8_t* key_buffer, uint8_t* Out_Buffer );
+void hal_AES_CMAC( uint8_t* data_buffer, uint16_t length, uint8_t* iv, uint8_t* key_buffer, uint8_t* Out_Buffer );
 
 
 #ifdef __cplusplus
