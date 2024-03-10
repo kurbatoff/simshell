@@ -21,6 +21,7 @@
 
 #include "tools.h"
 #include "pcscwrap.h"
+#include "globalplatform.h"
 
 #if defined(__APPLE__)
 	typedef uint32_t DWORD;
@@ -99,6 +100,8 @@ pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
 
 	if (0x00 == hCard) {
 	}
+
+	securechannel_wrap(_cmd, &_cmd_len);
 
 	dwRecvLength = sizeof(recvBuffer);
 

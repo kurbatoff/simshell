@@ -31,11 +31,13 @@ extern "C" {
 #endif
 
 int select_ISD();
-int mutual_authentication();
+int mutual_authentication(uint8_t _sec_level);
 int init_update();
 int ext_authenticate();
 
 void cmd_putkeyset(char* _cmd);
+
+void securechannel_wrap(uint8_t* cmd, uint16_t* cmd_len);
 
 #if defined(__cplusplus)
 }

@@ -28,6 +28,7 @@
 #include "keys.h"
 #include "scp02.h"
 #include "scp03.h"
+#include "scp11.h"
 #include "securechannel.h"
 #include "globalplatform.h"
 #include "getstatus.h"
@@ -65,6 +66,12 @@ int select_ISD()
 
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
+	if ( (2 == apdu.resp_len) && (0x6C == apdu.resp[0]) ) {
+		apdu.cmd[apdu.cmd_len-1] = apdu.resp[1];
+
+		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	}
+
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
 	}
@@ -77,13 +84,14 @@ int select_ISD()
 	return 0;
 }
 
-int mutual_authentication()
+int mutual_authentication(uint8_t _sec_level)
 {
 	init_update();
 	if (CTX.security_status != GPSYSTEM_INITUPDATE) {
 		return -1;
 	}
 
+	CTX.security_level = _sec_level;
 	ext_authenticate();
 
 	return 0;
@@ -206,7 +214,7 @@ int ext_authenticate()
 	apdu.cmd_len = 0;
 	apdu.cmd[apdu.cmd_len++] = 0x84;
 	apdu.cmd[apdu.cmd_len++] = INS_EXTERNAL_AUTHENTICATE;
-	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = CTX.security_level;
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 	apdu.cmd[apdu.cmd_len++] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
 
@@ -416,3 +424,38 @@ void cmd_putkeyset(char* _cmd)
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
 	}
 }
+
+void securechannel_wrap(uint8_t* cmd, uint16_t* cmd_len)
+{
+	if (cmd[0] == 0x84 && cmd[1] == INS_EXTERNAL_AUTHENTICATE)
+		return;
+
+	if (cmd[0] == 0x00 && cmd[1] == INS_GP_SELECT)
+		return;
+
+	if (cmd[0] == 0x00 && cmd[1] == INS_GET_RESPONSE)
+		return;
+
+	if ((CTX.security_level & SECURITY_LEVEL_MAC) == SECURITY_LEVEL_MAC) {
+
+		cmd[4] += 8;
+		cmd[0] |= 0x04;
+
+		switch (CTX.scp_index) {
+		case SECURE_CHANNEL_PROTOCOL_02:
+			scp02_calculate_c_mac(cmd, (int)*cmd_len, buf_session_MAC, c_mac);
+			memcpy(&cmd[*cmd_len], c_mac, 8);
+			break;
+
+		case SECURE_CHANNEL_PROTOCOL_03:
+			break;
+		case SECURE_CHANNEL_PROTOCOL_11:
+			break;
+		default:
+			;
+		}
+
+		*cmd_len += 8;
+	}
+}
+

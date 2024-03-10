@@ -37,6 +37,7 @@
 #include "keys.h"
 #include "gp.h"
 #include "cap.h"
+#include "securechannel.h"
 
 static void help(char* _cmd);
 static void cmd_version(char* _cmd);
@@ -353,7 +354,11 @@ static void cmd_initupdate(char* _cmd)
  */
 static void cmd_extauthenticate(char* _cmd)
 {
-	ext_authenticate();
+	uint8_t sec_level = SECURITY_LEVEL_PLAIN;
+
+	// TODO
+
+	ext_authenticate(sec_level);
 }
 /**
  * @brief get-sd-certificate callback function
@@ -374,7 +379,32 @@ static void cmd_getsdcert(char* _cmd)
  */
 static void cmd_auth(char* _cmd)
 {
-	mutual_authentication();
+	int offset;
+	int len = (int)strlen(_cmd);
+	uint8_t sec_level = SECURITY_LEVEL_PLAIN;
+
+	offset = 4; // just after auth
+	while (offset < len) {
+		switch (_cmd[offset]) {
+		case ' ':
+		case '\t':
+			offset++;
+			continue;
+		}
+
+		if (_cmd[offset] == 'm' && _cmd[offset + 1] == 'a' && _cmd[offset + 2] == 'c') {
+			sec_level = SECURITY_LEVEL_MAC;
+		}
+
+		if (_cmd[offset] == 'e' && _cmd[offset + 1] == 'n' && _cmd[offset + 2] == 'c') {
+			sec_level = SECURITY_LEVEL_ENC;
+		}
+
+		break;
+	}
+
+
+	mutual_authentication(sec_level);
 }
 
 /**

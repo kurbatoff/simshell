@@ -124,4 +124,3 @@ uint8_t securechannel_verify_cmac(void)
 
 
 
-

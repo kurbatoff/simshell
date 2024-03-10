@@ -36,7 +36,7 @@ static uint8_t GP_ISD[] = { 0xA0, 0, 0, 0x01, 0x51, 0, 0, 0 };
 //Key Version Number '74' is reserved for the CASD Keys (cf. section 9.2)
 
 
-// SCP03
+// SCP02, SCP03
 #define INS_INIT_UPDATE						0x50
 #define INS_EXTERNAL_AUTHENTICATE			0x82
 #define INS_BEGIN_R_MAC_SESSION				0x7A

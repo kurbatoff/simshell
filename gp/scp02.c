@@ -106,10 +106,10 @@ void scp02_external_authenticate(void)
 
 /**
  * ВНИМАНИЕ!
- *   буфер _cmd будет ИЗМЕНЕН, за длиной gCMDlen появится PADDING 0x8000..
+ *   буфер _cmd будет ИЗМЕНЕН, за длиной _cmd_len появится PADDING 0x8000..
  *
  */
-void scp02_calculate_c_mac(uint8_t* _cmd, int gCMDlen, uint8_t* _key, uint8_t* _mac)
+void scp02_calculate_c_mac(uint8_t* _cmd, int _cmd_len, uint8_t* _key, uint8_t* _mac)
 {
 	for (int i=0; i<8; i++) {
 		if (_mac[i] != 0x00) {
@@ -118,7 +118,7 @@ void scp02_calculate_c_mac(uint8_t* _cmd, int gCMDlen, uint8_t* _key, uint8_t* _
 		}
 	}
 
-	calculate_EMV_mac(_cmd, gCMDlen, _mac, _mac);
+	calculate_EMV_mac(_cmd, _cmd_len, _mac, _mac);
 }
 
 void calculate_EMV_mac(uint8_t* in_buff, int len, uint8_t* iv, uint8_t* out_buff)

@@ -28,7 +28,7 @@
 #include "iso7816.h"
 
 
-#define KNOWN_ELF_COUNT		12
+#define KNOWN_ELF_COUNT		13
 
 typedef struct known_elf_t
 {
@@ -92,6 +92,12 @@ static known_elf_t elf_array[KNOWN_ELF_COUNT] = {
 		"Mastercard",
 		7,
 		{0xA0, 0x00, 0x00, 0x00, 0x04, 0x10, 0x10}
+	},
+	{
+		//  PSE
+		"1PAY.SYS.DDF01",
+		14,
+		{0x31, 0x50, 0x41, 0x59, 0x2E, 0x53, 0x59, 0x53, 0x2E, 0x44, 0x44, 0x46, 0x30, 0x31}
 	},
 	{
 		//  PPSE
