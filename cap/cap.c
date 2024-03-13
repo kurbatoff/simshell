@@ -903,8 +903,9 @@ void static upload_cap(const char* filename)
 		goto end_load_cap;
 	if (!load_component_zip(cap, COMP_STATICFIELD, 0))
 		goto end_load_cap;
-	if (!load_component_zip(cap, COMP_EXPORT, 0))
-		goto end_load_cap;
+	if (!load_component_zip(cap, COMP_EXPORT, 0)) {
+		//goto end_load_cap; // Do not stop is EXPORT not found
+	}
 	if (!load_component_zip(cap, COMP_CONSTANTPOOL, 0))
 		goto end_load_cap;
 	if (!load_component_zip(cap, COMP_REFLOCATION, THE_LAST_COMPONENT))
@@ -975,8 +976,9 @@ void static upload_ijc(const char* _filename)
 		goto end_load_zip;
 	if (!load_component_ijc(fp, COMP_STATICFIELD_IDX, 0))
 		goto end_load_zip;
-	if (!load_component_ijc(fp, COMP_EXPORT_IDX, 0))
-		goto end_load_zip;
+	if (!load_component_ijc(fp, COMP_EXPORT_IDX, 0)) {
+		//goto end_load_zip; // Do not stop is EXPORT not found
+	}
 	if (!load_component_ijc(fp, COMP_CONSTANTPOOL_IDX, 0))
 		goto end_load_zip;
 	if (!load_component_ijc(fp, COMP_REFERENCELOCATION_IDX, THE_LAST_COMPONENT))
