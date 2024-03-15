@@ -565,6 +565,13 @@ static int proceed_Directives(char* cmd)
         return res;
     }
 
+    if (memcmp(cmd, ".load", 5) == 0) {
+
+        // TODO
+        // Activate built-in functions...
+        return res;
+    }
+
     return 0;
 }
 

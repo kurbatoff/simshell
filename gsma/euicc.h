@@ -38,7 +38,8 @@ typedef enum _esim_command_t
 extern "C" {
 #endif
 
-void cmd_esim(char* _cmd);
+void cmd_euicc_pl(void);
+//void cmd_euicc_enable(char* _cmd);
 
 #if defined(__cplusplus)
 }

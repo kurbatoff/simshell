@@ -60,7 +60,7 @@ select_ISD_R()
   *
   * @param _cmd: command line string
   */
-void cmd_esim(char* _cmd)
+void cmd_euicc_pl(void)
 {
 	apdu_t apdu;
 

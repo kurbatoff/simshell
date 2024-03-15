@@ -61,6 +61,8 @@ static void cmd_ls(char* _cmd);
 static void cmd_upload(char* _cmd);
 static void cmd_delete(char* _cmd);
 
+static void cmd_euicc(char* _cmd);
+
 //static void cmd_S_echo(char* _cmd);
 //static void cmd_S_sleep(char* _cmd);
 //static void cmd_S_mode(char* _cmd);
@@ -178,6 +180,12 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		cmd_delete
 	},
 	{
+		"uicc",
+		"\n\"uicc\" eid|info|pl|enable|disable|delete|download|reset\n",
+		" uicc              Perform eUICC RSP function: eid|info|pl|enable|disable|delete|download|reset\n",
+		cmd_euicc
+	},
+	{
 		"ls",
 		"\n\"ls\"\n",
 		" ls                Retrieve and print GP registry (GET STATUS)\n",
@@ -206,12 +214,6 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		"\n\"/send\":\n Usage:\n    APDU string\n",
 		" /send             Send APDU-C to the active reader\n",
 		cmd_S_send
-	},
-	{
-		"esim",
-		"\n\"esim\":\n Usage:\n    |eid|pl|enable|disable|delete|load\n",
-		" esim              Execute eUICC (GSMA RSP) comamnd\n",
-		cmd_esim
 	},
 	{
 		"/set-var",
@@ -634,6 +636,67 @@ static void cmd_delete(char* _cmd)
 	apdu.cmd[6] = apdu.cmd_len - 7;
 
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+}
+
+/**
+ * @brief euicc: Implements set of eUICC commands
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_euicc(char* _cmd)
+{
+	int len;
+	int offset;
+
+	offset = 4;
+
+	len = (int)strlen(_cmd);
+
+	while (offset < len) {
+		switch (_cmd[offset]) {
+		case ' ':
+		case '\t':
+			offset++;
+			continue;
+		}
+
+		break;
+	}
+
+	if (0 == memcmp(&_cmd[offset], "pl", 2)) {
+		printf(COLOR_WHITE "\n ISD-R Profile list" COLOR_RESET "\n");
+
+		cmd_euicc_pl();
+
+		return;
+	}
+
+	if (0 == memcmp(&_cmd[offset], "eid", 3)) {
+		printf(COLOR_WHITE "\n eUICC EID" COLOR_RESET "\n");
+		return;
+	}
+
+	if (0 == memcmp(&_cmd[offset], "enable", 6)) {
+		printf(COLOR_WHITE "\n Enable ISD-P profile" COLOR_RESET "\n");
+		return;
+	}
+
+	if (0 == memcmp(&_cmd[offset], "disable", 7)) {
+		printf(COLOR_WHITE "\n Disable ISD-P profile" COLOR_RESET "\n");
+		return;
+	}
+
+	if (0 == memcmp(&_cmd[offset], "delete", 6)) {
+		printf(COLOR_WHITE "\n Delete ISD-P profile" COLOR_RESET "\n");
+		return;
+	}
+
+	if (0 == memcmp(&_cmd[offset], "download", 8)) {
+		printf(COLOR_WHITE "\n Download ISD-P profile" COLOR_RESET "\n");
+		return;
+	}
+
+	printf(COLOR_WHITE "\n Unknown ISD-R command: " COLOR_RED "%s" COLOR_RESET "\n", &_cmd[offset]);
 }
 
 /**
