@@ -67,6 +67,9 @@ uint8_t BERTLV_set_length(uint8_t* buffer, uint8_t len);
 
 //size_t delete_symbol(uint8_t* buffer, size_t len, uint8_t symb);
 
+void swapbibbles_bin(uint8_t* buf, int len);
+void swapbibbles_text(uint8_t* buf, int len);
+
 #if defined(__cplusplus)
 }
 #endif

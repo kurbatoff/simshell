@@ -306,9 +306,11 @@ uint16_t print_taglen(uint8_t* buff, uint16_t* length)
 	len = buff[offset++];
 	switch (len) {
 	case 0x81:
+		printf("81");
 		len = buff[offset++];
 		break;
 	case 0x82:
+		printf("82");
 		len = 0x100 * buff[offset++];
 		len += buff[offset++];
 		break;
@@ -324,6 +326,7 @@ uint16_t print_taglen(uint8_t* buff, uint16_t* length)
 	*length = len;
 	return offset;
 }
+
 uint16_t print_tlv(uint8_t* buff)
 {
 	uint16_t len;
@@ -358,4 +361,25 @@ uint8_t BERTLV_set_length(uint8_t* buffer, uint8_t len)
 		buffer[2] = len - 3;
 	}
 	return len;
+}
+
+void swapbibbles_bin(uint8_t* buf, int len)
+{
+	uint8_t c;
+
+	for (int i = 0; i < len; i++) {
+		c = buf[i];
+		buf[i] = ((c & 0xFF) << 4) | (c >> 4);
+	}
+}
+
+void swapbibbles_text(uint8_t* buf, int len)
+{
+	uint8_t c;
+
+	for (int i = 0; i < len; i++) {
+		c = buf[i * 2 + 1];
+		buf[i * 2 + 1] = buf[i * 2];
+		buf[i * 2] = c;
+	}
 }

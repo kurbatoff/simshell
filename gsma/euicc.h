@@ -31,6 +31,8 @@ typedef enum _esim_command_t
 	ESIM_DISABLE,
 	ESIM_DELETE,
 	ESIM_LOAD,
+	ESIM_NOTIFICATIONS,
+	//
 	ESIM_ATTACH
 } esim_command_t;
 
@@ -39,6 +41,8 @@ extern "C" {
 #endif
 
 void cmd_euicc_pl(void);
+void cmd_euicc_eid(void);
+void cmd_euicc_info(void);
 //void cmd_euicc_enable(char* _cmd);
 
 #if defined(__cplusplus)

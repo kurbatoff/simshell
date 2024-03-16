@@ -20,15 +20,15 @@
  * TODO features
  * 
  * 1.   [+] JVM CAP, IJC: /cap-info											06 FEB 2024		v. ..
- * 1.a  [+] cap2ijc converter												07 JAN 2024		v. ..
- * 1.b  [+] IJC upload														08 FEB 2024		v. 0.03.34
- * 1.c      cap2pcom: applet to APDU
+ *   a. [+] cap2ijc converter												07 JAN 2024		v. ..
+ *   b. [+] IJC upload														08 FEB 2024		v. 0.03.34
+ *   c.     cap2pcom: applet to APDU
  * 2.       JCShell script support
- * 2.a      Variables, # and %
- * 2.b      Delete, install
- * 2.c  [+] auth mac                                                        10 MAR 2024		v. 0.03.35
- * 2.d      auth enc
- * 2.e      get-cplc, set-cplc
+ *   a.     Variables, # and %
+ *   b.     Delete, install
+ *   c. [+] auth mac                                                        10 MAR 2024		v. 0.03.35
+ *   d.     auth enc
+ *   e.     get-cplc, set-cplc
  * 3.   [+] Lua support														19 Nov 2023
  * 4.   [+] Lua: execute JCShell command									12 Dec 2023
  * 5.   [+] Run PCOM scripts												10 Jan 2024
@@ -38,14 +38,20 @@
  * 9.       Crypto support: shell & Lua
  * 10.      5G support / tests
  * 11.      Lua applications:
- * 11.a     SCP81 in offline mode			.lua
- * 11.b.    LPA in offline mode				.lua
- * 11.c     Milenage						.lua
- * 11.d     TUAK authentication				.lua
- * 11.e     Crypto pack						.lua
+ *    a.    SCP81 in offline mode			.lua
+ *    b.    LPA in offline mode				.lua
+ *    c.    Milenage						.lua
+ *    d.    TUAK authentication				.lua
+ *    e.    Crypto pack						.lua
  * 12.      ATR parsing
  * 13.      GP APDU parsing (last or current)
  * 14.      JRCP client
+ * 15.      ISD-R functions
+ *    a.    Profile List, EID                                               16 MAR 2024		v. 0.04.36
+ *    b.    eUICC Info 1, 2
+ *    c.    Enable, Disable, Delete
+ *    d.    Process notifications
+ *    e.    Download profile
  *
  * 21.      Shell functions: remember list of commands, Mac support, etc
  * 

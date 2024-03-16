@@ -673,11 +673,25 @@ static void cmd_euicc(char* _cmd)
 
 	if (0 == memcmp(&_cmd[offset], "eid", 3)) {
 		printf(COLOR_WHITE "\n eUICC EID" COLOR_RESET "\n");
+
+		cmd_euicc_eid();
+
+		return;
+	}
+
+	if (0 == memcmp(&_cmd[offset], "info", 4)) {
+		printf(COLOR_WHITE "\n eUICC Info1, Info2" COLOR_RESET "\n");
+
+		cmd_euicc_info();
+
 		return;
 	}
 
 	if (0 == memcmp(&_cmd[offset], "enable", 6)) {
 		printf(COLOR_WHITE "\n Enable ISD-P profile" COLOR_RESET "\n");
+
+		//cmd_euicc_enable();
+
 		return;
 	}
 
@@ -693,6 +707,11 @@ static void cmd_euicc(char* _cmd)
 
 	if (0 == memcmp(&_cmd[offset], "download", 8)) {
 		printf(COLOR_WHITE "\n Download ISD-P profile" COLOR_RESET "\n");
+		return;
+	}
+
+	if (0 == memcmp(&_cmd[offset], "notifications", 13)) {
+		printf(COLOR_WHITE "\n Process ISD-R notifications" COLOR_RESET "\n");
 		return;
 	}
 
