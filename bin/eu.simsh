@@ -3,6 +3,6 @@
 
 /atr
 
-uicc eid
-
-uicc pl
+#uicc eid
+#uicc pl
+uicc info
