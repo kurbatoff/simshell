@@ -182,7 +182,7 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 	{
 		"uicc",
 		"\n\"uicc\" eid|info|pl|enable|disable|delete|download|reset\n",
-		" uicc              Perform eUICC RSP function: eid|info|pl|enable|disable|delete|download|reset\n",
+		" uicc              Perform ISD-R function: eid|info|pl|enable|disable|delete|download|reset\n",
 		cmd_euicc
 	},
 	{
@@ -680,10 +680,7 @@ static void cmd_euicc(char* _cmd)
 	}
 
 	if (0 == memcmp(&_cmd[offset], "info", 4)) {
-		printf(COLOR_WHITE "\n eUICC Info1, Info2" COLOR_RESET "\n");
-
 		cmd_euicc_info();
-
 		return;
 	}
 

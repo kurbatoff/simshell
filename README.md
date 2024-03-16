@@ -27,7 +27,8 @@ Reset EUICC memory<br/>
 
 <h1>JVM</h1>
 Both CAP and IJC files are supported for upload<br/>
-CAP 2 IJC converting function
+CAP 2 IJC converting function<br/>
+CAP 2 APDU script<br/>
 
 <h1>Download</h1>
 Pre-built binary packages are not yet available

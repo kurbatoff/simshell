@@ -269,6 +269,11 @@ void print_bin2hex(uint8_t* buffer_bin, size_t len)
 
 	for (i = 0; i < len; i++) {
 		printf("%02X", buffer_bin[i]);
+
+		if (i > 31) {
+			printf(" ...");
+			break;
+		}
 	}
 	printf("\n");
 }

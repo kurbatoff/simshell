@@ -306,6 +306,8 @@ void cmd_euicc_info(void)
 
 	select_ISD_R();
 
+	printf(COLOR_WHITE "\n eUICC Info1" COLOR_RESET "\n");
+
 	apdu.cmd_len = 0;
 	apdu.cmd[apdu.cmd_len++] = 0x80;
 	apdu.cmd[apdu.cmd_len++] = INS_GP_STORE_DATA;
@@ -328,6 +330,8 @@ void cmd_euicc_info(void)
 	printf(COLOR_RESET "\n");
 
 
+
+	printf(COLOR_WHITE "\n eUICC Info2" COLOR_RESET "\n");
 
 	apdu.cmd_len = 0;
 	apdu.cmd[apdu.cmd_len++] = 0x80;

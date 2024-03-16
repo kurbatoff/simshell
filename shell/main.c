@@ -32,6 +32,7 @@
  * 3.   [+] Lua support														19 Nov 2023
  * 4.   [+] Lua: execute JCShell command									12 Dec 2023
  * 5.   [+] Run PCOM scripts												10 Jan 2024
+ *   a.     .LOAD directive and built-in functions
  * 6.   [+] get-data 00E0 etc												18 Nov 2023
  * 7.       SCP11 + ECC tests
  * 8.       SIM scan
@@ -47,10 +48,10 @@
  * 13.      GP APDU parsing (last or current)
  * 14.      JRCP client
  * 15.      ISD-R functions
- *    a.    Profile List, EID                                               16 MAR 2024		v. 0.04.36
+ *    a.[+] Profile List, EID                                               16 MAR 2024		v. 0.04.36
  *    b.    eUICC Info 1, 2
- *    c.    Enable, Disable, Delete
- *    d.    Process notifications
+ *    c.    Enable, Disable
+ *    d.    Delete, Process notifications
  *    e.    Download profile
  *
  * 21.      Shell functions: remember list of commands, Mac support, etc
