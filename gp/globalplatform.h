@@ -33,7 +33,7 @@ extern "C" {
 int select_ISD();
 int mutual_authentication(uint8_t _sec_level);
 int init_update();
-int ext_authenticate();
+int ext_authenticate(uint8_t sec_level);
 
 void cmd_putkeyset(char* _cmd);
 

@@ -91,8 +91,7 @@ int mutual_authentication(uint8_t _sec_level)
 		return -1;
 	}
 
-	CTX.security_level = _sec_level;
-	ext_authenticate();
+	ext_authenticate(_sec_level);
 
 	return 0;
 }
@@ -199,7 +198,7 @@ int init_update()
 	return 0;
 }
 
-int ext_authenticate()
+int ext_authenticate(uint8_t sec_level)
 {
 	apdu_t apdu;
 	uint8_t tmp_buffer[256 + LENGTH_OF_ICV]; // for SCP03
@@ -214,7 +213,7 @@ int ext_authenticate()
 	apdu.cmd_len = 0;
 	apdu.cmd[apdu.cmd_len++] = 0x84;
 	apdu.cmd[apdu.cmd_len++] = INS_EXTERNAL_AUTHENTICATE;
-	apdu.cmd[apdu.cmd_len++] = CTX.security_level;
+	apdu.cmd[apdu.cmd_len++] = sec_level;
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 	apdu.cmd[apdu.cmd_len++] = CHALLENGE_SZ + CRYPTOGRAMM_SZ;
 
@@ -250,6 +249,7 @@ int ext_authenticate()
 	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	CTX.security_status = GPSYSTEM_AUTHENTICATED;
+	CTX.security_level = sec_level;
 
 	//			CTX.security_level = 
 	//			CTX.security_status =

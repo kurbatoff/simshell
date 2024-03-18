@@ -49,7 +49,7 @@
  * 14.      JRCP client
  * 15.      ISD-R functions
  *    a.[+] Profile List, EID                                               16 MAR 2024		v. 0.04.36
- *    b.    eUICC Info 1, 2
+ *    b.[+] eUICC Info 1, 2                                                 16 MAR 2024		v. 0.04.37
  *    c.    Enable, Disable
  *    d.    Delete, Process notifications
  *    e.    Download profile
