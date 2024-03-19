@@ -31,7 +31,7 @@ CAP 2 IJC converting function<br/>
 CAP 2 APDU script<br/>
 
 <h1>Download</h1>
-MacOS: <a href="http://intergalaxy.org/download/mac/simshell.zip">simshell.zip</a><br/>
-Windows: <a href="http://intergalaxy.org/download/win/simshell.zip">simshell.zip</a>
+MacOS: <a href="https://intergalaxy.org/download/mac/simshell.zip">simshell.zip</a><br/>
+Windows: <a href="https://intergalaxy.org/download/win/simshell.zip">simshell.zip</a>
 <h1>Issues</h1>
 For issues please use the <a href="https://github.com/kurbatoff/simshell/issues">GitHub issue tracker</a>
