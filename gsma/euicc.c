@@ -26,6 +26,34 @@
 
 static uint8_t ISDR[] = { 0xA0, 0x00, 0x00, 0x05, 0x59, 0x10, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0x89, 0x00, 0x00, 0x01, 0x00 };
 
+static int select_ISD_R()
+{
+	apdu_t apdu;
+
+	apdu.cmd_len = 0;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = INS_GP_SELECT;
+	apdu.cmd[apdu.cmd_len++] = 0x04;
+	apdu.cmd[apdu.cmd_len++] = 0x00;
+	apdu.cmd[apdu.cmd_len++] = sizeof(ISDR);
+
+	memcpy(&apdu.cmd[apdu.cmd_len], ISDR, sizeof(ISDR));
+	apdu.cmd_len += sizeof(ISDR);
+
+	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+
+	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
+		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
+	}
+
+	if (0x90 != apdu.resp[apdu.resp_len - 2]) {
+		printf(COLOR_RED " Failed to select ISD-R\n" COLOR_RESET);
+		return -1;
+	}
+
+	return 0;
+}
+
 static void print_UICC_Capability(uint8_t* tlvbuff)
 {
 	printf(COLOR_YELLOW_I "    TODO: decode...\n" COLOR_RESET);
@@ -515,34 +543,6 @@ static void print_profile_list(uint8_t* tlvbuff)
 
 		printf("\n");
 	}
-}
-
-static int select_ISD_R()
-{
-	apdu_t apdu;
-
-	apdu.cmd_len = 0;
-	apdu.cmd[ apdu.cmd_len++ ] = 0x00;
-	apdu.cmd[ apdu.cmd_len++ ] = INS_GP_SELECT;
-	apdu.cmd[ apdu.cmd_len++ ] = 0x04;
-	apdu.cmd[ apdu.cmd_len++ ] = 0x00;
-	apdu.cmd[ apdu.cmd_len++ ] = sizeof(ISDR);
-
-	memcpy(&apdu.cmd[ apdu.cmd_len ], ISDR, sizeof(ISDR));
-	apdu.cmd_len += sizeof(ISDR);
-
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
-
-	if (0x61 == apdu.resp[ apdu.resp_len - 2 ]) {
-		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
-	}
-
-	if (0x90 != apdu.resp[ apdu.resp_len - 2 ]) {
-		printf(COLOR_RED " Failed to select ISD-R\n" COLOR_RESET);
-		return -1;
-	}
-
-	return 0;
 }
 
 /**

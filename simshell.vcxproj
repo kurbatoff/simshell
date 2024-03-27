@@ -178,6 +178,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cap\cap.c" />
+    <ClCompile Include="iotsafe\iotsafe.c" />
     <ClCompile Include="mbedtls-3.5.1\library\aes.c" />
     <ClCompile Include="mbedtls-3.5.1\library\aesni.c" />
     <ClCompile Include="mbedtls-3.5.1\library\aria.c" />

@@ -37,6 +37,9 @@
     <Filter Include="Source files\pcom">
       <UniqueIdentifier>{c3377c2b-c1c1-4cfb-9339-113e41b16a60}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source files\IoTSafe">
+      <UniqueIdentifier>{485727fc-762a-4720-8f50-77f03151fdb8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shell\main.c">
@@ -206,6 +209,9 @@
     </ClCompile>
     <ClCompile Include="pcom\libApduEngine.c">
       <Filter>Source files\pcom</Filter>
+    </ClCompile>
+    <ClCompile Include="iotsafe\iotsafe.c">
+      <Filter>Source files\IoTSafe</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

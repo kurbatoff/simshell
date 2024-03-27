@@ -53,6 +53,8 @@
  *    c.    Enable, Disable
  *    d.    Delete, Process notifications
  *    e.    Download profile
+ * 16.      Implement IOTSafe functions
+ *    a.    List objects: keys etc
  *
  * 21.      Shell functions: remember list of commands, Mac support, etc
  * 
