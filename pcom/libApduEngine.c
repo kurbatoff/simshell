@@ -29,6 +29,7 @@
 * [+]  6. .SET_BUFFER
 * [+]  7. Multi line
 *      8. .CALL directive
+*      9. .LOAD
 *
 *     20. malloc for buffers
 * [+] 21. Display execution time
@@ -41,6 +42,7 @@
 #include <ctype.h>
 #include <time.h>
 
+#include "shell.h"
 #include "libApduEngine.h"
 #include "tools.h"
 #include "pcscwrap.h"
@@ -560,9 +562,30 @@ static int proceed_Directives(char* cmd)
     }
 
     if (memcmp(cmd, ".call", 5) == 0) {
+        FILE* file;
+        char fullname[1024];
 
-        // TODO
-        return res;
+        sprintf(fullname, "%s/%s", gStartFolder , &cmd[6]);
+
+        if ((file = fopen(fullname, "r")))
+        {
+            fclose(file);
+            execute_PCOM(fullname);
+
+            return 0;
+        }
+
+        sprintf(fullname, "%s/pcom/%s", gStartFolder , &cmd[6]);
+
+        if ((file = fopen(fullname, "r")))
+        {
+            fclose(file);
+            execute_PCOM(fullname);
+
+            return 0;
+        }
+
+        return 1;
     }
 
     if (memcmp(cmd, ".load", 5) == 0) {

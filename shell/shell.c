@@ -137,6 +137,26 @@ static bool execute_file(const char* fname)
 	}
 
 	if (FILE_NOT_EXISTS == stype) {
+		sprintf(fullname, "%s/pcom/%s", gStartFolder, fname);
+
+		if ((file = fopen(fullname, "r")))
+		{
+			fclose(file);
+			stype = SCRIPT_TYPE_PCOM;
+		}
+	}
+
+	if (FILE_NOT_EXISTS == stype) {
+		sprintf(fullname, "%s\\pcom\\%s.pcom", gStartFolder, fname);
+
+		if ((file = fopen(fullname, "r")))
+		{
+			fclose(file);
+			stype = SCRIPT_TYPE_PCOM;
+		}
+	}
+
+	if (FILE_NOT_EXISTS == stype) {
 		sprintf(fullname, "%s.pcom", fname);
 
 		if ((file = fopen(fullname, "r")))
