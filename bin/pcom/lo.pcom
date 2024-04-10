@@ -1,0 +1,41 @@
+
+.DEFINE %KEY 01010101010101010101010101010101
+.DEFINE %CSN 0A186327016E0098000F00011D040304AA
+.DEFINE %RND AAAAAAAAAAAAAAAA
+
+.LOAD calcul.dll
+
+.SET_BUFFER K %KEY
+.SET_BUFFER L K(1;16) K(1;8)
+
+.DISPLAY K
+.DISPLAY L
+
+.SET_BUFFER I %CSN
+.SET_BUFFER J %RND
+
+*set the key that will be used in cryptographic & binary logic directives
+.SET_KEY L
+*.SET_VECT_INI 0000000000000000
+
+*set CSN value for internal buffer 'data'
+.SET_DATA I
+
+;compute a triple DES ECB 3 keys of buffer 'data'
+.DES3K M FF
+.DISPLAY M
+
+.SET_DATA J
+.SET_BUFFER L M(1;16) M(1;8)
+
+.SET_KEY L
+*.SET_VECT_INI 0000000000000000
+
+.DES3K N FF
+
+;; expecting 47 EC 96 8F  37 55 39 6E  
+.DISPLAY N
+
+
+
+.UNLOAD calcul.dll
