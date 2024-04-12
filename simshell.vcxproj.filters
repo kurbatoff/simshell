@@ -213,6 +213,9 @@
     <ClCompile Include="iotsafe\iotsafe.c">
       <Filter>Source files\IoTSafe</Filter>
     </ClCompile>
+    <ClCompile Include="pcom\calcul_dll.c">
+      <Filter>Source files\pcom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">
@@ -249,6 +252,9 @@
       <Filter>Source files\cap</Filter>
     </ClInclude>
     <ClInclude Include="pcom\libApduEngine.h">
+      <Filter>Source files\pcom</Filter>
+    </ClInclude>
+    <ClInclude Include="pcom\calcul_dll.h">
       <Filter>Source files\pcom</Filter>
     </ClInclude>
   </ItemGroup>

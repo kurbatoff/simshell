@@ -19,13 +19,16 @@
 #ifndef __CAP_H_
 #define __CAP_H_
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void print_cap_info(const char* _filename);
 void upload(const char* filename);
-void cap2ijc(char* _capname);
+void cap2ijc(char* _capname, char* _ijcname, bool verbose, bool all_components);
+void cap2apdu(char* _capname, uint8_t block);
 
 #ifdef __cplusplus
 }

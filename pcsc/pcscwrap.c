@@ -21,7 +21,6 @@
 
 #include "tools.h"
 #include "pcscwrap.h"
-#include "globalplatform.h"
 
 #if defined(__APPLE__)
 	typedef uint32_t DWORD;
@@ -70,7 +69,7 @@ uint16_t get_response(uint8_t response_len, uint8_t* _response_buff, uint16_t _r
 	command[ 3 ] = 0x00;
 	command[ 4 ] = response_len;
 
-	pcsc_sendAPDU(command, 5, _response_buff, _response_buff_sz, &resp_length);
+	pcsc_send_plain_APDU(command, 5, _response_buff, _response_buff_sz, &resp_length);
 
 	return resp_length;
 }
@@ -91,17 +90,14 @@ void print_reader_name()
 	}
 }
 
-pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
+pcsc_error_t pcsc_send_plain_APDU(uint8_t* _cmd, uint16_t _cmd_len,
   uint8_t *_response_buffer, uint16_t _response_buffer_sz, uint16_t* _response_length)
 {
-	pcsc_error_t error_code = PCSC_ERROR_UNKNOWN;
 	LONG rv;
 	uint8_t recvBuffer[PCSC_APDU_C_BUFF_LEN];
 
 	if (0x00 == hCard) {
 	}
-
-	securechannel_wrap(_cmd, &_cmd_len);
 
 	dwRecvLength = sizeof(recvBuffer);
 
@@ -123,9 +119,6 @@ pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
 
 		printf("\n");
 	}
-
-	error_code = recvBuffer[dwRecvLength - 2] << 8 | recvBuffer[dwRecvLength-1];
-	*_response_length = (uint16_t)dwRecvLength;
 
 	*_response_length = (uint16_t)dwRecvLength;
 
@@ -170,7 +163,7 @@ pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
   }
   */
 
-	return error_code;
+	return PCSC_SUCCESS;
 }
 
 pcsc_error_t pcsc_listreaders(void)

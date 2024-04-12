@@ -51,6 +51,13 @@ static uint8_t card_challenge[CHALLENGE_SZ];
 static uint8_t host_challenge[CHALLENGE_SZ];
 static uint8_t c_mac[C_MAC_SZ];
 
+void gp_send_APDU(apdu_t* apdu)
+{
+	securechannel_wrap(apdu->cmd, &apdu->cmd_len);
+
+	pcsc_send_plain_APDU(apdu->cmd, apdu->cmd_len, apdu->resp, sizeof(apdu->resp), &apdu->resp_len);
+}
+
 int select_ISD()
 {
 	apdu_t apdu;
@@ -64,12 +71,12 @@ int select_ISD()
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 	apdu.cmd[apdu.cmd_len++] = 0;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	if ( (2 == apdu.resp_len) && (0x6C == apdu.resp[0]) ) {
 		apdu.cmd[apdu.cmd_len-1] = apdu.resp[1];
 
-		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+		gp_send_APDU(&apdu);
 	}
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
@@ -116,7 +123,7 @@ int init_update()
 	memcpy(&apdu.cmd[ apdu.cmd_len ], host_challenge, CHALLENGE_SZ);
 	apdu.cmd_len += CHALLENGE_SZ;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -246,7 +253,7 @@ int ext_authenticate(uint8_t sec_level)
 		break;
 	}
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	CTX.security_status = GPSYSTEM_AUTHENTICATED;
 	CTX.security_level = sec_level;
@@ -410,14 +417,14 @@ void cmd_putkeyset(char* _cmd)
 	// Length
 	apdu.cmd[ISO1716_OFFSET_LC] = apdu.cmd_len - ISO1716_OFFSET_HEADER_LEN;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	if ( (0x6A == apdu.resp[apdu.resp_len - 2]) && (0x80 == apdu.resp[apdu.resp_len - 1]) ) {
 		apdu.cmd[ISO7816_OFFSET_P1] = kvn;
 
 		printf("Add new key set didn't work, try replace ...\n");
 
-		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+		gp_send_APDU(&apdu);
 	}
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  *  Copyright (c) 2023, Intergalaxy LLC
  *  This file is part of SIMSHELL.
  *
@@ -16,33 +16,40 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
- /**
-  * @file   globalplatform.h
-  * @brief  GLOBAL PLATFORM functions
-  */
+#include "calcul_dll.h"
 
-#ifndef __GLOBALPLATFORM_H_
-#define __GLOBALPLATFORM_H_
+uint8_t aes_key[16];
+uint8_t des_key[24];
+uint8_t data[1024];
+uint8_t iv[16];
 
-#include <stdbool.h>
-#include "pcscwrap.h"
+void load_calcul_dll(void)
+{
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-int select_ISD();
-int mutual_authentication(uint8_t _sec_level);
-int init_update();
-int ext_authenticate(uint8_t sec_level);
-
-void cmd_putkeyset(char* _cmd);
-
-void securechannel_wrap(uint8_t* cmd, uint16_t* cmd_len);
-void gp_send_APDU(apdu_t* apdu);
-
-#if defined(__cplusplus)
 }
-#endif
 
-#endif /* __GLOBALPLATFORM_H_ */
+void unload_calcul_dll(void)
+{
+
+}
+
+void set_data(char* str)
+{
+
+}
+
+void set_key(char* str)
+{
+
+}
+
+void set_init_vec(char* str)
+{
+
+}
+
+void des3k(void)
+{
+
+}
+

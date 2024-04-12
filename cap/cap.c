@@ -25,6 +25,7 @@
 #include <string.h>
 #include <zip.h>
 
+#include "globalplatform.h"
 #include "tools.h"
 #include "pcscwrap.h"
 #include "gp.h"
@@ -204,7 +205,7 @@ static bool install_for_load_APDU(uint8_t* _buffer_header, int _total_sz)
 	apdu.cmd[apdu.cmd_len++] = 0;
 
 	apdu.cmd[4] = apdu.cmd_len - 5;
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	// --- Load header.CAP ---
 	printf("Start loading " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", COMP_HEADER, header_len);
@@ -231,7 +232,7 @@ static bool install_for_load_APDU(uint8_t* _buffer_header, int _total_sz)
 	apdu.cmd_len += header_len;
 
 	apdu.cmd[4] = apdu.cmd_len - 5;
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	return true;
 }
@@ -325,7 +326,7 @@ static int load_size_ijc_(FILE* _fp)
 	return size;
 }
 
-static int copy_component(zip_t* _cap, const char* _cname, FILE* _dest)
+static int copy_component(zip_t* _cap, const char* _cname, FILE* _dest, bool verbose)
 {
 	struct zip_stat finfo;
 	zip_file_t* fd = NULL;
@@ -346,7 +347,8 @@ static int copy_component(zip_t* _cap, const char* _cname, FILE* _dest)
 	idx = (int)finfo.index;
 	len = (int)finfo.size;
 
-	printf("Start copying " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, len);
+	if (verbose)
+		printf("Start copying " COLOR_YELLOW "%s" COLOR_RESET " (%d byte)\n", _cname, len);
 
 	fd = zip_fopen_index(_cap, idx, 0);
 
@@ -418,7 +420,7 @@ static bool load_component_ijc(FILE* _fp, int _comp_idx, uint8_t _last)
 				if (_last && offset == len)
 					apdu.cmd[2] = 0x80;
 
-				pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+				gp_send_APDU(&apdu);
 				apdu.sw_ = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
 
 				if (apdu.sw_ != 0x9000 && apdu.sw_ != 0x6101)
@@ -482,7 +484,7 @@ static bool load_component_zip(zip_t* _cap, const char* _cname, uint8_t _last)
 		if (_last && offset == len)
 			apdu.cmd[2] = 0x80;
 
-		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+		gp_send_APDU(&apdu);
 		apdu.sw_ = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
 
 		if (apdu.sw_ != 0x9000 && apdu.sw_ != 0x6101)
@@ -490,6 +492,73 @@ static bool load_component_zip(zip_t* _cap, const char* _cname, uint8_t _last)
 	}
 
 	return true;
+}
+
+static void save_apdu(FILE* fsimshell, FILE* fpcom, uint8_t* apdu, int len)
+{
+	uint8_t apdu_s[(255 + 5) * 2 + 5]; // +5 for SPACEs, CRLF
+
+	convert_bin2hex(apdu, apdu_s, 4);
+	apdu_s[8] = ' ';
+	convert_bin2hex(&apdu[4], &apdu_s[9], 1);
+	apdu_s[11] = ' ';
+	convert_bin2hex(&apdu[5], &apdu_s[12], len - 5);
+
+	fprintf(fpcom, "%s [00] 9000\n", apdu_s);
+	fprintf(fsimshell, "/send \"%s\" 009000\n", apdu_s);
+}
+
+static int component_zip_2_apdu(zip_t* _cap, const char* _cname, FILE* fsimshell, FILE* fpcom, uint8_t _last)
+{
+	struct zip_stat finfo;
+	zip_file_t* fd = NULL;
+	uint8_t apdu[255 + 5];
+
+	int offset;
+	int comp_sz;
+	int len_read;
+	int apdu_len;
+	int idx;
+
+	zip_stat_init(&finfo);
+
+	if (!find_component_zip(_cap, _cname, &finfo))
+	{
+		return 0;
+	}
+
+	idx = (int)finfo.index;
+	comp_sz = (int)finfo.size;
+
+	fd = zip_fopen_index(_cap, idx, 0);
+
+	apdu[0] = 0x80;
+	apdu[1] = INS_GP_LOAD;
+	apdu[2] = 0;
+	//apdu.cmd[3] = counterP2;
+	//apdu.cmd[4] = 0;
+
+	offset = 0;
+	while (offset < comp_sz) {
+		len_read = comp_sz - offset;
+		if (len_read > 255)
+			len_read = 255;
+
+		len_read = (int)zip_fread(fd, &apdu[5], len_read);
+
+		apdu[3] = counterP2++;
+		apdu[4] = len_read;
+		apdu_len = 5 + len_read;
+
+		offset += len_read;
+
+		if (_last && offset == comp_sz)
+			apdu[2] = 0x80;
+
+		save_apdu(fsimshell, fpcom, apdu, apdu_len);
+	}
+
+	return comp_sz;
 }
 
 static void print_components_zip(zip_t* _cap, struct zip_stat* _finfo)
@@ -873,6 +942,89 @@ static bool install_for_load_zip(zip_t* _cap)
 	return install_for_load_APDU(buffer_header, total_sz);
 }
 
+static bool install_for_load_2_apdu(zip_t * _cap, FILE* fsimshell, FILE* fpcom, bool load_header)
+{
+	struct zip_stat finfo;
+	zip_file_t* fd = NULL;
+	int count = 0;
+	int total_sz;
+	uint8_t buffer_header[256];
+	int header_len;
+
+	int len = 0;
+	uint8_t apdu[255 + 5];
+
+	zip_stat_init(&finfo);
+
+	// --- 1 ---
+	if (!find_component_zip(_cap, COMP_HEADER, &finfo))
+	{
+		return false;
+	}
+
+	header_len = (int)finfo.size;
+	fd = zip_fopen_index(_cap, finfo.index, 0);
+	total_sz = (int)zip_fread(fd, buffer_header, header_len);
+
+	total_sz += load_size_cap(_cap, &finfo);
+
+	// --- INSTALL for LOAD ---
+	len = 0;
+	apdu[len++] = 0x80;
+	apdu[len++] = INS_GP_INSTALL;
+	apdu[len++] = INSTALL_FOR_LOAD;
+	apdu[len++] = 0;
+	apdu[len++] = 0; // To be updated
+
+	//
+	memcpy(&apdu[len], &buffer_header[12], 1 + buffer_header[12]);
+	len += (1 + buffer_header[12]);
+
+	//apdu.cmd[apdu.cmd_len++] = 0; // Target SD (AID length)
+	apdu[len++] = sizeof(GP_ISD);
+	memcpy(&apdu[len], GP_ISD, sizeof(GP_ISD));
+	len += sizeof(GP_ISD);
+
+	apdu[len++] = 0;
+	apdu[len++] = 0;
+	apdu[len++] = 0;
+
+	apdu[4] = len - 5;
+
+	save_apdu(fsimshell, fpcom, apdu, len);
+
+	// --- Load header.CAP ---
+	if (load_header) {
+		len = 0;
+		apdu[len++] = 0x80;
+		apdu[len++] = INS_GP_LOAD;
+		apdu[len++] = 0;
+		apdu[len++] = counterP2++;
+
+		apdu[len++] = 0; // to be updated
+		apdu[len++] = 0xC4;
+		if (total_sz > 255) {
+			apdu[len++] = 0x82;
+			apdu[len++] = total_sz >> 8;
+		}
+		else
+			if (total_sz > 127) {
+				apdu[len++] = 0x81;
+			}
+		apdu[len++] = total_sz & 0xFF;
+
+		memcpy(&apdu[len], buffer_header, header_len);
+		len += header_len;
+
+		apdu[4] = len - 5;
+
+		save_apdu(fsimshell, fpcom, apdu, len);
+	}
+
+	return true;
+}
+
+
 void static upload_cap(const char* filename)
 {
 	zip_t* cap = NULL; 
@@ -1002,7 +1154,7 @@ void upload(const char* _filename)
 	}
 }
 
-void cap2ijc(char* _capname)
+void cap2ijc(char* _capname, char* _ijcname, bool verbose, bool all_components)
 {
 	zip_t* cap = NULL;
 	FILE* fijc;
@@ -1017,29 +1169,173 @@ void cap2ijc(char* _capname)
 		return;
 	}
 
-	flen = (int)strlen(_capname);
-	_capname[flen - 3] = 'i';
-	_capname[flen - 2] = 'j';
-	_capname[flen - 1] = 'c';
-
-	fijc = fopen(_capname, "wb+");
+	fijc = fopen(_ijcname, "wb+");
 
 	flen = 0;
-	flen += copy_component(cap, COMP_HEADER, fijc);
-	flen += copy_component(cap, COMP_DIRECTORY, fijc);
-	flen += copy_component(cap, COMP_IMPORT, fijc);
-	flen += copy_component(cap, COMP_APPLET, fijc);
-	flen += copy_component(cap, COMP_CLASS, fijc);
-	flen += copy_component(cap, COMP_METHOD, fijc);
-	flen += copy_component(cap, COMP_STATICFIELD, fijc);
-	flen += copy_component(cap, COMP_EXPORT, fijc);
-	flen += copy_component(cap, COMP_CONSTANTPOOL, fijc);
-	flen += copy_component(cap, COMP_REFLOCATION, fijc);
-	flen += copy_component(cap, COMP_DESCRIPTOR, fijc);
-	flen += copy_component(cap, COMP_DEBUG, fijc);
+	flen += copy_component(cap, COMP_HEADER, fijc, verbose);
+	flen += copy_component(cap, COMP_DIRECTORY, fijc, verbose);
+	flen += copy_component(cap, COMP_IMPORT, fijc, verbose);
+	flen += copy_component(cap, COMP_APPLET, fijc, verbose);
+	flen += copy_component(cap, COMP_CLASS, fijc, verbose);
+	flen += copy_component(cap, COMP_METHOD, fijc, verbose);
+	flen += copy_component(cap, COMP_STATICFIELD, fijc, verbose);
+	flen += copy_component(cap, COMP_EXPORT, fijc, verbose);
+	flen += copy_component(cap, COMP_CONSTANTPOOL, fijc, verbose);
+	flen += copy_component(cap, COMP_REFLOCATION, fijc, verbose);
+	if (all_components) {
+		flen += copy_component(cap, COMP_DESCRIPTOR, fijc, verbose);
+		flen += copy_component(cap, COMP_DEBUG, fijc, verbose);
+	}
 
 	zip_close(cap);
 	fclose(fijc);
 
-	printf("\n Total IJC size: %d bytes\n", flen);
+	if (verbose)
+		printf("\n Total IJC size: %d bytes\n", flen);
+}
+
+void cap2apdu(char* _capname, uint8_t block)
+{
+	zip_t* cap = NULL;
+	FILE* fpcom;
+	FILE* fsimshell;
+	int errorp = 0;
+	int flen;
+	char pcom_name[1024];
+	char simshell_name[1024];
+
+	cap = zip_open(_capname, 0, &errorp);
+
+	if (cap == NULL) {
+		printf("Failed to open CAP file %s\n", _capname);
+
+		return;
+	}
+
+	flen = (int)strlen(_capname);
+	strcpy(simshell_name, _capname);
+	simshell_name[flen++] = '.';
+	simshell_name[flen++] = 's';
+	simshell_name[flen++] = 'i';
+	simshell_name[flen++] = 'm';
+	simshell_name[flen++] = 's';
+	simshell_name[flen++] = 'h';
+	simshell_name[flen++] = 0x00;
+
+	flen = (int)strlen(_capname);
+	strcpy(pcom_name, _capname);
+	pcom_name[flen++] = '.';
+	pcom_name[flen++] = 'p';
+	pcom_name[flen++] = 'c';
+	pcom_name[flen++] = 'o';
+	pcom_name[flen++] = 'm';
+	pcom_name[flen++] = 0x00;
+
+	fsimshell = fopen(simshell_name, "wt+");
+	fpcom = fopen(pcom_name, "wt+");
+
+//	fprintf(simshell_name, "/card\n");
+//	fprintf(simshell_name, "auth\n\n");
+
+	flen = 0;
+	counterP2 = 0;
+
+	if (!install_for_load_2_apdu(cap, fsimshell, fpcom, (block == 0)))
+		return;
+
+	if (0 == block) {
+		// COMP_HEADER loaded during Install for LOAD
+		// flen += component_zip_2_apdu(cap, COMP_HEADER, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_DIRECTORY, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_IMPORT, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_APPLET, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_CLASS, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_METHOD, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_STATICFIELD, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_EXPORT, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_CONSTANTPOOL, fsimshell, fpcom, false);
+		flen += component_zip_2_apdu(cap, COMP_REFLOCATION, fsimshell, fpcom, true);
+		//flen += component_zip_2_apdu(cap, COMP_DESCRIPTOR, fsimshell, fpcom, false);
+		//flen += component_zip_2_apdu(cap, COMP_DEBUG, fsimshell, fpcom, true);
+	}
+	zip_close(cap);
+
+	if (block > 0) {
+		char ijcname[1024];
+		FILE* fijc;
+		int ijc_sz;
+		uint8_t apdu[255 + 5];
+
+		flen = (int)strlen(_capname);
+		strcpy(ijcname, _capname);
+		ijcname[flen++] = '~';
+		ijcname[flen++] = 'i';
+		ijcname[flen++] = 'j';
+		ijcname[flen++] = 'c';
+		ijcname[flen++] = 0x00;
+
+		cap2ijc(_capname, ijcname, 
+			false, // == Verbose
+			false); // == All components
+
+		fijc = fopen(ijcname, "rb");
+
+		fseek(fijc, 0, SEEK_END);
+		ijc_sz = ftell(fijc);
+
+		fseek(fijc, 0, SEEK_SET);
+
+		counterP2 = 0;
+
+		apdu[0] = 0x80;
+		apdu[1] = INS_GP_LOAD;
+		apdu[2] = 0;
+		apdu[3] = counterP2++;
+		apdu[4] = 0; // To be updated
+
+		{
+			int len_read;
+
+			int len = 5;
+			apdu[len++] = 0xC4;
+			if (ijc_sz > 255) {
+				apdu[len++] = 0x82;
+				apdu[len++] = ijc_sz >> 8;
+			}
+			else
+				if (ijc_sz > 127) {
+					apdu[len++] = 0x81;
+				}
+			apdu[len++] = ijc_sz & 0xFF;
+
+			len_read = (int)fread(&apdu[len], 1, block + 5 - len, fijc);
+			apdu[4] = block;
+			ijc_sz -= len_read;
+
+			save_apdu(fsimshell, fpcom, apdu, block + 5);
+
+			while (ijc_sz) {
+				len_read = (int)fread(&apdu[5], 1, block, fijc);
+
+				apdu[3] = counterP2++;
+				apdu[4] = len_read;
+
+				ijc_sz -= len_read;
+
+				if (ijc_sz == 0)
+					apdu[2] = 0x80;
+
+				save_apdu(fsimshell, fpcom, apdu, len_read + 5);
+			}
+		}
+
+
+		fclose(fijc);
+		remove(ijcname);
+	}
+
+	fclose(fsimshell);
+	fclose(fpcom);
+
+	printf("\n Total APDU payload: %d bytes\n", flen);
 }

@@ -22,7 +22,7 @@
  * 1.   [+] JVM CAP, IJC: /cap-info											06 FEB 2024		v. ..
  *   a. [+] cap2ijc converter												07 JAN 2024		v. ..
  *   b. [+] IJC upload														08 FEB 2024		v. 0.03.34
- *   c.     cap2pcom: applet to APDU
+ *   c. [+] cap2apdu: applet to APDU script                                 11 APR 2024     v. 0.03.38
  * 2.       JCShell script support
  *   a.     Variables, # and %
  *   b.     Delete, install

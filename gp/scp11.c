@@ -63,7 +63,7 @@ void cmd_scp11_perform_security_operation(void)
 	apdu.cmd[ apdu.cmd_len++ ] = 's';
 	apdu.cmd[ apdu.cmd_len++ ] = 'd';
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 
 	if (0x61 == apdu.resp[ apdu.resp_len - 2 ]) {
@@ -93,7 +93,7 @@ void cmd_scp11_perform_security_operation(void)
 	apdu.cmd[ apdu.cmd_len++ ] = 0x11;
 	apdu.cmd[ apdu.cmd_len++ ] = 0x20;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	if (0x61 == apdu.resp[ apdu.resp_len - 2 ]) {
 		apdu.resp_len = get_response(apdu.resp[ apdu.resp_len - 1 ], apdu.resp, sizeof(apdu.resp));

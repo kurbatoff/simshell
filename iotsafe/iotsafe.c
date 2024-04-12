@@ -46,7 +46,7 @@ static int select_IOT_SATE()
 	memcpy(&apdu.cmd[apdu.cmd_len], IOTSAFE_AID, sizeof(IOTSAFE_AID));
 	apdu.cmd_len += sizeof(IOTSAFE_AID);
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -127,7 +127,7 @@ void cmd_IOTSafe_info(void)
 //	apdu.cmd[apdu.cmd_len++] = DO_GSMA_EUICC_INFO_1 & 0xFF;
 	apdu.cmd[apdu.cmd_len++] = 0;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -148,7 +148,7 @@ void cmd_IOTSafe_info(void)
 //	apdu.cmd[apdu.cmd_len++] = DO_GSMA_EUICC_INFO_2 & 0xFF;
 	apdu.cmd[apdu.cmd_len++] = 0;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));

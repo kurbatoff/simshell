@@ -44,6 +44,7 @@ static void cmd_version(char* _cmd);
 
 static void cmd_S_capinfo(char* _cmd);
 static void cmd_S_cap2ijc(char* _cmd);
+static void cmd_S_cap2apdu(char* _cmd);
 static void cmd_S_listreaders(char* _cmd);
 static void cmd_S_term(char* _cmd);
 static void cmd_S_close(char* _cmd);
@@ -62,6 +63,7 @@ static void cmd_upload(char* _cmd);
 static void cmd_delete(char* _cmd);
 
 static void cmd_euicc(char* _cmd);
+static void cmd_iotsafe(char* _cmd);
 
 //static void cmd_S_echo(char* _cmd);
 //static void cmd_S_sleep(char* _cmd);
@@ -168,6 +170,12 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		cmd_S_cap2ijc
 	},
 	{
+		"/cap2apdu",
+		"\n\"/cap2apdu file.CAP\":\n Usage:\n    file: the .CAP file name\n",
+		" /cap2apdu     [-] Convert .CAP file into APDU commands\n",
+		cmd_S_cap2apdu
+	},
+	{
 		"upload",
 		"\n\"upload\"\n",
 		" upload            Load .CAP or .IJC file\n",
@@ -184,6 +192,12 @@ simshell_command_t commands_array[SHELL_COMMANDS_COUNT] = {
 		"\n\"uicc\" eid|info|pl|enable|disable|delete|download|reset\n",
 		" uicc              Perform ISD-R function: eid|info|pl|enable|disable|delete|download|reset\n",
 		cmd_euicc
+	},
+	{
+		"iotsafe",
+		"\n\"iotsafe\" dir|encrypt|decrypt|sign|verify|...\n",
+		" iotsafe           Perform IoT SAFE function: dir|encrypt|decrypt|sign|verify|...t\n",
+		cmd_iotsafe
 	},
 	{
 		"ls",
@@ -450,7 +464,7 @@ static void cmd_S_send(char* _cmd)
 		offset += 2;
 	}
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 }
 
 /**
@@ -470,7 +484,30 @@ static void cmd_S_capinfo(char* _cmd)
  */
 static void cmd_S_cap2ijc(char* _cmd)
 {
-	cap2ijc(&_cmd[9]);
+	char ijcname[1024];
+	int flen;
+
+	char* capname = &_cmd[9];
+
+	strcpy(ijcname, capname);
+
+	flen = (int)strlen(ijcname);
+	ijcname[flen - 3] = 'i';
+	ijcname[flen - 2] = 'j';
+	ijcname[flen - 1] = 'c';
+
+	cap2ijc(capname, ijcname, true, true);
+}
+
+/**
+ * @brief /cap2apdu callback function
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_S_cap2apdu(char* _cmd)
+{
+	//cap2apdu(&_cmd[10]);
+	cap2apdu(&_cmd[10], 160);
 }
 
 /**
@@ -635,7 +672,17 @@ static void cmd_delete(char* _cmd)
 	apdu.cmd[4] = apdu.cmd_len - 5;
 	apdu.cmd[6] = apdu.cmd_len - 7;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
+}
+
+/**
+ * @brief iotsafe: Implements set of IoT SAFE commands
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_iotsafe(char* _cmd)
+{
+	printf(COLOR_CYAN "\n IoT SAFE-R" COLOR_RESET " commands\n");
 }
 
 /**

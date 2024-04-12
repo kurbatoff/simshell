@@ -64,7 +64,7 @@ void print_reader_name(void);
  * \return                    An error code on failure.
  *
  */
-pcsc_error_t pcsc_sendAPDU(uint8_t* _cmd, uint16_t _cmd_len,
+pcsc_error_t pcsc_send_plain_APDU(uint8_t* _cmd, uint16_t _cmd_len,
 	uint8_t* _response_buffer, uint16_t _response_buffer_sz, uint16_t* _response_length);
 
 pcsc_error_t pcsc_listreaders(void);

@@ -42,7 +42,6 @@
 #include <ctype.h>
 #include <time.h>
 
-#include "shell.h"
 #include "libApduEngine.h"
 #include "tools.h"
 #include "pcscwrap.h"
@@ -75,6 +74,7 @@ static char SWexp[32]; // Sequence of expected SW(s) in CAPITAL hex: '61XX91XX90
 static char DATAexp[512]; // Expected DATA in CAPITAL hex
 
 static char PartString[2048];
+static char ScriptFolder[1024];
 
 /**
 * SEQUENSE of:
@@ -135,7 +135,7 @@ static int errors_count()
     return errors.comm + errors.data + errors.status + errors.syntax;
 }
 
-static void print_Buffers_()
+static void print_Buffers()
 {
     char B[4] = { ' ', 'G', ':', 0 };
 
@@ -145,6 +145,21 @@ static void print_Buffers_()
             dump_hexascii_buffer(B, BUFFs[i].data, BUFFs[i].len);
         B[1]++;
     }
+    printf("\n");
+}
+
+static void print_Buffer(char b)
+{
+    char s[16];
+    uint8_t idx;
+
+    idx = b - BUFFER_ZERO;
+    b = toupper(b);
+
+    sprintf(s, " Buffer %c:", b);
+
+
+    dump_hexascii_buffer(s, BUFFs[idx].data, BUFFs[idx].len);
     printf("\n");
 }
 
@@ -337,7 +352,7 @@ static int process_SET_BUFFER(char* _cmd)
     convert_hex2bin(value, (uint8_t* )value, value_len);
     set_Buffer(buf_idx, (uint8_t* )value, value_len);
 
-    //print_Buffers();
+    print_Buffers();
 
     return 0;
 }
@@ -527,7 +542,11 @@ static int proceed_Directives(char* cmd)
     int res = 0;
 
     if (memcmp(cmd, ".insert", 7) == 0) {
-        //
+        if (pcsc_listreaders() != PCSC_SUCCESS) {
+            errors.comm++;
+            return -1;
+        }
+
         return 0;
     }
 
@@ -565,7 +584,7 @@ static int proceed_Directives(char* cmd)
         FILE* file;
         char fullname[1024];
 
-        sprintf(fullname, "%s/%s", gStartFolder , &cmd[6]);
+        sprintf(fullname, "%s/%s", ScriptFolder, &cmd[6]);
 
         if ((file = fopen(fullname, "r")))
         {
@@ -575,7 +594,7 @@ static int proceed_Directives(char* cmd)
             return 0;
         }
 
-        sprintf(fullname, "%s/pcom/%s", gStartFolder , &cmd[6]);
+        sprintf(fullname, "%s/pcom/%s", ScriptFolder, &cmd[6]);
 
         if ((file = fopen(fullname, "r")))
         {
@@ -588,12 +607,27 @@ static int proceed_Directives(char* cmd)
         return 1;
     }
 
-    if (memcmp(cmd, ".load", 5) == 0) {
+    if (memcmp(cmd, ".display", 8) == 0) {
 
-        // TODO
-        // Activate built-in functions...
+        print_Buffer(cmd[9]);
+        return 0;
+    }
+
+    if (memcmp(cmd, ".load", 5) == 0) {
         return res;
     }
+    if (memcmp(cmd, ".unload", 7) == 0) {
+        return res;
+    }
+
+//    if () {
+    if (memcmp(cmd, ".set_key", 8) == 0) {
+        printf("%s\n", cmd);
+
+        return res;
+    }
+    //    }
+
 
     return 0;
 }
@@ -754,10 +788,22 @@ void execute_PCOM(const char* _filename)
     char fileline[1024];
     clock_t start, stop;
 
-    if (pcsc_listreaders() != PCSC_SUCCESS) {
-        errors.comm++;
-        return;
+    // Copy script folder
+    strcpy(ScriptFolder, _filename);
+    while (1) {
+        size_t len = strlen(ScriptFolder);
+
+        if (0 == len)
+            break;
+
+        if (ScriptFolder[len - 1] == '\\') {
+            ScriptFolder[len - 1] = 0x00;
+            break;
+        }
+
+        ScriptFolder[len - 1] = 0x00;
     }
+
 
     if ((fc = fopen(_filename, "r")) == NULL) {
         printf("Cannot open PCOM file %s\n", _filename);
@@ -966,12 +1012,6 @@ int execute_OneLine(const char* _fileline)
 
     {
         apdu_t apdu;
-//        uint8_t apdu[255 + 5] = { 0, 0, 0, 0, 0 };
-//        uint8_t response[258];
-//        uint16_t response_length;
-//        uint8_t lc;
-//        uint8_t le;
-//        uint8_t with_le;
         int err_data, err_sw;
 
         i = 0;
@@ -981,11 +1021,13 @@ int execute_OneLine(const char* _fileline)
         }
         apdu.cmd_len = i;
 
-        pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+        if (PCSC_SUCCESS != pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len))
+        {
+            return -1;
+        }
 
         set_Buffer(BUFF_W, &apdu.resp[apdu.resp_len - 2], 2);
         set_Buffer(BUFF_R, apdu.resp, apdu.resp_len - 2);
-
         
         err_data = check_DATA(apdu.resp, apdu.resp_len - 2);
         err_sw = check_SW(&apdu.resp[apdu.resp_len - 2]);

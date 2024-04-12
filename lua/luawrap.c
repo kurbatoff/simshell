@@ -24,6 +24,7 @@
 
 #include "shell.h"
 #include "gp.h"
+#include "globalplatform.h"
 #include "cap.h"
 #include "tools.h"
 #include "pcscwrap.h"
@@ -117,7 +118,7 @@ static int Lua_select_ISD(lua_State* L)
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 	apdu.cmd[apdu.cmd_len++] = 0;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -137,7 +138,7 @@ static int Lua_send_apdu(lua_State* L)
 
 	apdu.cmd_len = lua_popup_array(L, apdu.cmd);
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	lua_createtable(L, apdu.resp_len, 0);
 
@@ -247,7 +248,7 @@ static int Lua_install(lua_State* L)
 
 	apdu.cmd[4] = apdu.cmd_len - 5;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));

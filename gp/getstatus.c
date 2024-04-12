@@ -21,8 +21,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "gp.h"
 #include "getstatus.h"
+
+#include "globalplatform.h"
+#include "gp.h"
 #include "pcscwrap.h"
 #include "tools.h"
 #include "iso7816.h"
@@ -276,7 +278,7 @@ int get_status()
 	apdu.cmd[ apdu.cmd_len++ ] = TAG_AID;
 	apdu.cmd[ apdu.cmd_len++ ] = 0x00;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -298,7 +300,7 @@ int get_status()
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 
 	while (1) {
-		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+		gp_send_APDU(&apdu);
 
 		if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 			apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -330,7 +332,7 @@ int get_status()
 	apdu.cmd[apdu.cmd_len++] = 0x00;
 
 	while (1) {
-		pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+		gp_send_APDU(&apdu);
 
 		if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 			apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -441,7 +443,8 @@ void cmd_getdata(char* _cmd)
 	apdu.cmd[apdu.cmd_len++] = tag & 0xFF;
 	apdu.cmd[apdu.cmd_len++] = 0;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	gp_send_APDU(&apdu);
+	
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));

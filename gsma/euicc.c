@@ -40,7 +40,7 @@ static int select_ISD_R()
 	memcpy(&apdu.cmd[apdu.cmd_len], ISDR, sizeof(ISDR));
 	apdu.cmd_len += sizeof(ISDR);
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -567,7 +567,7 @@ void cmd_euicc_pl(void)
 	apdu.cmd[apdu.cmd_len++] = DO_GSMA_GET_PROFILE_INFO & 0xFF;
 	apdu.cmd[apdu.cmd_len++] = 0;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	pl_sz = 0;
 	while (0x61 == apdu.resp[apdu.resp_len - 2]) {
@@ -605,7 +605,7 @@ void cmd_euicc_eid(void)
 	apdu.cmd[apdu.cmd_len++] = 0x01;
 	apdu.cmd[apdu.cmd_len++] = 0x5A;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -636,7 +636,7 @@ void cmd_euicc_info(void)
 	apdu.cmd[apdu.cmd_len++] = DO_GSMA_EUICC_INFO_1 & 0xFF;
 	apdu.cmd[apdu.cmd_len++] = 0;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
@@ -657,7 +657,7 @@ void cmd_euicc_info(void)
 	apdu.cmd[apdu.cmd_len++] = DO_GSMA_EUICC_INFO_2 & 0xFF;
 	apdu.cmd[apdu.cmd_len++] = 0;
 
-	pcsc_sendAPDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
+	pcsc_send_plain_APDU(apdu.cmd, apdu.cmd_len, apdu.resp, sizeof(apdu.resp), &apdu.resp_len);
 
 	if (0x61 == apdu.resp[apdu.resp_len - 2]) {
 		apdu.resp_len = get_response(apdu.resp[apdu.resp_len - 1], apdu.resp, sizeof(apdu.resp));
