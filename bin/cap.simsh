@@ -11,4 +11,5 @@
 
 #/cap2ijc cap/tracker.cap
 
-/cap2apdu K:\V.CPP\simshell\bin\cap\tracker.cap
+#/cap2apdu K:\V.CPP\simshell\bin\cap\tracker.cap
+/cap2apdu M:\eclipse.oxygen\MilenageSwitcher\bin\org\intergalaxy\milenage\javacard\milenage.cap

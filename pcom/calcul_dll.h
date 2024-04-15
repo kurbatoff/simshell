@@ -25,13 +25,14 @@
 extern "C" {
 #endif
 
+bool is_calcul_loaded(void);
 void load_calcul_dll(void);
 void unload_calcul_dll(void);
 
 void set_data(char* str);
 void set_key(char* str);
 void set_init_vec(char* str);
-void des3k(void);
+void des3k(char* str);
 
 
 #if defined(__cplusplus)

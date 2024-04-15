@@ -21,18 +21,11 @@
 
 #include <stdint.h>
 
-#define BUFFER_MAX_LEN 2048
-
 struct errorCount_t {
 	int status;
 	int syntax;
 	int data;
 	int comm;
-};
-
-struct buffer_t {
-    int len;
-    uint8_t data[BUFFER_MAX_LEN];
 };
 
 void execute_PCOM(const char* _filename);

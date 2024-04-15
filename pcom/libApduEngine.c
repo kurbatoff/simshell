@@ -45,29 +45,10 @@
 #include "libApduEngine.h"
 #include "tools.h"
 #include "pcscwrap.h"
+#include "pcom_buffers.h"
 
-#define BUFFER_ZERO 'g'
-#define BUFFER_MAX_COUNT ('w' - BUFFER_ZERO + 1)
+#include "calcul_dll.h"
 
-#define BUFF_G      ('g' - BUFFER_ZERO)
-#define BUFF_H      ('h' - BUFFER_ZERO)
-#define BUFF_I      ('i' - BUFFER_ZERO)
-#define BUFF_J      ('j' - BUFFER_ZERO)
-#define BUFF_K      ('k' - BUFFER_ZERO)
-#define BUFF_L      ('l' - BUFFER_ZERO)
-#define BUFF_M      ('m' - BUFFER_ZERO)
-#define BUFF_N      ('n' - BUFFER_ZERO)
-#define BUFF_O      ('o' - BUFFER_ZERO)
-#define BUFF_P      ('p' - BUFFER_ZERO)
-#define BUFF_Q      ('q' - BUFFER_ZERO)
-#define BUFF_R      ('r' - BUFFER_ZERO)
-#define BUFF_S      ('s' - BUFFER_ZERO)
-#define BUFF_T      ('t' - BUFFER_ZERO)
-#define BUFF_U      ('u' - BUFFER_ZERO)
-#define BUFF_V      ('v' - BUFFER_ZERO)
-#define BUFF_W      ('w' - BUFFER_ZERO)
-
-static struct buffer_t BUFFs[BUFFER_MAX_COUNT];
 static struct errorCount_t errors;
 
 static char SWexp[32]; // Sequence of expected SW(s) in CAPITAL hex: '61XX91XX9000'
@@ -118,8 +99,7 @@ static void leftshift_n(char* _s, int n)
 
 static void clear_all()
 {
-    for (int i = 0; i < BUFFER_MAX_COUNT; i++)
-        BUFFs[i].len = 0;
+    clear_buffers();
 
     errors.comm = 0;
     errors.data = 0;
@@ -133,40 +113,6 @@ static void clear_all()
 static int errors_count()
 {
     return errors.comm + errors.data + errors.status + errors.syntax;
-}
-
-static void print_Buffers()
-{
-    char B[4] = { ' ', 'G', ':', 0 };
-
-    printf(COLOR_YELLOW " Buffers:\n" COLOR_RESET);
-    for (int i = 0; i < BUFFER_MAX_COUNT; i++) {
-        if (BUFFs[i].len)
-            dump_hexascii_buffer(B, BUFFs[i].data, BUFFs[i].len);
-        B[1]++;
-    }
-    printf("\n");
-}
-
-static void print_Buffer(char b)
-{
-    char s[16];
-    uint8_t idx;
-
-    idx = b - BUFFER_ZERO;
-    b = toupper(b);
-
-    sprintf(s, " Buffer %c:", b);
-
-
-    dump_hexascii_buffer(s, BUFFs[idx].data, BUFFs[idx].len);
-    printf("\n");
-}
-
-static void set_Buffer(uint8_t idx, uint8_t* value, int len)
-{
-    BUFFs[idx].len = len;
-    memcpy(BUFFs[idx].data, value, len);
 }
 
 static void print_Defines_()
@@ -343,7 +289,6 @@ static int process_SET_BUFFER(char* _cmd)
         else
             value_len++;
     }
-
 
     buf_idx = *name - BUFFER_ZERO;
 
@@ -540,6 +485,34 @@ static int replace_defines_and_buffers(char* _s)
 static int proceed_Directives(char* cmd)
 {
     int res = 0;
+    char* arg1 = cmd;
+
+    while (1) {
+        switch (arg1[0]) {
+            case 0x20:
+            case 0x09:
+                break;
+
+            default:
+                arg1++;
+                continue;
+        }
+
+        arg1++; // skip SPACE
+        break;
+    }
+
+    if (memcmp(cmd, ".define", 7) == 0) {
+        res = process_DEFINE(&cmd[8]);
+
+        return res;
+    }
+
+    if (memcmp(cmd, ".set_buffer", 11) == 0) {
+        res = process_SET_BUFFER(&cmd[12]);
+
+        return res;
+    }
 
     if (memcmp(cmd, ".insert", 7) == 0) {
         if (pcsc_listreaders() != PCSC_SUCCESS) {
@@ -561,18 +534,6 @@ static int proceed_Directives(char* cmd)
     if (memcmp(cmd, ".power_off", 10) == 0) {
         disconnect_reader();
         return 0;
-    }
-
-    if (memcmp(cmd, ".define", 7) == 0) {
-        res = process_DEFINE(&cmd[8]);
-
-        return res;
-    }
-
-    if (memcmp(cmd, ".set_buffer", 11) == 0) {
-        res = process_SET_BUFFER(&cmd[12]);
-
-        return res;
     }
 
     if (memcmp(cmd, ".allundefine", 12) == 0) {
@@ -614,21 +575,49 @@ static int proceed_Directives(char* cmd)
     }
 
     if (memcmp(cmd, ".load", 5) == 0) {
-        return res;
+        load_calcul_dll();
+
+        return 0;
     }
+
     if (memcmp(cmd, ".unload", 7) == 0) {
-        return res;
+        unload_calcul_dll();
+
+        return 0;
     }
 
-//    if () {
-    if (memcmp(cmd, ".set_key", 8) == 0) {
-        printf("%s\n", cmd);
 
-        return res;
-    }
-    //    }
+    if (is_calcul_loaded()) {
+    
+        // A. SET_KEY takes destination buffer; no process
+        if (memcmp(cmd, ".des3k", 6) == 0) {
+            printf("%s\n", cmd);
+
+            des3k(&cmd[7]);
+            return res;
+        }
 
 
+        // B. Other .directives specify source buffer, to be proceed
+        replace_defines_and_buffers(arg1);
+
+        if (memcmp(cmd, ".set_key", 8) == 0) {
+
+            set_key(&cmd[9]);
+            return res;
+        }
+        if (memcmp(cmd, ".set_data", 9) == 0) {
+            printf("%s\n", cmd);
+
+            set_data(&cmd[10]);
+            return res;
+        }
+    } // Calcul.dll LOADED
+
+
+
+    //
+    printf(COLOR_WHITE "\n Unknow directive: " COLOR_RED "%s \n" COLOR_RESET, cmd);
     return 0;
 }
 
@@ -777,7 +766,7 @@ static void finishExecution(clock_t duration)
         printf(COLOR_RED " ------------------------------------------------\n" COLOR_RESET);
     }
 
-    printf("  Script execution time:");
+    printf("  Execution time:");
     printf(COLOR_CYAN " %02d:%02d:%02d.%03d\n" COLOR_RESET, tm_hour, tm_min, tm_sec, tm_ms);
 }
 

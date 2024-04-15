@@ -504,7 +504,8 @@ static void save_apdu(FILE* fsimshell, FILE* fpcom, uint8_t* apdu, int len)
 	apdu_s[11] = ' ';
 	convert_bin2hex(&apdu[5], &apdu_s[12], len - 5);
 
-	fprintf(fpcom, "%s [00] 9000\n", apdu_s);
+	fprintf(fpcom, "%s (6101)\n", apdu_s);
+//	fprintf(fpcom, "00C00000 01 [00] (9000)\n");
 	fprintf(fsimshell, "/send \"%s\" 009000\n", apdu_s);
 }
 
