@@ -566,23 +566,26 @@ static void print_components_zip(zip_t* _cap, struct zip_stat* _finfo)
 {
 	int count;
 	int len;
-	int cname;
 
 	count = 0;
 	while ((zip_stat_index(_cap, count, 0, _finfo)) == 0)
 	{
 		char* component;
 
-		len = (int)_finfo->size;
-		cname = (int)strlen(_finfo->name);
-		component = (char* )&_finfo->name[cname - 1];
+		len = (int)strlen(_finfo->name);
+		component = (char*)&_finfo->name[len - 3];
 
-		while (*component != '/')
-			component--;
+		// To exclude \META-INF\MANIFEST.MF etc
+		if (component[0] == 'c' && component[1] == 'a' && component[2] == 'p') {
+			len = (int)_finfo->size;
 
-		component++; // next after '/'
+			while (*component != '/')
+				component--;
 
-		printf("   %-16s : %d bytes\n", component, (int)len);
+			component++; // next after '/'
+
+			printf("   %-16s : %d bytes\n", component, (int)len);
+		}
 
 		count++;
 	}
@@ -591,9 +594,12 @@ static void print_header_component(uint8_t* _buffer)
 {
 	int len;
 	int offset;
+	int comp_sz;
+
+	comp_sz = _buffer[1] * 0x100 + _buffer[2] + 3;
 
 	offset = 7;
-	printf(" CAP file version   : %d.%d\n", _buffer[offset], _buffer[offset + 1]);
+	printf(" CAP file version   : %d.%d\n", _buffer[offset + 1], _buffer[offset]);
 	offset += 2;
 
 	printf(" Integer support    : %s\n", _buffer[offset] & 0x01 ? "Yes" : "No");
@@ -601,7 +607,7 @@ static void print_header_component(uint8_t* _buffer)
 	//printf(" Applet component   : %s\n", _buffer[offset] & 0x04 ? "Yes" : "No");
 	offset++;
 
-	printf(" Package version    : %d.%d\n", _buffer[offset], _buffer[offset + 1]);
+	printf(" Package version    : %d.%d\n", _buffer[offset + 1], _buffer[offset]);
 	offset += 2;
 
 	len = _buffer[offset++];
@@ -611,11 +617,13 @@ static void print_header_component(uint8_t* _buffer)
 		printf("%02X", _buffer[offset++]);
 	printf("\n");
 
-	len = _buffer[offset++];
+	printf(" Internal pkg name  : ");
+	if (comp_sz > offset) {
+		len = _buffer[offset++];
 
-	printf(" Package name       : ");
-	for (int j = 0; j < len; j++)
-		printf("%c", _buffer[offset++]);
+		for (int j = 0; j < len; j++)
+			printf("%c", _buffer[offset++]);
+	}
 	printf("\n");
 }
 
@@ -678,6 +686,7 @@ static void print_header_zip(zip_t* _cap, struct zip_stat* _finfo)
 
 		fd = zip_fopen_index(_cap, _finfo->index, 0);
 		len_read = (int)zip_fread(fd, buffer, len);
+		zip_fclose(fd);
 
 		print_header_component(buffer);
 	}
@@ -700,6 +709,7 @@ static void print_import_zip(zip_t* _cap, struct zip_stat* _finfo)
 
 		fd = zip_fopen_index(_cap, _finfo->index, 0);
 		len_read = (int)zip_fread(fd, buffer, len);
+		zip_fclose(fd);
 
 		print_import_component(buffer);
 	}
@@ -723,6 +733,7 @@ static void print_applet_zip(zip_t* _cap, struct zip_stat* _finfo)
 
 		fd = zip_fopen_index(_cap, _finfo->index, 0);
 		len_read = (int)zip_fread(fd, buffer, len);
+		zip_fclose(fd);
 
 		print_applet_component(buffer);
 	}
@@ -858,7 +869,6 @@ void print_cap_info(const char* _filename)
 	FILE* fp = NULL;
 	zip_t* cap = NULL;
 	struct zip_stat finfo;
-	zip_file_t* fd = NULL; 
 	int errorp = 0;
 	bool is_zip;
 
@@ -868,6 +878,7 @@ void print_cap_info(const char* _filename)
 
 	if (is_zip) {
 		cap = zip_open(_filename, 0, &errorp);
+
 		if (cap == NULL) {
 			printf("Failed to open CAP file\n");
 			return;
@@ -910,7 +921,9 @@ void print_cap_info(const char* _filename)
 	}
 
 	if (is_zip) {
-		zip_close(cap);
+		if (0 != zip_close(cap)) {
+			printf(" ERROR closing ZIP..\n");
+		}
 	}
 	else {
 		fclose(fp);

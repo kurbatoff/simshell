@@ -45,6 +45,7 @@ static void cmd_version(char* _cmd);
 static void cmd_S_capinfo(char* _cmd);
 static void cmd_S_cap2ijc(char* _cmd);
 static void cmd_S_cap2apdu(char* _cmd);
+
 static void cmd_S_listreaders(char* _cmd);
 static void cmd_S_term(char* _cmd);
 static void cmd_S_close(char* _cmd);
@@ -506,8 +507,7 @@ static void cmd_S_cap2ijc(char* _cmd)
  */
 static void cmd_S_cap2apdu(char* _cmd)
 {
-	//cap2apdu(&_cmd[10]);
-	cap2apdu(&_cmd[10], 160);
+	cap2apdu(&_cmd[10], 152);
 }
 
 /**
