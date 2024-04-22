@@ -487,9 +487,13 @@ static bool load_component_zip(zip_t* _cap, const char* _cname, uint8_t _last)
 		gp_send_APDU(&apdu);
 		apdu.sw_ = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
 
-		if (apdu.sw_ != 0x9000 && apdu.sw_ != 0x6101)
+		if (apdu.sw_ != 0x9000 && apdu.sw_ != 0x6101) {
+			zip_fclose(fd);
 			return false;
+		}
+
 	}
+	zip_fclose(fd);
 
 	return true;
 }
@@ -950,6 +954,7 @@ static bool install_for_load_zip(zip_t* _cap)
 	header_len = (int)finfo.size;
 	fd = zip_fopen_index(_cap, finfo.index, 0);
 	total_sz = (int)zip_fread(fd, buffer_header, header_len);
+	zip_fclose(fd);
 
 	total_sz += load_size_cap(_cap, &finfo);
 
