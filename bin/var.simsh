@@ -1,0 +1,5 @@
+
+/set-var path K:\V.CPP\simshell\bin
+/set-var X 0102030405
+/set-var Y A0A1A2
+/list-vars

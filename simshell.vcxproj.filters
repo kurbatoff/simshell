@@ -28,9 +28,6 @@
     <Filter Include="Source files\mbed">
       <UniqueIdentifier>{13d738d2-e582-4fa5-b4dc-2bd8c0ee7953}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source files\esim">
-      <UniqueIdentifier>{98701625-e40f-4234-b8f2-15d62b836314}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\cap">
       <UniqueIdentifier>{ec791d62-67ad-41f2-b7a3-37dac96a226e}</UniqueIdentifier>
     </Filter>
@@ -39,6 +36,9 @@
     </Filter>
     <Filter Include="Source files\IoTSafe">
       <UniqueIdentifier>{485727fc-762a-4720-8f50-77f03151fdb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\euicc">
+      <UniqueIdentifier>{98701625-e40f-4234-b8f2-15d62b836314}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -100,7 +100,7 @@
       <Filter>Source files\PCSC</Filter>
     </ClCompile>
     <ClCompile Include="gsma\euicc.c">
-      <Filter>Source files\esim</Filter>
+      <Filter>Source files\euicc</Filter>
     </ClCompile>
     <ClCompile Include="shell\vars.c">
       <Filter>Source files\Shell</Filter>

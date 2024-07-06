@@ -31,7 +31,7 @@ typedef struct apdu_t
 	uint16_t cmd_len;
 	uint8_t resp[ PCSC_APDU_R_BUFF_LEN ];
 	uint16_t resp_len;
-	uint16_t sw_;
+	uint16_t sw;
 } apdu_t;
 
 

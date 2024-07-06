@@ -22,7 +22,7 @@
 *   TODO
 * [+]  1. .POWER_ON
 * [+]  2. .POWER_OFF
-*      3. .INSERT
+* [+]  3. .INSERT
 * [+]  4. Check SW
 * 
 * [+]  5. Check DATA
@@ -66,11 +66,18 @@ static char ScriptFolder[1024];
 * }
 * 
 */
-static uint8_t DEFs[8 * 1024];
+static uint8_t VARs[8 * 1024];
 
 static int replace_defines_and_buffers(char* _s);
 static void print_syntax_error(const char* _str, int _pos);
 static void print_sw_error(const char* sw);
+
+static printf_error(int _idx, char* _line, char* _cmt)
+{
+    printf("\n");
+    printf(COLOR_RED  " Error: %s\n" COLOR_RESET, _cmt);
+    printf(COLOR_CYAN " LINE %d:" COLOR_RESET " %s\n", _idx, _line);
+}
 
 static void leftshift(char* _s)
 {
@@ -99,6 +106,7 @@ static void leftshift_n(char* _s, int n)
 
 static void clear_all()
 {
+    VARs[0] = 0;
     clear_buffers();
 
     errors.comm = 0;
@@ -106,7 +114,6 @@ static void clear_all()
     errors.status = 0;
     errors.syntax = 0;
 
-    DEFs[0] = 0;
     PartString[0] = 0;
 }
 
@@ -123,32 +130,32 @@ static void print_Defines_()
 
     printf(COLOR_YELLOW " Defines:\n" COLOR_RESET);
 
-    //dump_hexascii_buffer(" DEFs:", DEFs, 128);
+    //dump_hexascii_buffer(" VARs:", VARs, 128);
 
-    while (DEFs[offset] != 0) {
-        len = DEFs[offset++];
+    while (VARs[offset] != 0) {
+        len = VARs[offset++];
 
-        c = DEFs[offset + len];
-        DEFs[offset + len] = 0x00;
-        printf("%s ", &DEFs[offset]);
-        DEFs[offset + len] = c;
+        c = VARs[offset + len];
+        VARs[offset + len] = 0x00;
+        printf("%s ", &VARs[offset]);
+        VARs[offset + len] = c;
         offset += len;
 
-        len = DEFs[offset++];
+        len = VARs[offset++];
         switch (len) {
         case 0x81:
-            len = DEFs[offset++];
+            len = VARs[offset++];
             break;
         case 0x82:
-            len = DEFs[offset++];
+            len = VARs[offset++];
             len *= 0x100;
-            len += DEFs[offset++];
+            len += VARs[offset++];
             break;
         }
-        c = DEFs[offset + len];
-        DEFs[offset + len] = 0x00;
-        printf("%s\n", &DEFs[offset]);
-        DEFs[offset + len] = c;
+        c = VARs[offset + len];
+        VARs[offset + len] = 0x00;
+        printf("%s\n", &VARs[offset]);
+        VARs[offset + len] = c;
 
         offset += len;
     }
@@ -159,19 +166,19 @@ static int get_Defines_length()
     int offset = 0;
     int len;
 
-    while (DEFs[offset] != 0) {
-        len = DEFs[offset++];
+    while (VARs[offset] != 0) {
+        len = VARs[offset++];
         offset += len;
 
-        len = DEFs[offset++];
+        len = VARs[offset++];
         switch (len) {
         case 0x81:
-            len = DEFs[offset++];
+            len = VARs[offset++];
             break;
         case 0x82:
-            len = DEFs[offset++];
+            len = VARs[offset++];
             len *= 0x100;
-            len = DEFs[offset++];
+            len = VARs[offset++];
             break;
         }
         offset += len;
@@ -187,25 +194,25 @@ static int find_define(char* _name, int _namelen, char** _define, int* _datalen)
     int vlen;
     uint8_t* name;
 
-    while (DEFs[offset] != 0) {
-        nlen = DEFs[offset++];
-        name = &DEFs[offset];
+    while (VARs[offset] != 0) {
+        nlen = VARs[offset++];
+        name = &VARs[offset];
         offset += nlen;
 
-        vlen = DEFs[offset++];
+        vlen = VARs[offset++];
         switch (vlen) {
         case 0x81:
-            vlen = DEFs[offset++];
+            vlen = VARs[offset++];
             break;
         case 0x82:
-            vlen = DEFs[offset++];
+            vlen = VARs[offset++];
             vlen *= 0x100;
-            vlen = DEFs[offset++];
+            vlen = VARs[offset++];
             break;
         }
 
         if ( (nlen == _namelen) && 0 == memcmp(_name, name, _namelen) ) {
-            *_define = (char* )&DEFs[offset];
+            *_define = (char* )&VARs[offset];
             *_datalen = vlen;
             
             return 0;
@@ -224,28 +231,28 @@ static void add_Define_(const char* name, int name_len, char* value, int value_l
     
     len = get_Defines_length();
 
-    DEFs[len++] = name_len;
-    memcpy(&DEFs[len], name, name_len);
+    VARs[len++] = name_len;
+    memcpy(&VARs[len], name, name_len);
     len += name_len;
 
     if (value_len < 0x80) {
-        DEFs[len++] = value_len;
+        VARs[len++] = value_len;
     }
     else {
         if (value_len < 0x100) {
-            DEFs[len++] = 0x81;
-            DEFs[len++] = value_len;
+            VARs[len++] = 0x81;
+            VARs[len++] = value_len;
         }
         else {
-            DEFs[len++] = 0x82;
-            DEFs[len++] = value_len >> 8;
-            DEFs[len++] = value_len & 0xFF;
+            VARs[len++] = 0x82;
+            VARs[len++] = value_len >> 8;
+            VARs[len++] = value_len & 0xFF;
         }
     }
-    memcpy(&DEFs[len], value, value_len);
+    memcpy(&VARs[len], value, value_len);
     len += value_len;
 
-    DEFs[len] = 0x00;
+    VARs[len] = 0x00;
 
     //print_Defines();
 }
@@ -454,9 +461,11 @@ static int replace_defines_and_buffers(char* _s)
     while (_s[i]) {
         if ('%' == _s[i])
         {
+            print_Defines_();
+
             res = replace_one_define(&_s[i]);
             if (res < 0) {
-                //printf_error(_s, "DEFINE not found", i);
+                printf_error(i, _s, "DEFINE not found");
                 return res;
             }
 
@@ -537,7 +546,7 @@ static int proceed_Directives(char* cmd)
     }
 
     if (memcmp(cmd, ".allundefine", 12) == 0) {
-        DEFs[0] = 0;
+        VARs[0] = 0;
         return 0;
     }
 
@@ -550,7 +559,7 @@ static int proceed_Directives(char* cmd)
         if ((file = fopen(fullname, "r")))
         {
             fclose(file);
-            execute_PCOM(fullname);
+            execute_PCOM(fullname, false);
 
             return 0;
         }
@@ -560,7 +569,7 @@ static int proceed_Directives(char* cmd)
         if ((file = fopen(fullname, "r")))
         {
             fclose(file);
-            execute_PCOM(fullname);
+            execute_PCOM(fullname, false);
 
             return 0;
         }
@@ -770,7 +779,7 @@ static void finishExecution(clock_t duration)
     printf(COLOR_CYAN " %02d:%02d:%02d.%03d\n" COLOR_RESET, tm_hour, tm_min, tm_sec, tm_ms);
 }
 
-void execute_PCOM(const char* _filename)
+void execute_PCOM(const char* _filename, bool clearCtx)
 {
     FILE* fc;
     int i = 1;
@@ -800,7 +809,8 @@ void execute_PCOM(const char* _filename)
     }
 
     printf("%s ------------------------------------------------%s\n", COLOR_YELLOW, COLOR_RESET);
-    clear_all();
+    if (clearCtx)
+        clear_all();
 
     start = clock();
     while (fgets(fileline, sizeof(fileline), fc) != NULL) {

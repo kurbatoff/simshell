@@ -421,9 +421,9 @@ static bool load_component_ijc(FILE* _fp, int _comp_idx, uint8_t _last)
 					apdu.cmd[2] = 0x80;
 
 				gp_send_APDU(&apdu);
-				apdu.sw_ = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
+				apdu.sw = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
 
-				if (apdu.sw_ != 0x9000 && apdu.sw_ != 0x6101)
+				if (apdu.sw != 0x9000 && apdu.sw != 0x6101)
 					return false;
 			}
 
@@ -485,9 +485,9 @@ static bool load_component_zip(zip_t* _cap, const char* _cname, uint8_t _last)
 			apdu.cmd[2] = 0x80;
 
 		gp_send_APDU(&apdu);
-		apdu.sw_ = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
+		apdu.sw = apdu.resp[apdu.resp_len - 2] * 256 + apdu.resp[apdu.resp_len - 1];
 
-		if (apdu.sw_ != 0x9000 && apdu.sw_ != 0x6101) {
+		if (apdu.sw != 0x9000 && apdu.sw != 0x6101) {
 			zip_fclose(fd);
 			return false;
 		}
