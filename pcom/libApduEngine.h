@@ -29,6 +29,6 @@ struct errorCount_t {
 };
 
 void execute_PCOM(const char* _filename, bool clearCtx);
-int execute_OneLine(const char* _fileline);
+int execute_OneLine(const char* _fileline, char* _scriptfolder);
 
 #endif // __LIBAPDUENGINE_H_

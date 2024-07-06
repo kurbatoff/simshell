@@ -55,7 +55,6 @@ static char SWexp[32]; // Sequence of expected SW(s) in CAPITAL hex: '61XX91XX90
 static char DATAexp[512]; // Expected DATA in CAPITAL hex
 
 static char PartString[2048];
-static char ScriptFolder[1024];
 
 /**
 * SEQUENSE of:
@@ -461,7 +460,7 @@ static int replace_defines_and_buffers(char* _s)
     while (_s[i]) {
         if ('%' == _s[i])
         {
-            print_Defines_();
+            //print_Defines_();
 
             res = replace_one_define(&_s[i]);
             if (res < 0) {
@@ -491,7 +490,7 @@ static int replace_defines_and_buffers(char* _s)
     return 0;
 }
 
-static int proceed_Directives(char* cmd)
+static int proceed_Directives(char* cmd, char* _scriptfolder)
 {
     int res = 0;
     char* arg1 = cmd;
@@ -554,7 +553,7 @@ static int proceed_Directives(char* cmd)
         FILE* file;
         char fullname[1024];
 
-        sprintf(fullname, "%s/%s", ScriptFolder, &cmd[6]);
+        sprintf(fullname, "%s/%s", _scriptfolder, &cmd[6]);
 
         if ((file = fopen(fullname, "r")))
         {
@@ -564,7 +563,7 @@ static int proceed_Directives(char* cmd)
             return 0;
         }
 
-        sprintf(fullname, "%s/pcom/%s", ScriptFolder, &cmd[6]);
+        sprintf(fullname, "%s/pcom/%s", _scriptfolder, &cmd[6]);
 
         if ((file = fopen(fullname, "r")))
         {
@@ -573,6 +572,8 @@ static int proceed_Directives(char* cmd)
 
             return 0;
         }
+
+        printf(COLOR_RED " File not found: " COLOR_RESET "%s\n", fullname);
 
         return 1;
     }
@@ -783,6 +784,7 @@ void execute_PCOM(const char* _filename, bool clearCtx)
 {
     FILE* fc;
     int i = 1;
+    char ScriptFolder[1024];
     char fileline[1024];
     clock_t start, stop;
 
@@ -816,7 +818,7 @@ void execute_PCOM(const char* _filename, bool clearCtx)
     while (fgets(fileline, sizeof(fileline), fc) != NULL) {
         printf(COLOR_CYAN "%.4d" COLOR_RESET " : %s\n", i++, fileline);
 
-        if (execute_OneLine(fileline) < 0)
+        if (execute_OneLine(fileline, ScriptFolder) < 0)
             break;
     }
     stop = clock();
@@ -826,7 +828,7 @@ void execute_PCOM(const char* _filename, bool clearCtx)
     finishExecution(stop-start);
 }
 
-int execute_OneLine(const char* _fileline)
+int execute_OneLine(const char* _fileline, char* _scriptfolder)
 {
     char cmd[2048];
     int count = 0;
@@ -906,7 +908,7 @@ int execute_OneLine(const char* _fileline)
 
     // 3.a Directives
     if ('.' == *cmd) {
-        return proceed_Directives(cmd);
+        return proceed_Directives(cmd, _scriptfolder);
     }
 
     if (0 == *cmd)
