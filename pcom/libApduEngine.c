@@ -71,7 +71,7 @@ static int replace_defines_and_buffers(char* _s);
 static void print_syntax_error(const char* _str, int _pos);
 static void print_sw_error(const char* sw);
 
-static printf_error(int _idx, char* _line, char* _cmt)
+static void printf_error(int _idx, char* _line, char* _cmt)
 {
     printf("\n");
     printf(COLOR_RED  " Error: %s\n" COLOR_RESET, _cmt);
