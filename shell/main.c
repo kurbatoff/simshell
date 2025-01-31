@@ -118,6 +118,10 @@ main(int argc, char* argv[])
 	printf(" (c) 2023, 2024 Intergalaxy. All rights reserved.\n");
 	printf("------------------------------------------------------------------------\n\n");
 
+	if (argc == 1) {
+		// No parameters.. read config and choose APPlication
+		read_config(argv[0]);
+	}
 
 	strcpy(gStartFolder, argv[0]);
 

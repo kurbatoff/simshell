@@ -219,6 +219,9 @@
     <ClCompile Include="pcom\pcom_buffers.c">
       <Filter>Source files\pcom</Filter>
     </ClCompile>
+    <ClCompile Include="shell\config.c">
+      <Filter>Source files\Shell</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shell\commands.h">
