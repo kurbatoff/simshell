@@ -37,10 +37,10 @@ uint16_t load_status = CALCUL_DLL_OFF;
 
 void static clear_dll(void)
 {
-	memset(key, sizeof(key), 0);
-	memset(data, sizeof(data), 0);
-	memset(cipher, sizeof(cipher), 0);
-	memset(iv, sizeof(iv), 0);
+	memset(key, 0, sizeof(key));
+	memset(data, 0, sizeof(data));
+	memset(cipher, 0, sizeof(cipher));
+	memset(iv, 0, sizeof(iv));
 }
 
 void load_calcul_dll(void)
