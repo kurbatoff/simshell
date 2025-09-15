@@ -30,6 +30,7 @@
 * [+]  7. Multi line
 *      8. .CALL directive
 *      9. .LOAD
+* [+] 10. .LIST_OFF / .LIST_ON 
 *
 *     20. malloc for buffers
 * [+] 21. Display execution time
@@ -544,6 +545,16 @@ static int proceed_Directives(char* cmd, char* _scriptfolder)
         return 0;
     }
 
+    if (memcmp(cmd, ".list_on", 8) == 0) {
+        gPcsc_PrintFlag = true;
+        return 0;
+    }
+
+    if (memcmp(cmd, ".list_off", 9) == 0) {
+        gPcsc_PrintFlag = false;
+        return 0;
+    }
+
     if (memcmp(cmd, ".allundefine", 12) == 0) {
         VARs[0] = 0;
         return 0;
@@ -816,7 +827,9 @@ void execute_PCOM(const char* _filename, bool clearCtx)
 
     start = clock();
     while (fgets(fileline, sizeof(fileline), fc) != NULL) {
-        printf(COLOR_CYAN "%.4d" COLOR_RESET " : %s\n", i++, fileline);
+
+        if (gPcsc_PrintFlag)
+            printf(COLOR_CYAN "%.4d" COLOR_RESET " : %s\n", i++, fileline);
 
         if (execute_OneLine(fileline, ScriptFolder) < 0)
             break;

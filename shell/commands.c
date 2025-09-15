@@ -38,6 +38,8 @@
 #include "gp.h"
 #include "cap.h"
 #include "securechannel.h"
+#include "config.h"
+#include "serial.h"
 
 static void help(char* _cmd);
 static void cmd_version(char* _cmd);
@@ -299,6 +301,40 @@ static void help(char* _cmd)
  */
 static void cmd_S_term(char* _cmd)
 {
+	//serial_print_portname();
+	const char* cmd_oem = "AT + CGMI\r";
+	const char* cmd_model = "AT + CGMM\r";
+
+	//  ;; Open logical channel
+	//	;; 
+	const char* cmd_openlc = "AT + CSIM = 10, \"0070000000\"\r";
+	const char* cmd_closelc = "AT + CSIM = 10, \"0170800100\"\r";
+
+	//	;; Select ISD - R
+	//	;; 
+	const char* cmd_selectisdr = "AT + CSIM = 44, \"01A4040010A0000005591010ffffffff890000010000\"\r";
+
+	//	;; Get profile list
+	//	;; AT + CSIM = 18, "81E2910003BF2D0000"
+	const char* cmd_pl = "AT + CSIM = 18, \"81E2910003BF2D0000\"\r";
+
+	if (serial_open((const char* const)serialPort)) {
+		char name_oem[128];
+		char name_model[128];
+		char apdur[1024];
+
+		serial_execute(cmd_oem, name_oem);
+		serial_execute(cmd_model, name_model);
+		serial_execute(cmd_openlc, apdur);
+		serial_execute(cmd_selectisdr, apdur);
+		serial_execute(cmd_pl, apdur);
+		serial_execute(cmd_closelc, apdur);
+
+
+		printf(COLOR_CYAN " Available serial port:\n" COLOR_RESET);
+		printf(" 0.     %s: %s %s\n\n", serialPort, name_oem, name_model);
+	}
+
 	pcsc_listreaders();
 }
 

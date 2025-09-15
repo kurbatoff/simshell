@@ -27,6 +27,8 @@ extern int MSG_tar;
 extern unsigned char MSG_apdu[];
 extern int MSG_apdu_len;
 
+extern char serialPort[32];
+
 extern char QR_MID[128];
 extern char QR_Address[128];
 extern char QR_Port[8];

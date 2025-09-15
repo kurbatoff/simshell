@@ -45,9 +45,11 @@
 	}
 #endif
 
+char serialPort[32];
+
 char QR_MID[128];
 char QR_Address[128];
-char QR_Port[8];
+char QR_Port[8] = "80";
 
 char eIM_Address[128];
 char eIM_Port[8];
@@ -57,12 +59,14 @@ uint8_t LocI_NMR_UMTS[512];
 uint8_t LocI_NMR_LTE[512];
 uint8_t LocI_AT;
 
-static void read_ENC(char* src);
-static void read_MAC(char* src);
+//static void read_ENC(char* src);
+//static void read_MAC(char* src);
 
 static void read_MatchingID(char* src);
 static void read_InetAddress(char* src, char* dest, size_t destsize);
 static void read_InetPort(char* src, char* dest, size_t destsize);
+static void read_SerialPort(char* src, char* dest, size_t destsize);
+
 
 static void dump_eUICC_Info1(uint8_t* s);
 static void dump_Server_Signed1(uint8_t* s);
@@ -245,6 +249,24 @@ int read_config(const char* exename)
 			read_InetPort(&s[9], QR_Port, sizeof(QR_Port));
 			continue;
 		}
+		if (s == strstr(s, "SMDP_PORT")) {
+			read_InetPort(&s[9], QR_Port, sizeof(QR_Port));
+			continue;
+		}
+
+#ifdef _WIN32
+		if (s == strstr(s, "SERIAL_WIN")) {
+			read_SerialPort(&s[10], serialPort, sizeof(serialPort));
+			continue;
+		}
+#endif
+
+#ifdef __APPLE__
+		if (s == strstr(s, "SERIAL_MAC")) {
+			read_SerialPort(&s[10], serialPort, sizeof(serialPort));
+			continue;
+		}
+#endif
 
 /*
 		if (s == strstr(s, "EIM_IP")) {
@@ -299,6 +321,13 @@ static void read_InetPort(char* src, char* dest, size_t destsize)
 	strcpy_s(dest, destsize, src);
 
 	printf(" Server Port: %s\n", dest);
+}
+static void read_SerialPort(char* src, char* dest, size_t destsize)
+{
+	src = skip_to_value(src);
+	strcpy_s(dest, destsize, src);
+
+	printf(" Serial Port: %s\n", dest);
 }
 
 static void dump_eUICC_Info1(uint8_t* src)

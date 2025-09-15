@@ -34,6 +34,7 @@
  * 5.   [+] Run PCOM scripts												10 Jan 2024
  *   a.     .LOAD directive and built-in functions
  *   b. [+]  .CALL directive improved										06 Jul 2024
+ *   c. [+]  .LIST_ON & .LIST_OFF directives                                10 Mar 2025
  * 6.   [+] get-data 00E0 etc												18 Nov 2023
  * 7.       SCP11 + ECC tests
  * 8.       SIM scan
@@ -79,6 +80,7 @@
 #include "keys.h"
 #include "version.h"
 #include "tools.h"
+#include "config.h"
 
 #if defined(_WIN32) || defined(WIN32)
 	#define pathSeparator '\\'
@@ -115,7 +117,7 @@ main(int argc, char* argv[])
 
 	printf("------------------------------------------------------------------------\n");
 	printf(COLOR_WHITE " SIM, Global Platform and JVM" COLOR_RESET " shell [Version %s]\n", version); 
-	printf(" (c) 2023, 2024 Intergalaxy. All rights reserved.\n");
+	printf(" (c) 2023, 2025 Intergalaxy. All rights reserved.\n");
 	printf("------------------------------------------------------------------------\n\n");
 
 	if (argc == 1) {

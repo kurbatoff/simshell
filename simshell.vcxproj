@@ -236,6 +236,7 @@
     <ClCompile Include="pcom\pcom_buffers.c" />
     <ClCompile Include="pcsc\iso7816.c" />
     <ClCompile Include="pcsc\pcscwrap.c" />
+    <ClCompile Include="pcsc\serial.c" />
     <ClCompile Include="shell\commands.c" />
     <ClCompile Include="shell\config.c" />
     <ClCompile Include="shell\main.c" />
@@ -255,6 +256,7 @@
     <ClInclude Include="pcom\libApduEngine.h" />
     <ClInclude Include="pcom\pcom_buffers.h" />
     <ClInclude Include="pcsc\pcscwrap.h" />
+    <ClInclude Include="pcsc\serial.h" />
     <ClInclude Include="shell\commands.h" />
     <ClInclude Include="shell\shell.h" />
     <ClInclude Include="shell\tools.h" />

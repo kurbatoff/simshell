@@ -46,6 +46,7 @@ extern "C" {
 #endif
 
 extern uint8_t LChannel_ID;
+extern bool gPcsc_PrintFlag;
 
 uint16_t get_response(uint8_t response_len, uint8_t* response, uint16_t response_size);
 

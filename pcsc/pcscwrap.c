@@ -47,6 +47,8 @@
 	#define STRLEN	wcslen
 #endif
 
+bool gPcsc_PrintFlag = true;
+		
 RSTR mszReaders;
 
 SCARDCONTEXT hContext;
@@ -101,6 +103,7 @@ pcsc_error_t pcsc_send_plain_APDU(uint8_t* _cmd, uint16_t _cmd_len,
 
 	dwRecvLength = sizeof(recvBuffer);
 
+	if (gPcsc_PrintFlag)
 	{
 		dump_hexascii_buffer(" Cmd :", _cmd, 5);
 		dump_hexascii_buffer(" Data:", &_cmd[5], _cmd_len - 5);
@@ -112,6 +115,7 @@ pcsc_error_t pcsc_send_plain_APDU(uint8_t* _cmd, uint16_t _cmd_len,
 		return PCSC_ERROR_UNKNOWN;
 	}
 
+	if (gPcsc_PrintFlag)
 	{
 		dump_hexascii_buffer(" Resp:", recvBuffer, dwRecvLength - 2);
 
@@ -236,6 +240,8 @@ pcsc_error_t pcsc_listreaders(void)
 		}
 
 		// --- 2 --- Print the list of readers
+		printf(COLOR_YELLOW " Available smart card readers:\n" COLOR_RESET);
+
 		i = 0;
 		readers = mszReaders;
 		while (readers[0]) {
@@ -287,6 +293,10 @@ pcsc_error_t pcsc_listreaders(void)
 		else {
 			// Choose default
 			idx = idx_default;
+		}
+
+		if (0 == idx) {
+
 		}
 
 		i = 0;

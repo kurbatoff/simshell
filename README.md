@@ -1,6 +1,6 @@
 # SIM shell
 SIM, Global Platform and JVM shell<br/>
-(c) Intergalaxy LLC, 2023, 2024
+(c) Intergalaxy LLC, 2023, 2025
 <br/>
 <br/>
 <h1>SIM</h1>

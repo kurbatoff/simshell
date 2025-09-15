@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2023, Intergalaxy LLC
+ *  Copyright (c) 2025, Intergalaxy LLC
  *  This file is part of SIMSHELL.
  *
  *  SIMSHELL is a free software: you can redistribute it and/or modify
@@ -16,21 +16,27 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef __COMMANDS_H_6AFFA93386F5388B
-#define __COMMANDS_H_6AFFA93386F5388B
+#ifndef __SERIAL_H_1BCAE72D2E8FB2DB
+#define __SERIAL_H_1BCAE72D2E8FB2DB
 
-#define SHELL_COMMANDS_COUNT		26
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef void (*shellcommand_f)(char* _cmd);
+#include <stdio.h>
+#include <stdint.h>
 
-typedef struct simshell_command_t
-{
-	const char* pcName;
-	const char* pcHelpString;
-	const char* pcShortHelp;
-	const shellcommand_f pCallBackFunction;
-} simshell_command_t;
+//int connectEmulator( const char* const comPortStr, int connectTryCount );
+int serial_open(const char* comPortStr);
+int comPort_send(const char* data, size_t dataLen);
+int comPort_read(unsigned char* data, uint32_t dataLen);
+size_t serial_receive(unsigned char* data);
+int serial_close(void);
+void serial_execute(const char* atcmd, char* atresp);
 
-extern simshell_command_t commands_array[SHELL_COMMANDS_COUNT];
+#ifdef __cplusplus
+}
+#endif
 
-#endif // __COMMANDS_H_6AFFA93386F5388B
+#endif // __SERIAL_H_1BCAE72D2E8FB2DB
+
