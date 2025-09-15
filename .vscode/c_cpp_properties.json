@@ -7,6 +7,7 @@
                 "${workspaceFolder}/../assemblies/vcard",
                 "${workspaceFolder}/sim",
                 "${workspaceFolder}/vm",
+                "${workspaceFolder}/gp",
                 "${workspaceFolder}/vm/mask/vcard",
                 "${workspaceFolder}/hal/hal_vcard",
                 "${workspaceFolder}/hal/hal_common"
