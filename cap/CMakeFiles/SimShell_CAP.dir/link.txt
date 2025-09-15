@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSimShell_CAP.a CMakeFiles/SimShell_CAP.dir/cap.c.o
-/usr/bin/ranlib libSimShell_CAP.a

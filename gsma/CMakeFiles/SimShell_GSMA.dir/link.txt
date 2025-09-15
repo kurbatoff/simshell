@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSimShell_GSMA.a CMakeFiles/SimShell_GSMA.dir/euicc.c.o
-/usr/bin/ranlib libSimShell_GSMA.a

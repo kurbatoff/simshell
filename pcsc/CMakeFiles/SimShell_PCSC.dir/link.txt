@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSimShell_PCSC.a CMakeFiles/SimShell_PCSC.dir/iso7816.c.o CMakeFiles/SimShell_PCSC.dir/pcscwrap.c.o
-/usr/bin/ranlib libSimShell_PCSC.a

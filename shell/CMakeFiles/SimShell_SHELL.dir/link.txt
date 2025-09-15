@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSimShell_SHELL.a CMakeFiles/SimShell_SHELL.dir/commands.c.o CMakeFiles/SimShell_SHELL.dir/shell.c.o CMakeFiles/SimShell_SHELL.dir/tools.c.o CMakeFiles/SimShell_SHELL.dir/vars.c.o CMakeFiles/SimShell_SHELL.dir/version.c.o
-/usr/bin/ranlib libSimShell_SHELL.a

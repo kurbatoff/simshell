@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSimShell_MBED.a CMakeFiles/SimShell_MBED.dir/hal_aes.c.o CMakeFiles/SimShell_MBED.dir/hal_des.c.o CMakeFiles/SimShell_MBED.dir/mbedwrap.c.o
-/usr/bin/ranlib libSimShell_MBED.a

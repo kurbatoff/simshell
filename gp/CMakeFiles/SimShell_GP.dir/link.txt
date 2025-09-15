@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSimShell_GP.a CMakeFiles/SimShell_GP.dir/getstatus.c.o CMakeFiles/SimShell_GP.dir/globalplatform.c.o CMakeFiles/SimShell_GP.dir/keys.c.o CMakeFiles/SimShell_GP.dir/scp02.c.o CMakeFiles/SimShell_GP.dir/scp03.c.o CMakeFiles/SimShell_GP.dir/scp11.c.o CMakeFiles/SimShell_GP.dir/securechannel.c.o CMakeFiles/SimShell_GP.dir/sw.c.o
-/usr/bin/ranlib libSimShell_GP.a
