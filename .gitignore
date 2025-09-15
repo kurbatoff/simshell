@@ -65,3 +65,4 @@ bin/cap
 bin/logs
 zip/jvmcap
 genversion.bat
+/bin/icao

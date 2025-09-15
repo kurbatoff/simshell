@@ -115,7 +115,7 @@ main(int argc, char* argv[])
 
 	printf("------------------------------------------------------------------------\n");
 	printf(COLOR_WHITE " SIM, Global Platform and JVM" COLOR_RESET " shell [Version %s]\n", version); 
-	printf(" (c) 2023, 2024 Intergalaxy. All rights reserved.\n");
+	printf(" (c) 2023, 2025 Intergalaxy. All rights reserved.\n");
 	printf("------------------------------------------------------------------------\n\n");
 
 	if (argc == 1) {

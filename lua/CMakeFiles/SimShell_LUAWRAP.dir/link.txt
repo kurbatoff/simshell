@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSimShell_LUAWRAP.a CMakeFiles/SimShell_LUAWRAP.dir/luawrap.c.o
+/usr/bin/ranlib libSimShell_LUAWRAP.a
