@@ -31,14 +31,7 @@
 * [+]  7. Multi line
 *      8. .CALL directive
 *      9. .LOAD
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 * [+] 10. .LIST_OFF / .LIST_ON 
-*
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 *     20. malloc for buffers
 * [+] 21. Display execution time
 * 
@@ -808,7 +801,7 @@ void execute_PCOM(const char* _filename, bool clearCtx)
     clock_t start, stop;
 
     // Look up order:
-
+    // 1. If full path: starting / or ~ or X:
 
     // Copy script folder
     strcpy(ScriptFolder, _filename);
@@ -839,7 +832,6 @@ void execute_PCOM(const char* _filename, bool clearCtx)
 
     start = clock();
     while (fgets(fileline, sizeof(fileline), fc) != NULL) {
-
         if (gPcsc_PrintFlag)
             printf(COLOR_CYAN "%.4d" COLOR_RESET " : %s\n", i++, fileline);
 

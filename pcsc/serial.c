@@ -17,6 +17,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>>
 
 #include "serial.h"
 
@@ -97,7 +98,9 @@ static HANDLE openSerialPort( const char* const comPortStr, int connectTryCount,
 
 int serial_close(void)
 {
+#ifdef _WIN32
 	CloseHandle(handleCOM);
+#endif // _WIN32
 	
 	return 1;
 }

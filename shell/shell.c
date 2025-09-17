@@ -193,8 +193,10 @@ static bool execute_file(const char* fname)
 		break;
 
 	case SCRIPT_TYPE_PCOM:
-		printf(" Executing PCOM file: " COLOR_CYAN "%s\n\n" COLOR_RESET, fullname);
-		execute_PCOM(fullname, true);
+		{
+			printf(" Executing PCOM file: " COLOR_CYAN "%s\n\n" COLOR_RESET, fullname);
+			execute_PCOM(fullname, true);
+		}
 		break;
 	}
 

@@ -82,8 +82,6 @@
 #include "libApduEngine.h"
 #include "platform.h"
 #include "tools.h"
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 #include "config.h"
 
 #if defined(_WIN32) || defined(WIN32)
@@ -91,13 +89,8 @@
 #else
 	#define pathSeparator '/'
 #endif
-=======
-#include "version.h"
->>>>>>> Stashed changes
-=======
-#include "version.h"
->>>>>>> Stashed changes
 
+#include "version.h"
 
 /**
 * @brief Main function
