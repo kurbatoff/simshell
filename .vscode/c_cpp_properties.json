@@ -4,13 +4,14 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}",
-                "${workspaceFolder}/../assemblies/vcard",
-                "${workspaceFolder}/sim",
-                "${workspaceFolder}/vm",
+                "${workspaceFolder}/cap",
                 "${workspaceFolder}/gp",
-                "${workspaceFolder}/vm/mask/vcard",
-                "${workspaceFolder}/hal/hal_vcard",
-                "${workspaceFolder}/hal/hal_common"
+                "${workspaceFolder}/gsma",
+                "${workspaceFolder}/iotsafe",
+                "${workspaceFolder}/lua",
+                "${workspaceFolder}/pcsc",
+                "${workspaceFolder}/pcom",
+                "${workspaceFolder}/shell"
             ],
             "defines": [],
             "macFrameworkPath": [

@@ -77,9 +77,12 @@
 
 #include "shell.h"
 #include "commands.h"
+#include "config.h"
 #include "keys.h"
-#include "version.h"
+#include "libApduEngine.h"
+#include "platform.h"
 #include "tools.h"
+<<<<<<< Updated upstream
 #include "config.h"
 
 #if defined(_WIN32) || defined(WIN32)
@@ -87,6 +90,9 @@
 #else
 	#define pathSeparator '/'
 #endif
+=======
+#include "version.h"
+>>>>>>> Stashed changes
 
 
 /**
@@ -115,14 +121,19 @@ main(int argc, char* argv[])
 	printf("\033[00;00m");
 #endif
 
-	printf("------------------------------------------------------------------------\n");
-	printf(COLOR_WHITE " SIM, Global Platform and JVM" COLOR_RESET " shell [Version %s]\n", version); 
+	printf(COLOR_BLUE "------------------------------------------------------------------------\n" COLOR_RESET);
+	printf(COLOR_BLUE " SIM" COLOR_RESET ", Global Platform and JVM " COLOR_BLUE "shell" COLOR_RESET " [Version %s]\n", version); 
 	printf(" (c) 2023, 2025 Intergalaxy. All rights reserved.\n");
-	printf("------------------------------------------------------------------------\n\n");
+	printf(COLOR_BLUE "------------------------------------------------------------------------\n" COLOR_RESET);
 
 	if (argc == 1) {
 		// No parameters.. read config and choose APPlication
 		read_config(argv[0]);
+	}
+
+	if (argc == 2) {
+		execute_PCOM(argv[1], true);
+		return 0;
 	}
 
 	strcpy(gStartFolder, argv[0]);

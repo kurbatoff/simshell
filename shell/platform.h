@@ -16,21 +16,15 @@
  *  See the GNU GENERAL PUBLIC LICENSE for more details.
  */
 
-#ifndef _VERSION_H_
-#define _VERSION_H_
+#ifndef __PLATFORM_H_
+#define __PLATFORM_H_
 
-#ifdef __cplusplus
-extern "C" {
+#include <stdint.h>
+
+#if defined(_WIN32) || defined(WIN32)
+	#define pathSeparator '\\'
+#else
+	#define pathSeparator '/'
 #endif
 
-#define MAJOR "0"
-#define MINOR "05"
-#define BUILD "41"
-
-extern char* version;
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif // __PLATFORM_H_

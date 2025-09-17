@@ -27,11 +27,15 @@
 * 
 * [+]  5. Check DATA
 * [+]  6. .SET_BUFFER
+*
 * [+]  7. Multi line
 *      8. .CALL directive
 *      9. .LOAD
+<<<<<<< Updated upstream
 * [+] 10. .LIST_OFF / .LIST_ON 
 *
+=======
+>>>>>>> Stashed changes
 *     20. malloc for buffers
 * [+] 21. Display execution time
 * 
@@ -47,6 +51,7 @@
 #include "tools.h"
 #include "pcscwrap.h"
 #include "pcom_buffers.h"
+#include "platform.h"
 
 #include "calcul_dll.h"
 
@@ -799,6 +804,9 @@ void execute_PCOM(const char* _filename, bool clearCtx)
     char fileline[1024];
     clock_t start, stop;
 
+    // Look up order:
+
+
     // Copy script folder
     strcpy(ScriptFolder, _filename);
     while (1) {
@@ -807,13 +815,14 @@ void execute_PCOM(const char* _filename, bool clearCtx)
         if (0 == len)
             break;
 
-        if (ScriptFolder[len - 1] == '\\') {
+        if (ScriptFolder[len - 1] == pathSeparator) {
             ScriptFolder[len - 1] = 0x00;
             break;
         }
 
         ScriptFolder[len - 1] = 0x00;
     }
+    printf("PCOM script folder:" COLOR_RED " %s\n" COLOR_RESET , ScriptFolder);
 
 
     if ((fc = fopen(_filename, "r")) == NULL) {
