@@ -78,6 +78,7 @@
 #include "shell.h"
 #include "commands.h"
 #include "config.h"
+#include "config.h"
 #include "keys.h"
 #include "libApduEngine.h"
 #include "platform.h"

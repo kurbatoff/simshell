@@ -48,6 +48,7 @@
 #include "pcscwrap.h"
 #include "pcom_buffers.h"
 #include "platform.h"
+#include "platform.h"
 
 #include "calcul_dll.h"
 
