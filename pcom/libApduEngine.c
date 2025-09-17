@@ -32,8 +32,11 @@
 *      8. .CALL directive
 *      9. .LOAD
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 * [+] 10. .LIST_OFF / .LIST_ON 
 *
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 *     20. malloc for buffers
