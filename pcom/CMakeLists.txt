@@ -9,5 +9,5 @@ target_include_directories(${CMAKE_PROJECT_NAME}_PCOM PUBLIC
 
 target_link_libraries(${CMAKE_PROJECT_NAME}_PCOM
 	${CMAKE_PROJECT_NAME}_SHELL
-	${CMAKE_PROJECT_NAME}_pcsc
+	${CMAKE_PROJECT_NAME}_PCSC
 )

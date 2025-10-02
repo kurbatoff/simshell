@@ -36,7 +36,7 @@
 #ifdef _WIN32
 	#include <windows.h>
 #endif
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
 	void strcpy_s(char* dest, size_t destsize, const char* src)
 	{
 		if (strlen(src) < destsize) {

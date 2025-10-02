@@ -7,6 +7,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -Wextra \
 	-Wformat -Wformat-security"
 )
 
+# Find the libzip package
+# find_package(libzip CONFIG REQUIRED)
+
+
 if(UNIX OR APPLE)
 	set(LIBZIP_LIBRARY zip)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I/usr/include/PCSC")
@@ -21,5 +25,19 @@ add_subdirectory(cap)
 add_subdirectory(Lua5.3)
 add_subdirectory(mbed)
 add_subdirectory(mbedtls-3.5.1/library)
+add_subdirectory(pcom)
 add_subdirectory(pcsc)
 add_subdirectory(shell)
+
+
+add_executable(${CMAKE_PROJECT_NAME}
+	shell/main.c
+)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}
+	${CMAKE_PROJECT_NAME}_SHELL
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
+	${PROJECT_SOURCE_DIR}/shell
+)
