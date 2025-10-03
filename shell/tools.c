@@ -17,6 +17,7 @@
  */
 
 #include "tools.h"
+size_t delete_symbol__(uint8_t* buffer, size_t len, uint8_t symb);
 
 uint16_t calculate_crc16(uint8_t* Data, uint16_t Len)
 {

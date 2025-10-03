@@ -90,6 +90,10 @@ static const char* COMP_DESCRIPTOR	= "Descriptor.cap"; // Only for cap2ijc
 static const char* COMP_DEBUG		= "Debug.cap"; // Only for cap2ijc
 
 uint8_t counterP2;
+void print_cap_info(const char* _filename);
+void upload(const char* _filename);
+void cap2ijc(char* _capname, char* _ijcname, bool verbose, bool all_components);
+void cap2apdu(char* _capname, uint8_t block);
 
 #define COMPONENT_COUNT		12
 static const char* COMP_NAMES[COMPONENT_COUNT] = {

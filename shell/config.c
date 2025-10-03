@@ -37,6 +37,8 @@
 	#include <windows.h>
 #endif
 #if defined (__APPLE__) || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
+	void strcpy_s(char* dest, size_t destsize, const char* src); // to suppress -Wmissing-declarations
+
 	void strcpy_s(char* dest, size_t destsize, const char* src)
 	{
 		if (strlen(src) < destsize) {
@@ -78,6 +80,10 @@ static void dump_smdpSigned2(uint8_t* src);
 static void dump_smdpSignature2(uint8_t* src);
 //
 static void dump_boundProfilePackage(uint8_t* src);
+static void set_config_name(const char* exename);
+void print_hex(char* s_, unsigned char* bufhex_, int len_);
+int str_remove_spaces(char* buf);
+int str_piece(char* src, char* dest, char del, int idx);
 
 
 unsigned char config_name[256]; // exefile name but extension '.conf'
@@ -369,7 +375,7 @@ static void dump_eUICC_Info1(uint8_t* src)
 static void dump_Server_Signed1(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 //	uint16_t len;
 
@@ -389,7 +395,7 @@ static void dump_Server_Signed1(uint8_t* src)
 static void dump_Server_Signature1(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 	//uint16_t len;
 
@@ -409,7 +415,7 @@ static void dump_Server_Signature1(uint8_t* src)
 static void dump_AuthenticateServerResponse(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 //	uint16_t len;
 
@@ -470,7 +476,7 @@ static void dump_profileMetadata(uint8_t* src)
 static void dump_smdpSigned2(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 //	uint16_t len;
 
@@ -489,7 +495,7 @@ static void dump_smdpSigned2(uint8_t* src)
 static void dump_smdpSignature2(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 	//uint16_t len;
 
@@ -508,7 +514,7 @@ static void dump_smdpSignature2(uint8_t* src)
 static void dump_boundProfilePackage(uint8_t* src)
 {
 	uint8_t buff[64 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 	size_t len;
 

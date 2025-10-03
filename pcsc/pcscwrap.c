@@ -27,7 +27,8 @@
 #endif
 #if defined(__APPLE__) || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
 	#include <PCSC/winscard.h>
-
+	#include <PCSC/pcsclite.h>
+	#include <PCSC/wintypes.h>
 	//typedef const int* LPTSTR;
 	typedef uint8_t BYTE;
 	typedef long LONG;
@@ -225,7 +226,7 @@ pcsc_error_t pcsc_listreaders(void)
 				SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1, &hCard, &dwActiveProtocol);
 			if (0 == rv)
 			{
-				if (i<sizeof(cards))
+				if ((unsigned long)i < sizeof(cards))
 					cards[i] = 1;
 
 				if (idx_default == 0)

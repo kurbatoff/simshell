@@ -45,6 +45,7 @@ static int Lua_send_apdu(lua_State* L);
 //static int Lua_upload(lua_State* L);
 static int Lua_install(lua_State* L);
 static int Lua_execute_shellcommand(lua_State* L);
+void Lua_execute(char* filename);
 
 static void lua_strcopy(lua_State* L, int idx, char* dest, int maxlen)
 {
