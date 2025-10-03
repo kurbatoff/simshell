@@ -30,6 +30,8 @@
 #include "pcscwrap.h"
 #include "gp.h"
 
+static uint8_t GP_ISD[] = { 0xA0, 0, 0, 0x01, 0x51, 0, 0, 0 };
+
 #define THE_LAST_COMPONENT		1
 
 /*
@@ -572,10 +574,9 @@ static int component_zip_2_apdu(zip_t* _cap, const char* _cname, FILE* fsimshell
 
 static void print_components_zip(zip_t* _cap, struct zip_stat* _finfo)
 {
-	int count;
+	int count = 0;
 	int len;
 
-	count = 0;
 	while ((zip_stat_index(_cap, count, 0, _finfo)) == 0)
 	{
 		char* component;
@@ -679,13 +680,13 @@ static void print_applet_component(uint8_t* _buffer)
 
 static void print_header_zip(zip_t* _cap, struct zip_stat* _finfo)
 {
-	int len;
+	long unsigned int len;
 	uint8_t buffer[256];
 	zip_file_t* fd = NULL;
 
 	if (find_component_zip(_cap, COMP_HEADER, _finfo))
 	{
-		int len_read;
+		// int len_read;
 
 		len = (int)_finfo->size;
 
@@ -693,7 +694,7 @@ static void print_header_zip(zip_t* _cap, struct zip_stat* _finfo)
 			len = sizeof(buffer);
 
 		fd = zip_fopen_index(_cap, _finfo->index, 0);
-		len_read = (int)zip_fread(fd, buffer, len);
+		(void)zip_fread(fd, buffer, (zip_int64_t)len);
 		zip_fclose(fd);
 
 		print_header_component(buffer);
@@ -702,21 +703,21 @@ static void print_header_zip(zip_t* _cap, struct zip_stat* _finfo)
 
 static void print_import_zip(zip_t* _cap, struct zip_stat* _finfo)
 {
-	int len;
+	long unsigned int len;
 	uint8_t buffer[256];
 	zip_file_t* fd = NULL;
 
 	if (find_component_zip(_cap, COMP_IMPORT, _finfo))
 	{
-		int len_read;
+		// int len_read;
 
-		len = (int)_finfo->size;
+		len = _finfo->size;
 
 		if (len > sizeof(buffer))
 			len = sizeof(buffer);
 
 		fd = zip_fopen_index(_cap, _finfo->index, 0);
-		len_read = (int)zip_fread(fd, buffer, len);
+		(void)zip_fread(fd, buffer, len);
 		zip_fclose(fd);
 
 		print_import_component(buffer);
@@ -726,13 +727,13 @@ static void print_import_zip(zip_t* _cap, struct zip_stat* _finfo)
 
 static void print_applet_zip(zip_t* _cap, struct zip_stat* _finfo)
 {
-	int len;
+	long unsigned int len;
 	uint8_t buffer[256];
 	zip_file_t* fd = NULL;
 
 	if (find_component_zip(_cap, COMP_APPLET, _finfo))
 	{
-		int len_read;
+		// int len_read;
 
 		len = (int)_finfo->size;
 
@@ -740,7 +741,7 @@ static void print_applet_zip(zip_t* _cap, struct zip_stat* _finfo)
 			len = sizeof(buffer);
 
 		fd = zip_fopen_index(_cap, _finfo->index, 0);
-		len_read = (int)zip_fread(fd, buffer, len);
+		(void)zip_fread(fd, buffer, len);
 		zip_fclose(fd);
 
 		print_applet_component(buffer);
@@ -942,7 +943,7 @@ static bool install_for_load_zip(zip_t* _cap)
 {
 	struct zip_stat finfo;
 	zip_file_t* fd = NULL;
-	int count = 0;
+	// int count = 0;
 	int total_sz;
 	uint8_t buffer_header[256];
 	int header_len;
@@ -969,7 +970,7 @@ static bool install_for_load_2_apdu(zip_t * _cap, FILE* fsimshell, FILE* fpcom, 
 {
 	struct zip_stat finfo;
 	zip_file_t* fd = NULL;
-	int count = 0;
+	// int count = 0;
 	int total_sz;
 	uint8_t buffer_header[256];
 	int header_len;
@@ -1097,7 +1098,7 @@ end_load_cap:
 
 static bool install_for_load_ijc(FILE* _fp)
 {
-	int count = 0;
+	// int count = 0;
 	int total_sz;
 	uint8_t buffer_header[256];
 
@@ -1121,7 +1122,7 @@ static bool install_for_load_ijc(FILE* _fp)
 void static upload_ijc(const char* _filename)
 {
 	FILE* fp;
-	bool found = false;
+	// bool found = false;
 
 	fp = fopen(_filename, "rb");
 

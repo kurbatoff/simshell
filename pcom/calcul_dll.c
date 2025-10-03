@@ -35,7 +35,7 @@ uint16_t data_len;
 
 uint16_t load_status = CALCUL_DLL_OFF;
 
-void static clear_dll(void)
+static void clear_dll(void)
 {
 	memset(key, 0, sizeof(key));
 	memset(data, 0, sizeof(data));

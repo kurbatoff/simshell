@@ -33,7 +33,7 @@ static uint8_t VARs[16 * 1024];
 static void print_VARs();
 static int get_VARs_length();
 static void add_VAR(const char* name, int name_len, char* value, int value_len);
-static int find_VAR(char* _name, int _namelen, char** _var, int* _datalen);
+// static int find_VAR(char* _name, int _namelen, char** _var, int* _datalen);
 
  /**
   * @brief /set-var command
@@ -151,6 +151,7 @@ static int get_VARs_length()
     return offset;
 }
 
+#if(0)
 static int find_VAR(char* _name, int _namelen, char** _var, int* _datalen)
 {
     int offset = 0;
@@ -188,7 +189,7 @@ static int find_VAR(char* _name, int _namelen, char** _var, int* _datalen)
 
     return -1;
 }
-
+#endif
 static void add_VAR(const char* name, int name_len, char* value, int value_len)
 {
     int len;

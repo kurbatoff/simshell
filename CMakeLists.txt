@@ -7,9 +7,24 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -Wextra \
 	-Wformat -Wformat-security"
 )
 
-# Find the libzip package
-# find_package(libzip CONFIG REQUIRED)
 
+find_package(ZLIB)
+if (ZLIB_FOUND)
+	message(STATUS "zlib found")
+else()
+	message(FATAL_ERROR "zlib not found on the host system.\n"
+						"Pass the following command to install it:\n"
+						"(Ubuntu): sudo apt install zlib1g-dev\n"
+						"(MacOS): brew install zlib"
+	)
+endif()
+
+# find_package(LIBZIP)
+# if (LIBZIP_FOUND)
+# 	message(STATUS "libzip found")
+# else()
+# 	message(FATAL_ERROR "libzip not found on the host system.\n")
+# endif()
 
 if(UNIX OR APPLE)
 	set(LIBZIP_LIBRARY zip)

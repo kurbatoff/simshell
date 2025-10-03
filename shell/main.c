@@ -178,6 +178,7 @@ main(int argc, char* argv[])
 		SHELL_execute(str);
 
 		finish = clock() - start;
+		(void)finish; // suppress -Wunused-but-set-variable
 //		interval = finish / (double)CLOCKS_PER_SEC;
 //		printf(" [Processing time: %.03f s]\n", interval);
 	}
