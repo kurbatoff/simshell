@@ -7,10 +7,14 @@ add_library(${CMAKE_PROJECT_NAME}_LUALIB STATIC
 	src/ldump.c
 	src/lfunc.c
 	src/lgc.c
+
 	src/llex.c
+
 	src/lmem.c
+
 	src/lobject.c
 	src/lopcodes.c
+
 	src/lparser.c
 	src/lstate.c
 	src/lstring.c

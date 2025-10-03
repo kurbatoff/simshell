@@ -1,5 +1,7 @@
 add_library(${CMAKE_PROJECT_NAME}_PCOM STATIC
+	calcul_dll.c
 	libApduEngine.c
+	pcom_buffers.c
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME}_PCOM PUBLIC
