@@ -124,6 +124,7 @@ static int errors_count()
     return errors.comm + errors.data + errors.status + errors.syntax;
 }
 
+#if(0)
 static void print_Defines_()
 {
     int offset = 0;
@@ -162,7 +163,7 @@ static void print_Defines_()
         offset += len;
     }
 }
-
+#endif
 static int get_Defines_length()
 {
     int offset = 0;
@@ -681,7 +682,7 @@ static void print_sw_error(const char* sw)
 
 static void print_data_error(const char* _data)
 {
-    int idx = 0;
+    // int idx = 0;
 
     printf(COLOR_RED " ------------------------------------------------\n");
     printf(COLOR_RED "  DATA error \n" COLOR_RESET);

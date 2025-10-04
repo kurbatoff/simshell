@@ -11,7 +11,8 @@
                 "${workspaceFolder}/lua",
                 "${workspaceFolder}/pcsc",
                 "${workspaceFolder}/pcom",
-                "${workspaceFolder}/shell"
+                "${workspaceFolder}/shell",
+				"${workspaceFolder}/Lua5.3/include"
             ],
             "defines": [],
             "macFrameworkPath": [

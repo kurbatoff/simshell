@@ -196,11 +196,11 @@ size_t serial_receive(unsigned char* data)
 
 void serial_execute(const char* atcmd, char* atresp)
 {
-	char OK[1024];
+	unsigned char OK[1024];
 
 	comPort_send(atcmd, strlen(atcmd));
 	serial_receive(OK); // echo
-	serial_receive(atresp);
+	serial_receive((unsigned char*)atresp);
 	serial_receive(OK); // CRLF
 	serial_receive(OK); // OK
 }

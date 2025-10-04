@@ -19,7 +19,7 @@
 #ifndef __GP_H__
 #define __GP_H__
 
-static uint8_t GP_ISD[] = { 0xA0, 0, 0, 0x01, 0x51, 0, 0, 0 };
+// static uint8_t GP_ISD[] = { 0xA0, 0, 0, 0x01, 0x51, 0, 0, 0 };
 
 
 #define KEY_IDX_TOKEN_VERIFICATION			0x70

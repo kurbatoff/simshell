@@ -413,17 +413,6 @@ static void cmd_extauthenticate(char* _cmd)
 
 	ext_authenticate(sec_level);
 }
-/**
- * @brief get-sd-certificate callback function
- *
- * @param _cmd: command line string
- */
-static void cmd_getsdcert(char* _cmd)
-{
-	cmd_scp11_perform_security_operation();
-
-	printf(COLOR_CYAN " get-sd-certificate " COLOR_RESET "still under implementation..\n");
-}
 
 /**
  * @brief auth callback function
@@ -547,37 +536,6 @@ static void cmd_S_cap2apdu(char* _cmd)
 }
 
 /**
- * @brief /sleep callback function
- * 
- * @param _cmd: command line string
- */
-static void cmd_S_sleep(char* _cmd)
-{
-	printf(COLOR_CYAN " /sleep " COLOR_RESET "under implementation..\n");
-}
-
-/**
- * @brief /echo callback function
- * 
- * @param _cmd: command line string
- */
-static void cmd_S_echo(char* _cmd)
-{
-	printf(COLOR_CYAN " /echo " COLOR_RESET "under implementation..\n");
-}
-
-/**
- * @brief /mode callback function
- *
- * @param _cmd: command line string
- */
-static void cmd_S_mode(char* _cmd)
-{
-	printf(COLOR_CYAN " /mode " COLOR_RESET "under implementation..\n");
-}
-
-
-/**
  * @brief /card callback function
  * 
  * @param _cmd: command line string
@@ -590,27 +548,6 @@ static void cmd_S_card(char* _cmd)
 	}
 
 	select_ISD();
-}
-
-
-/**
- * @brief /execute callback function
- *
- * @param _cmd: command line string
- */
-static void cmd_S_execute(char* _cmd)
-{
-	printf(COLOR_CYAN " /execute " COLOR_RESET "under implementation..\n");
-}
-
-/**
- * @brief /error callback function
- *
- * @param _cmd: command line string
- */
-static void cmd_S_error(char* _cmd)
-{
-	printf(COLOR_CYAN " /error " COLOR_RESET "under implementation..\n");
 }
 
 /**
@@ -670,7 +607,7 @@ static void cmd_delete(char* _cmd)
 	apdu_t apdu;
 	int len;
 	int offset;
-	uint8_t del_all = 0;
+	// uint8_t del_all = 0;
 
 	apdu.cmd_len = 0;
 	apdu.cmd[apdu.cmd_len++] = 0x80;
@@ -810,15 +747,7 @@ static void cmd_version(char* _cmd)
 //	printf("OS version: %s\n", os_version);
 }
 
-/**
- * @brief install callback function
- * 
- * @param _cmd: command line string
- */
-static void cmd_install(char* _cmd)
-{
-	printf(COLOR_CYAN " install " COLOR_RESET "under implementation..\n");
-}
+
 
 /**
  * @brief /close command
@@ -840,6 +769,80 @@ static void cmd_S_reset(char* _cmd)
 	printf(COLOR_CYAN " /reset " COLOR_RESET "under implementation..\n");
 }
 
+#if(0)
+
+/**
+ * @brief get-sd-certificate callback function
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_getsdcert(char* _cmd)
+{
+	cmd_scp11_perform_security_operation();
+
+	printf(COLOR_CYAN " get-sd-certificate " COLOR_RESET "still under implementation..\n");
+}
+
+/**
+ * @brief /sleep callback function
+ * 
+ * @param _cmd: command line string
+ */
+static void cmd_S_sleep(char* _cmd)
+{
+	printf(COLOR_CYAN " /sleep " COLOR_RESET "under implementation..\n");
+}
+
+/**
+ * @brief /echo callback function
+ * 
+ * @param _cmd: command line string
+ */
+static void cmd_S_echo(char* _cmd)
+{
+	printf(COLOR_CYAN " /echo " COLOR_RESET "under implementation..\n");
+}
+
+/**
+ * @brief /mode callback function
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_S_mode(char* _cmd)
+{
+	printf(COLOR_CYAN " /mode " COLOR_RESET "under implementation..\n");
+}
+
+/**
+ * @brief /execute callback function
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_S_execute(char* _cmd)
+{
+	printf(COLOR_CYAN " /execute " COLOR_RESET "under implementation..\n");
+}
+
+/**
+ * @brief /error callback function
+ *
+ * @param _cmd: command line string
+ */
+static void cmd_S_error(char* _cmd)
+{
+	printf(COLOR_CYAN " /error " COLOR_RESET "under implementation..\n");
+}
+
+/**
+ * @brief install callback function
+ * 
+ * @param _cmd: command line string
+ */
+static void cmd_install(char* _cmd)
+{
+	printf(COLOR_CYAN " install " COLOR_RESET "under implementation..\n");
+}
+
 /**
  * @brief milenage command
  *
@@ -859,3 +862,4 @@ static void cmd_tuak(char* _cmd)
 {
 	printf(COLOR_CYAN " TUAK " COLOR_RESET "under implementation..\n");
 }
+#endif

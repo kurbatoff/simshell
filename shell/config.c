@@ -36,7 +36,9 @@
 #ifdef _WIN32
 	#include <windows.h>
 #endif
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
+	void strcpy_s(char* dest, size_t destsize, const char* src); // to suppress -Wmissing-declarations
+
 	void strcpy_s(char* dest, size_t destsize, const char* src)
 	{
 		if (strlen(src) < destsize) {
@@ -65,19 +67,28 @@ uint8_t LocI_AT;
 static void read_MatchingID(char* src);
 static void read_InetAddress(char* src, char* dest, size_t destsize);
 static void read_InetPort(char* src, char* dest, size_t destsize);
+
+#if defined (_WIN32) || defined (__APPLE__)
 static void read_SerialPort(char* src, char* dest, size_t destsize);
+#endif
 
-
+#if(0)
 static void dump_eUICC_Info1(uint8_t* s);
 static void dump_Server_Signed1(uint8_t* s);
 static void dump_Server_Signature1(uint8_t* s);
-//
+
 static void dump_AuthenticateServerResponse(uint8_t* src);
 static void dump_profileMetadata(uint8_t* src);
 static void dump_smdpSigned2(uint8_t* src);
 static void dump_smdpSignature2(uint8_t* src);
-//
+
 static void dump_boundProfilePackage(uint8_t* src);
+#endif
+
+static void set_config_name(const char* exename);
+void print_hex(char* s_, unsigned char* bufhex_, int len_);
+int str_remove_spaces(char* buf);
+int str_piece(char* src, char* dest, char del, int idx);
 
 
 unsigned char config_name[256]; // exefile name but extension '.conf'
@@ -322,6 +333,8 @@ static void read_InetPort(char* src, char* dest, size_t destsize)
 
 	printf(" Server Port: %s\n", dest);
 }
+
+#if defined (_WIN32) || defined (__APPLE__)
 static void read_SerialPort(char* src, char* dest, size_t destsize)
 {
 	src = skip_to_value(src);
@@ -329,6 +342,9 @@ static void read_SerialPort(char* src, char* dest, size_t destsize)
 
 	printf(" Serial Port: %s\n", dest);
 }
+#endif
+
+#if(0)
 
 static void dump_eUICC_Info1(uint8_t* src)
 {
@@ -369,7 +385,7 @@ static void dump_eUICC_Info1(uint8_t* src)
 static void dump_Server_Signed1(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 //	uint16_t len;
 
@@ -389,7 +405,7 @@ static void dump_Server_Signed1(uint8_t* src)
 static void dump_Server_Signature1(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 	//uint16_t len;
 
@@ -405,11 +421,11 @@ static void dump_Server_Signature1(uint8_t* src)
 
 	printf(" ---\n");
 }
-//
+
 static void dump_AuthenticateServerResponse(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 //	uint16_t len;
 
@@ -425,6 +441,7 @@ static void dump_AuthenticateServerResponse(uint8_t* src)
 
 	printf(" ---\n");
 }
+
 
 static void dump_profileMetadata(uint8_t* src)
 {
@@ -467,10 +484,12 @@ static void dump_profileMetadata(uint8_t* src)
 	offset += print_tlv(&buff[offset]);
 
 }
+
+
 static void dump_smdpSigned2(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 //	uint16_t len;
 
@@ -486,10 +505,11 @@ static void dump_smdpSigned2(uint8_t* src)
 
 	printf(" ---\n");
 }
+
 static void dump_smdpSignature2(uint8_t* src)
 {
 	uint8_t buff[16 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
 	//uint16_t len;
 
@@ -505,18 +525,19 @@ static void dump_smdpSignature2(uint8_t* src)
 
 	printf(" ---\n");
 }
+
 static void dump_boundProfilePackage(uint8_t* src)
 {
 	uint8_t buff[64 * 1024];
-	uint16_t offset = 0;
+	// uint16_t offset = 0;
 	size_t length;
-	size_t len;
+	// size_t len;
 
 	while (' ' == *src) src++;
 	while (':' == *src) src++;
 	while (' ' == *src) src++;
 
-	len = strlen((const char* )src);
+	// len = strlen((const char* )src);
 	//mbedtls_base64_decode(buff, sizeof(buff), &length, src, len);
 
 	printf(" ------------------------------------------------\n");
@@ -525,3 +546,4 @@ static void dump_boundProfilePackage(uint8_t* src)
 
 	printf(" ---\n");
 }
+#endif

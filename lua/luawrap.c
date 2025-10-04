@@ -45,6 +45,7 @@ static int Lua_send_apdu(lua_State* L);
 //static int Lua_upload(lua_State* L);
 static int Lua_install(lua_State* L);
 static int Lua_execute_shellcommand(lua_State* L);
+void Lua_execute(char* filename);
 
 static void lua_strcopy(lua_State* L, int idx, char* dest, int maxlen)
 {
@@ -53,7 +54,7 @@ static void lua_strcopy(lua_State* L, int idx, char* dest, int maxlen)
 
 	str = (char*)lua_tostring(L, idx);
 	len = strlen(str);
-	if (len > maxlen)
+	if (len > (long unsigned int)maxlen)
 		len = maxlen;
 	memcpy(dest, str, len);
 	dest[len] = 0;
@@ -289,7 +290,7 @@ void Lua_execute(char* filename)
 	lua_register(L, "C_execute", Lua_execute_shellcommand);
 
 
-	luaL_dofile(L, filename);
+	(void)luaL_dofile(L, filename);
 
 	lua_close(L);
 }

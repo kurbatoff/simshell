@@ -22,6 +22,8 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/cmac.h"
 
+void hal_AES128_crypt_block( uint8_t* data_buffer, uint8_t* key_buffer, uint8_t* Out_Buffer, uint8_t Mode );
+
 // ---------------------------------------------------------------------------------------------------------------------
 void hal_AES128_crypt_block( uint8_t* data_buffer, uint8_t* key_buffer, uint8_t* Out_Buffer, uint8_t Mode )
 {

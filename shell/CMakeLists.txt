@@ -1,5 +1,6 @@
 add_library(${CMAKE_PROJECT_NAME}_SHELL STATIC
 	commands.c
+	config.c
 	shell.c
 	tools.c
 	vars.c
@@ -12,6 +13,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}_SHELL
 	${CMAKE_PROJECT_NAME}_GSMA
 	${CMAKE_PROJECT_NAME}_LUAWRAP
 	${CMAKE_PROJECT_NAME}_LUALIB
+	${CMAKE_PROJECT_NAME}_PCOM
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME}_SHELL PUBLIC
@@ -20,20 +22,5 @@ target_include_directories(${CMAKE_PROJECT_NAME}_SHELL PUBLIC
 	${PROJECT_SOURCE_DIR}/gsma
 	${PROJECT_SOURCE_DIR}/lua
 	${PROJECT_SOURCE_DIR}/cap
-)
-
-
-add_executable(${CMAKE_PROJECT_NAME} main.c)
-
-target_link_libraries(${CMAKE_PROJECT_NAME}
-	${CMAKE_PROJECT_NAME}_SHELL
-	# ${CMAKE_PROJECT_NAME}_PCSC
-	# ${CMAKE_PROJECT_NAME}_GP
-	# ${CMAKE_PROJECT_NAME}_GSMA
-	# ${CMAKE_PROJECT_NAME}_LUAWRAP
-	# ${CMAKE_PROJECT_NAME}_LUALIB
-)
-
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
-	${PROJECT_SOURCE_DIR}/shell
+	${PROJECT_SOURCE_DIR}/pcom
 )
