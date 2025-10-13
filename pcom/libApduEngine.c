@@ -860,7 +860,7 @@ int execute_OneLine(const char* _fileline, char* _scriptfolder)
 #ifdef _WIN32
     strcpy_s(cmd, sizeof(cmd), _fileline);
 #endif
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
     strcpy(cmd, _fileline);
 #endif
 
