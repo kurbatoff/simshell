@@ -263,10 +263,10 @@ pcsc_error_t pcsc_listreaders(void)
 			i++;
 #ifdef _WIN32
 			printf(" %d. %s %ls\n", i, cardIN, readers);
-#endif
+#else
 // #ifdef __APPLE__
 			printf(" %d. %s %s\n", i, cardIN, readers);
-// #endif
+#endif
 			if (i == idx_default) {
 				name_default = readers;
 			}
