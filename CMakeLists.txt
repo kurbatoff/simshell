@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 project(simshell VERSION 0.11)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -Wextra \
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -O0 -Wextra \
 	-Wno-unused-parameter -Wno-missing-field-initializers \
 	-Wmissing-declarations -Wredundant-decls -Wcast-align \
 	-Wformat -Wformat-security"

@@ -68,7 +68,7 @@ static void read_MatchingID(char* src);
 static void read_InetAddress(char* src, char* dest, size_t destsize);
 static void read_InetPort(char* src, char* dest, size_t destsize);
 
-#if defined (_WIN32) || defined (__APPLE__)
+#if defined (_WIN32) || defined (__APPLE__)  || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
 static void read_SerialPort(char* src, char* dest, size_t destsize);
 #endif
 
@@ -270,9 +270,8 @@ int read_config(const char* exename)
 			read_SerialPort(&s[10], serialPort, sizeof(serialPort));
 			continue;
 		}
-#endif
-
-#ifdef __APPLE__
+#else
+// #ifdef __APPLE__
 		if (s == strstr(s, "SERIAL_MAC")) {
 			read_SerialPort(&s[10], serialPort, sizeof(serialPort));
 			continue;
@@ -334,7 +333,7 @@ static void read_InetPort(char* src, char* dest, size_t destsize)
 	printf(" Server Port: %s\n", dest);
 }
 
-#if defined (_WIN32) || defined (__APPLE__)
+#if defined (_WIN32) || defined (__APPLE__)  || defined(__linux__) || defined(linux) || defined(__linux) || defined(__gnu_linux__)
 static void read_SerialPort(char* src, char* dest, size_t destsize)
 {
 	src = skip_to_value(src);
