@@ -86,8 +86,8 @@ void print_reader_name()
 	else {
 #ifdef _WIN32
 	printf(COLOR_BLUE " [%ls]" COLOR_RESET, mszReaders);
-#endif
-#ifdef __APPLE__
+#else
+// #ifdef __APPLE__
 	printf(COLOR_BLUE " [%s]" COLOR_RESET, mszReaders);
 #endif
 	}
@@ -263,8 +263,8 @@ pcsc_error_t pcsc_listreaders(void)
 			i++;
 #ifdef _WIN32
 			printf(" %d. %s %ls\n", i, cardIN, readers);
-#endif
-#ifdef __APPLE__
+#else
+// #ifdef __APPLE__
 			printf(" %d. %s %s\n", i, cardIN, readers);
 #endif
 			if (i == idx_default) {
@@ -279,8 +279,8 @@ pcsc_error_t pcsc_listreaders(void)
 
 #ifdef _WIN32
 			printf(" Choose reader (Default: %ls) > ", name_default);
-#endif
-#ifdef __APPLE__
+#else
+// #ifdef __APPLE__
 			printf(" Choose reader (Default: %s) > ", name_default);
 #endif
 			idx = getchar();
@@ -307,8 +307,8 @@ pcsc_error_t pcsc_listreaders(void)
 				mszReaders = readers;
 #ifdef _WIN32
 				printf("  >> Selected: " COLOR_YELLOW "%ls\n" COLOR_RESET, mszReaders);
-#endif
-#ifdef __APPLE__
+#else
+// #ifdef __APPLE__
 				printf("  >> Selected: " COLOR_YELLOW "%s\n" COLOR_RESET,mszReaders);
 #endif
 			}
